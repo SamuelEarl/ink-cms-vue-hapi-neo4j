@@ -13,10 +13,10 @@
     </div>
     <nav id="nav" class="container">
       <div id="left-nav">
-        <a href="#home">Home</a>
+        <a class="home" href="#home"><img id="logo" src="@/client/assets/logo-20x20.png" alt="logo"></a>
+        <a href="#about">About</a>
         <a href="#news">News</a>
         <a href="#contact">Contact</a>
-        <a href="#about">About</a>
       </div>
       <div id="right-nav">
         <a href="#cart">Cart ( 0 )</a>
@@ -101,6 +101,10 @@ export default {
             color: white;
           }
         }
+
+        .home {
+          display: none;
+        }
       }
     }
   }
@@ -120,10 +124,17 @@ export default {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
+      padding-left: 0;
+      padding-right: 0;
       text-align: center;
 
       div {
         flex-direction: row;
+        align-items: center;
+
+        .home {
+          display: block;
+        }
       }
     }
   }

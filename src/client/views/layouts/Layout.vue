@@ -1,7 +1,9 @@
 <template>
   <div id="layout">
     <Header />
-    <router-view />
+    <div class="container">
+      <router-view />
+    </div>
     <Footer />
   </div>
 </template>
@@ -20,5 +22,11 @@ export default {
 </script>
 
 <style scoped lang="stylus">
+@media $s-up {
 
+}
+
+@media $m-up {
+
+}
 </style>
