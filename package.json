@@ -9,7 +9,7 @@
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
     "__dev_comment__": "Configure dev env with babel-node and node-dev (or nodemon if nodemon isn't broken): https://github.com/babel/example-node-server. UPDATE: In Babel 7, the 'babel-node' command comes from @babel/node: https://new.babeljs.io/docs/en/next/v7-migration.html#babel-node. If node-dev doesn't work in dev:express, then use PM2's watch and restart options for development: https://pm2.io/doc/en/runtime/guide/development-tools/#watch-options.",
-    "_dev": "node src/server/server.js",
+    "_dev": "node server.js",
     "dev": "npm-run-all --parallel dev:vue dev:express",
     "dev:vue": "vue-cli-service serve",
     "dev:express": "NODE_ENV=development node-dev --no-notify src/server/server.js --exec babel-node",
