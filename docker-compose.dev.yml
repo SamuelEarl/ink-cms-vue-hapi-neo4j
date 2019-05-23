@@ -26,7 +26,7 @@ services:
   dev-mongodb:
     image: bitnami/mongodb:latest
     ports:
-      - "27017:27017"
+      - "27020:27017"
     # Volumes allow you to persist data. See the README to find out where the MongoDB data are stored on the host machine.
     volumes:
       - type: volume

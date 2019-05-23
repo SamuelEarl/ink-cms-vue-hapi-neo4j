@@ -1,0 +1,51 @@
+// General HTML element styles go in this file. These form the base styles that can be modified in the other .styl files of inside the Vue component files.
+
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// Neither "html" nor "body" work for setting base styles in Vue CLI,
+// so I have used "div" since the Vue app mounts to a <div> element.
+div, nav {
+  font-family: $sans-font-stack;
+  font-size: $base-font-size;
+  color: black;
+}
+
+// ====================================
+// Typography:
+// This includes font families, font sizes, line heights and other
+// typographical styles for applicable HTML elements (e.g. <h1>, <p>).
+// ====================================
+// Add base styles here...
+
+
+
+// ==================================================
+// Base Styles for Common Elements
+// ==================================================
+button {
+  outline: none;
+  border: none;
+  cursor: pointer;
+  background-color: none;
+  &:active, &:focus {
+    background-color: none;
+  }
+}
+
+
+// ==================================================
+// Base Styles for Semantic Elements in HTML5:
+// https://www.w3schools.com/html/html5_semantic_elements.asp
+// ==================================================
+// Add base styles here...
+
+
+
+// ==================================================
+// Base Styles for Forms
+// ==================================================
+// Add base styles here...

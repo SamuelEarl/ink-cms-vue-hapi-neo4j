@@ -1,0 +1,34 @@
+// This will contain the variables or mixins for your breakpoints.
+
+// ===============================================
+// w3pro.css Media Queries
+// It is probably best to use the default media query ranges that are used in w3pro.css
+// to avoid styling issues.
+// ===============================================
+// small  : 0px - 600px      | Small devices (e.g., phones 600px and smaller)
+// medium : 601px - 992px    | Medium devices (e.g., tablets 601px to 992px)
+// large  : 993px and wider  | Large devices (e.g., laptops/desktops, 993px and larger)
+
+
+// For reference, here are the viewport sizes of some common devices:
+// -------------------------------------------------------------------
+// * iPhone 8: 375px wide x 667px high
+// * iPad (in portrait mode): 768px wide x 1024px high
+// * iPad Pro (in portrait mode): 1024px wide x 1366px high
+// * Macbook Pro 15": 1440px wide x 900px high
+
+
+// Example: @media $s-up {}
+$s-up = "(min-width: 0px)";
+// $s-only = "(min-width: 0px) and (max-width: 600px)";
+
+// Example: @media $m-up {}
+$m-up = "(min-width: 601px)";
+// $m-only = "(min-width: 601px) and (max-width: 992px)";
+
+// Example: @media $l-up {}
+$l-up = "(min-width: 993px)";
+// NOTE: Technically speaking, this should be $l-only instead of $l-up because there is no media
+// query above large. But since the styles in this project use the $s-up and $m-up media
+// queries (instead of $s-only and $m-only), I wanted to stay consistent with the syntax used by
+// those media queries.
