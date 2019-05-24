@@ -14,38 +14,58 @@
       <table class="w3-table-all w3-hoverable">
         <thead>
           <tr>
+            <th></th>
             <th>Title</th>
             <th class="center">Edit Page</th>
             <th class="center">Delete Page</th>
           </tr>
         </thead>
-        <tbody>
+        <Draggable
+          v-model="pages"
+          handle=".btn-sort"
+          v-bind="dragOptions"
+          @end="onEnd"
+          tag="tbody"
+        >
           <tr v-for="(page, index) in pages" :key="page.id">
+            <td>
+              <button class="btn-table btn-sort" title="Drag &amp; Drop">
+                <font-awesome-icon icon="sort" />
+              </button>
+            </td>
             <td>{{ page.title | capitalize }}</td>
             <td class="center">
-              <router-link :to="{ name: 'edit-page', params: {
-                pageId: page.id
-              }}" exact>
-                <button><font-awesome-icon icon="edit" /></button>
+              <router-link :to="{
+                name: 'edit-page',
+                params: {
+                  pageId: page.id
+                }
+              }" exact>
+                <button class="btn-table">
+                  <font-awesome-icon icon="edit" />
+                </button>
               </router-link>
             </td>
-            <td v-if="page.title === 'home'" class="center"></td>
-            <td v-else class="center">
-              <button v-on:click="deletePage(page.id, index, page.title)">
+            <td class="center">
+              <button v-on:click="deletePage(page.id, index, page.title)" class="btn-table">
                 <font-awesome-icon icon="times-circle" />
               </button>
             </td>
           </tr>
-        </tbody>
+        </Draggable>
       </table>
     </div>
   </div>
 </template>
 
 <script>
+import Draggable from "vuedraggable";
+
 export default {
   name: "Pages",
-  components: {},
+  components: {
+    Draggable
+  },
 
   data() {
     return {
@@ -70,6 +90,17 @@ export default {
     }
   },
 
+  computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        group: "description",
+        disabled: false,
+        ghostClass: "ghost"
+      };
+    }
+  },
+
   methods: {
     async deletePage(id, index, title) {
       try {
@@ -83,7 +114,22 @@ export default {
       catch(err) {
         console.log(err);
       }
-    }
+    },
+
+    // onEnd: debounce(async function(event) {
+    //   // To see which Draggable properties are available on the event object, look at
+    //   // https://github.com/SortableJS/Sortable#options under the "onEnd" method.
+
+    //   console.log("Pages have been reordered!");
+    //   // this.reorderPages();
+    // }, 3000),
+    async onEnd(event) {
+      // To see which Draggable properties are available on the event object, look at
+      // https://github.com/SortableJS/Sortable#options under the "onEnd" method.
+
+      console.log("Pages have been reordered!");
+      // this.reorderPages();
+    },
   }
 }
 </script>

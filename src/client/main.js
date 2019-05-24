@@ -5,7 +5,8 @@ import {
   faShoppingCart,
   faUserShield,
   faEdit,
-  faTimesCircle
+  faTimesCircle,
+  faSort
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import App from "./App.vue";
@@ -18,6 +19,7 @@ library.add(faShoppingCart);
 library.add(faUserShield);
 library.add(faEdit);
 library.add(faTimesCircle);
+library.add(faSort);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
