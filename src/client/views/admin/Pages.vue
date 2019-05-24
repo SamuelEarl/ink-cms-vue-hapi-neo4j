@@ -1,9 +1,14 @@
 <template>
   <div>
     <h1>Pages</h1>
-    <button class="primary-btn">Add a new page</button>
 
-    <br><br>
+    <br>
+
+    <router-link :to="{ name: 'add-page' }" exact>
+      <button class="btn-primary">Add a new page</button>
+    </router-link>
+
+    <br><br><br>
 
     <div class="w3-responsive">
       <table class="w3-table-all w3-hoverable">
@@ -19,7 +24,7 @@
             <td>{{ page.title | capitalize }}</td>
             <td class="center">
               <router-link :to="{ name: 'edit-page', params: {
-                pageId: page.Id
+                pageId: page.id
               }}" exact>
                 <button><font-awesome-icon icon="edit" /></button>
               </router-link>
@@ -66,10 +71,6 @@ export default {
   },
 
   methods: {
-    async editPage() {
-
-    },
-
     async deletePage(id, index, title) {
       try {
         if (index > -1) {

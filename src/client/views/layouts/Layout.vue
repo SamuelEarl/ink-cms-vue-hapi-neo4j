@@ -2,6 +2,7 @@
   <div id="layout">
     <Header />
     <div class="container">
+      <br>
       <router-view />
     </div>
     <Footer />

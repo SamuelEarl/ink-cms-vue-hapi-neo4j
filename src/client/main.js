@@ -21,6 +21,12 @@ library.add(faTimesCircle);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
+// TinyMCE Editor Configs:
+Vue.prototype.$editorApiKey = "7gka8rihodg40gmphfhqb1tk9tjbswjiu0xcdqvgetdg6057";
+Vue.prototype.$editorOptions = {
+  // toolbar: ""
+};
+
 Vue.config.productionTip = false;
 
 // -------------------
