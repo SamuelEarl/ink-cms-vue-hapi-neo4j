@@ -2,7 +2,7 @@
   <footer>
     <br><br><br>
     <div>
-      &copy; Quill CMS
+      &copy; Ink CMS
     </div>
   </footer>
 </template>

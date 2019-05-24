@@ -13,15 +13,36 @@
     </div>
     <nav id="nav" class="container">
       <div id="left-nav">
-        <a class="home" href="#home"><img id="logo" src="@/client/assets/logo-20x20.png" alt="logo"></a>
-        <a href="#about">About</a>
-        <a href="#news">News</a>
-        <a href="#contact">Contact</a>
+        <router-link :to="{ name: 'home' }" exact title="Home"><img id="logo" src="@/client/assets/logo-20x20.png" alt="logo"></router-link>
+        <div v-if="$route.path.startsWith('/admin')">
+          <router-link :to="{ name: 'admin-pages' }" exact>Pages</router-link>
+          <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
+          <router-link :to="{ name: 'admin-products' }" exact>Products</router-link>
+        </div>
+        <div v-else>
+          <router-link :to="{ name: 'about' }" exact>About</router-link>
+          <router-link :to="{ name: 'news' }" exact>News</router-link>
+          <router-link :to="{ name: 'contact' }" exact>Contact</router-link>
+        </div>
       </div>
       <div id="right-nav">
-        <a href="#cart">Cart ( 0 )</a>
-        <a href="#login">Login</a>
-        <a href="#admin">Admin</a>
+        <router-link
+          v-if="!$route.path.startsWith('/admin')"
+          :to="{ name: 'shopping-cart' }"
+          title="Shopping Cart"
+          exact
+        >
+          <font-awesome-icon icon="shopping-cart" /> ( 0 )
+        </router-link>
+        <router-link
+          v-if="!$route.path.startsWith('/admin')"
+          :to="{ name: 'admin-pages' }"
+          title="Admin"
+          exact
+        >
+          <font-awesome-icon icon="user-shield" />
+        </router-link>
+        <router-link :to="{ name: 'login' }" exact>Login</router-link>
       </div>
     </nav>
   </header>
@@ -31,6 +52,13 @@
 export default {
   name: "Header",
   components: {},
+
+  data() {
+    return {
+      groups: [ "admin" ]
+      // groups: []
+    }
+  },
 
   methods: {
     toggleNav() {

@@ -1,6 +1,7 @@
 <template>
   <div id="home">
     <p>Home</p>
+    {{ $route.path.startsWith('/admin') }}
   </div>
 </template>
 
@@ -9,6 +10,11 @@
 
 export default {
   name: "home",
-  components: {}
+  components: {},
+  // computed: {
+  //   route() {
+  //     return this.$route;
+  //   }
+  // }
 }
 </script>

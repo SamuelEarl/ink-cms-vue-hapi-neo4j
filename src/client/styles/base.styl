@@ -11,7 +11,7 @@
 div, header, footer, nav {
   font-family: $sans-font-stack;
   font-size: $base-font-size;
-  color: black;
+  color: #333;
 }
 
 // ====================================
@@ -30,11 +30,23 @@ button {
   outline: none;
   border: none;
   cursor: pointer;
-  background-color: none;
+  background-color: transparent;
+  color: #333;
   &:active, &:focus {
     background-color: none;
   }
+
+  &.primary-btn {
+    padding: 7px 10px;
+    background-color: navy;
+    color: white;
+    box-shadow: 2px 2px 3px gray;
+    &:hover {
+      box-shadow: none;
+    }
+  }
 }
+
 
 
 // ==================================================
