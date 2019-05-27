@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import Draggable from "vuedraggable";
 
 export default {
@@ -69,28 +70,15 @@ export default {
 
   data() {
     return {
-      pages: [
-        {
-          id: 0,
-          title: "home"
-        },
-        {
-          id: 1,
-          title: "About"
-        },
-        {
-          id: 2,
-          title: "contact"
-        },
-        {
-          id: 3,
-          title: "news"
-        }
-      ]
+      pages: []
     }
   },
 
   computed: {
+    ...mapGetters({
+      getPages: "pages/getPages",
+    }),
+
     dragOptions() {
       return {
         animation: 200,
@@ -101,7 +89,21 @@ export default {
     }
   },
 
+  watch: {
+    getPages() {
+      this.populatePages();
+    }
+  },
+
+  created() {
+    this.populatePages();
+  },
+
   methods: {
+    populatePages() {
+      this.pages = this.getPages;
+    },
+
     async deletePage(id, index, title) {
       try {
         if (index > -1) {

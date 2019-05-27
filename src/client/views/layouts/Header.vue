@@ -19,10 +19,17 @@
           <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
           <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
         </div>
-        <div v-else>
-          <router-link :to="{ name: 'about' }" exact>About</router-link>
+        <div v-else v-for="page in pages" :key="page._id">
+          <router-link :to="{ name: page.slug }" exact>
+            {{ page.title | capitalize }}
+          </router-link>
+
+
+          <!-- <router-link :to="{ name: 'about' }" exact>About</router-link>
           <router-link :to="{ name: 'news' }" exact>News</router-link>
-          <router-link :to="{ name: 'contact' }" exact>Contact</router-link>
+          <router-link :to="{ name: 'contact' }" exact>Contact</router-link> -->
+
+
         </div>
       </div>
       <div id="right-nav">
@@ -49,15 +56,33 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "Header",
   components: {},
 
   data() {
     return {
-      groups: [ "admin" ]
-      // groups: []
+      groups: [ "admin" ],
+      pages: []
     }
+  },
+
+  computed: {
+    ...mapGetters({
+      getPages: "pages/getPages",
+    }),
+  },
+
+  watch: {
+    getPages() {
+      this.populatePages();
+    }
+  },
+
+  created() {
+    this.populatePages();
   },
 
   methods: {
@@ -69,6 +94,10 @@ export default {
       else {
         nav.style.display = "flex";
       }
+    },
+
+    populatePages() {
+      this.pages = this.getPages;
     }
   }
 }

@@ -69,8 +69,10 @@ export default {
 
   methods: {
     async submitPageData() {
+      console.log("FIRED");
+
       const method = "POST";
-      const url = "/admin/pages/add-page";
+      const url = "/pages/add-page";
       const payload = {
         title: this.title,
         slug: this.slug,

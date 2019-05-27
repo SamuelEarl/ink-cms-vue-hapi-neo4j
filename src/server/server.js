@@ -190,11 +190,11 @@ app.use(bodyParser.json());
 // });
 
 // Define route modules
-// const pages = require("./routes/pages.js");
-// app.use("/", pages);
+const pages = require("./routes/pages.js");
+app.use("/pages", pages);
 
-const adminPages = require("./routes/admin-pages.js");
-app.use("/admin/pages", adminPages);
+// const adminPages = require("./routes/admin-pages.js");
+// app.use("/admin/pages", adminPages);
 
 // const products = require("./routes/products.js");
 // const cart = require("./routes/cart.js");
