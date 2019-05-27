@@ -193,7 +193,7 @@ app.use(bodyParser.json());
 const pages = require("./routes/pages.js");
 app.use("/pages", pages);
 
-// const adminPages = require("./routes/admin-pages.js");
+// const adminPages = require("./routes/pages-list.js");
 // app.use("/admin/pages", adminPages);
 
 // const products = require("./routes/products.js");

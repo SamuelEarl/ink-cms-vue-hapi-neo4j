@@ -31,7 +31,7 @@ const mutations = {
 
 
 const actions = {
-  pagesAction: async ({ commit }) => {
+  setPagesAction: async ({ commit }) => {
     const response = await Axios.get("/pages/get-all-pages");
     const pagesArray = response.data;
     commit("setPages", pagesArray);

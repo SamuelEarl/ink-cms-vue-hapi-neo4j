@@ -2,7 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import Home from "./views/home/Home.vue";
 import Admin from "./views/admin/Admin.vue";
-import Pages from "./views/admin/PagesList.vue";
+import PagesList from "./views/admin/PagesList.vue";
 import Page from "./views/admin/Page.vue";
 import Categories from "./views/admin/Categories.vue";
 import Products from "./views/admin/Products.vue";
@@ -23,9 +23,9 @@ export default new Router({
       component: Admin,
       children: [
         {
-          path: "pages",
-          name: "admin-pages",
-          component: Pages
+          path: "pages-list",
+          name: "pages-list",
+          component: PagesList
         },
         {
           path: "add-page",

@@ -5,7 +5,7 @@
 
     <br>
 
-    <router-link :to="{ name: 'admin-pages' }" exact>
+    <router-link :to="{ name: 'pages-list' }" exact>
       <button class="btn-primary">
         Back to all pages
       </button>
@@ -69,8 +69,6 @@ export default {
 
   methods: {
     async submitPageData() {
-      console.log("FIRED");
-
       const method = "POST";
       const url = "/pages/add-page";
       const payload = {
@@ -86,6 +84,10 @@ export default {
       });
 
       console.log("RESPONSE:", response.data);
+
+      if (typeof response.data === "object") {
+        this.$router.push({ name: "pages-list" });
+      }
     }
   }
 }

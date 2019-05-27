@@ -22,12 +22,12 @@ function updateAppLocalsPages(request) {
         req.app.locals.pages = pages;
       }
       catch(err) {
-        console.log("admin-pages.js, updateAppLocalsPages returned function Error:", err);
+        console.log("pages.js, updateAppLocalsPages returned function Error:", err);
       }
     }
   }
   catch(err) {
-    console.log("admin-pages.js, updateAppLocalsPages Error:", err);
+    console.log("pages.js, updateAppLocalsPages Error:", err);
   }
 }
 

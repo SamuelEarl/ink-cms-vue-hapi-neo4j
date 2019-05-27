@@ -15,7 +15,7 @@
       <div id="left-nav">
         <router-link :to="{ name: 'home' }" exact id="home-link" title="Home"><img id="logo" src="@/client/assets/logo-20x20.png" alt="logo"></router-link>
         <div v-if="$route.path.startsWith('/admin')">
-          <router-link :to="{ name: 'admin-pages' }" exact>Pages</router-link>
+          <router-link :to="{ name: 'pages-list' }" exact>Pages</router-link>
           <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
           <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
         </div>
@@ -36,7 +36,7 @@
         </router-link>
         <router-link
           v-if="!$route.path.startsWith('/admin')"
-          :to="{ name: 'admin-pages' }"
+          :to="{ name: 'pages-list' }"
           title="Admin"
           exact
         >
@@ -49,7 +49,8 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
+import deepEqual from "deep-equal";
 
 export default {
   name: "Header",
@@ -69,16 +70,33 @@ export default {
   },
 
   watch: {
-    getPages() {
+    getPages(currentPagesArray, prevPagesArray) {
+      if (deepEqual(currentPagesArray, prevPagesArray)) {
+        return;
+      }
       this.populatePages();
     }
   },
 
+  /**
+   * When this component is first created, it calls the "setPagesAction", which populates
+   * the "pages" state property in the Vuex module. Then the watch property above watches for
+   * changes to the "getPages" property in the Vuex module. If there are changes, then the
+   * "pages" property in this component will be updated with those changes.
+   */
   created() {
-    this.populatePages();
+    this.setPagesAction();
   },
 
   methods: {
+    ...mapActions({
+      setPagesAction: "pages/setPagesAction",
+    }),
+
+    populatePages() {
+      this.pages = this.getPages;
+    },
+
     toggleNav() {
       const nav = document.getElementById("nav");
       if (nav.style.display === "flex") {
@@ -88,10 +106,6 @@ export default {
         nav.style.display = "flex";
       }
     },
-
-    populatePages() {
-      this.pages = this.getPages;
-    }
   }
 }
 </script>

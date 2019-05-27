@@ -38,7 +38,7 @@
               <router-link :to="{
                 name: 'edit-page',
                 params: {
-                  pageId: page.id
+                  pageId: page._id
                 }
               }" exact>
                 <button class="btn-table">
@@ -59,7 +59,8 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
+import deepEqual from "deep-equal";
 import Draggable from "vuedraggable";
 
 export default {
@@ -90,16 +91,29 @@ export default {
   },
 
   watch: {
-    getPages() {
+    getPages(currentPagesArray, prevPagesArray) {
+      console.log("CURRENT:", currentPagesArray, "PREVIOUS:", prevPagesArray);
+      console.log(deepEqual(currentPagesArray, prevPagesArray));
+      if (deepEqual(currentPagesArray, prevPagesArray)) {
+        return;
+      }
       this.populatePages();
     }
   },
 
+  /**
+   * To understand what is going on in this component, see the comment above the "created" hook
+   * in the "Header.vue" component file.
+   */
   created() {
-    this.populatePages();
+    this.setPagesAction();
   },
 
   methods: {
+    ...mapActions({
+      setPagesAction: "pages/setPagesAction",
+    }),
+
     populatePages() {
       this.pages = this.getPages;
     },
