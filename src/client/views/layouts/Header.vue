@@ -23,13 +23,6 @@
           <router-link :to="{ name: page.slug }" exact>
             {{ page.title | capitalize }}
           </router-link>
-
-
-          <!-- <router-link :to="{ name: 'about' }" exact>About</router-link>
-          <router-link :to="{ name: 'news' }" exact>News</router-link>
-          <router-link :to="{ name: 'contact' }" exact>Contact</router-link> -->
-
-
         </div>
       </div>
       <div id="right-nav">
