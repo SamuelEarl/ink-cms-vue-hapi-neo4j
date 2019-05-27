@@ -41,9 +41,10 @@
 <script>
 // TinyMCE Vue docs: https://github.com/tinymce/tinymce-vue
 import Editor from "@tinymce/tinymce-vue";
+import * as Axios from "axios";
 
 export default {
-  name: "EditPage",
+  name: "Page",
   components: {
     Editor
   },
@@ -67,8 +68,22 @@ export default {
   },
 
   methods: {
-    submitPageData() {
-      console.log("PAGE DATA:", "TITLE:", this.title, "SLUG:", this.slug, "CONTENT:", this.content);
+    async submitPageData() {
+      const method = "POST";
+      const url = "/admin/pages/add-page";
+      const payload = {
+        title: this.title,
+        slug: this.slug,
+        content: this.content
+      };
+
+      const response = await Axios({
+        method: method,
+        url: url,
+        data: payload
+      });
+
+      console.log("RESPONSE:", response.data);
     }
   }
 }

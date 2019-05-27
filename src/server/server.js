@@ -1,36 +1,66 @@
-var express = require("express");
-var path = require("path");
-// var mongoose = require("mongoose");
-// // var config = require("./config/database");
-// var bodyParser = require("body-parser");
-// var session = require("express-session");
-// var expressValidator = require("express-validator");
-// var fileUpload = require("express-fileupload");
-// var passport = require("passport");
+const NODE_ENV = process.env.NODE_ENV || "development";
 
-// // Connect to db
-// mongoose.connect(config.database, { useNewUrlParser: true});
-// var db = mongoose.connection;
-// db.on("error", console.error.bind(console, "connection error:"));
-// db.once("open", function() {
-//   console.log("Connected to MongoDB");
-// });
+const express = require("express");
+const path = require("path");
+const MongoClient = require("mongodb").MongoClient;
+const bodyParser = require("body-parser");
+// const session = require("express-session");
+// const expressValidator = require("express-validator");
+// const fileUpload = require("express-fileupload");
+// const passport = require("passport");
+
+/**
+ * MongoDB configs
+ */
+// Connection URL
+let url = "";
+if (NODE_ENV !== "production") {
+  // Development URL
+  url = "mongodb://172.28.1.2:27017";
+}
+else {
+  // Production URL
+  // url = "";
+}
+
+// Database Name
+const dbName = "inkcms";
+
+(async () => {
+  try {
+    // Use the connect method to connect to the MongoDB server
+    const dbConnection = await MongoClient.connect(url, { useNewUrlParser: true });
+
+    // Store the MongoDB connection in a global variable that can be accessed throughout the app
+    app.locals.db = dbConnection.db(dbName);
+    // const db = dbConnection.db(dbName);
+
+    // client.close();
+
+    // Log the connection message
+    const mongoServer = dbConnection.s.options.servers[0];
+    console.log("Connected to MongoDB server at", mongoServer);
+  }
+  catch(err) {
+    console.log(`MongoDB connection error: ${err}`);
+  }
+})();
 
 // Initialize the app
-var app = express();
+const app = express();
 
-// View engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
+// // View engine setup
+// app.set("views", path.join(__dirname, "views"));
+// app.set("view engine", "ejs");
 
-// Set public folder
-app.use(express.static(path.join(__dirname, "public")));
+// // Set public folder
+// app.use(express.static(path.join(__dirname, "public")));
 
-// Set global errors variable
-app.locals.errors = null;
+// // Set global errors variable
+// app.locals.errors = null;
 
 // // Get Page Model
-// var Page = require('./models/page');
+// const Page = require('./models/page');
 
 // // Get all pages to pass to header.ejs
 // Page.find({}).sort({ sorting: 1 }).exec(function(err, pages) {
@@ -42,8 +72,10 @@ app.locals.errors = null;
 //   }
 // });
 
+app.locals.pages = [];
+
 // // Get Category Model
-// var Category = require('./models/category');
+// const Category = require('./models/category');
 
 // // Get all categories to pass to header.ejs
 // Category.find(function(err, categories) {
@@ -58,11 +90,11 @@ app.locals.errors = null;
 // // Express fileUpload middleware
 // app.use(fileUpload());
 
-// // Body Parser middleware
-// // parse application/x-www-form-urlencoded
-// app.use(bodyParser.urlencoded({ extended: false }));
-// // parse application/json
-// app.use(bodyParser.json());
+// Body Parser middleware
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
 
 // // Express Session middleware
 // app.use(session({
@@ -75,7 +107,7 @@ app.locals.errors = null;
 // // Express Validator middleware
 // app.use(expressValidator({
 //   errorFormatter: function(param, msg, value) {
-//     var namespace = param.split(".")
+//     const namespace = param.split(".")
 //     , root = namespace.shift()
 //     , formParam = root;
 
@@ -90,7 +122,7 @@ app.locals.errors = null;
 //   },
 //   customValidators: {
 //     isImage: function(value, filename) {
-//       var extension = (path.extname(filename)).toLowerCase();
+//       const extension = (path.extname(filename)).toLowerCase();
 //       switch (extension) {
 //         case ".jpg":
 //           return ".jpg";
@@ -126,17 +158,19 @@ app.locals.errors = null;
 //  * The shopping cart is an array that holds objects. Each object represents a product.
 //  * The shopping cart array is stored in a session and then made available to each request/response
 //  * cycle via the "res.locals.cart" variable.
+//  * But I will probably make the shopping cart more frontend centric. I will probably store
+//  * the shopping cart array in localStorage and then work with it from there.
 //  */
 // app.get("*", function(req, res, next) {
 //   // "req.session.cart" will be undefined until a user adds a product to their cart in the
 //   // "/cart/add/:product" route. So you need to set the "cart" variable as an empty array by default.
-//   var cart = [];
+//   const cart = [];
 //   if (req.session.cart) {
 //     cart = req.session.cart;
 //   }
 
-//   var items = 0;
-//   for (var i = 0; i < cart.length; i++) {
+//   const items = 0;
+//   for (let i = 0; i < cart.length; i++) {
 //     items = items + cart[i].qty
 //   }
 
@@ -155,25 +189,27 @@ app.locals.errors = null;
 //   next();
 // });
 
-// // Set routes
-// var pages = require("./routes/pages.js");
-// var products = require("./routes/products.js");
-// var cart = require("./routes/cart.js");
-// var users = require("./routes/users.js");
-// var adminPages = require("./routes/admin_pages.js");
-// var adminCategories = require("./routes/admin_categories.js");
-// var adminProducts = require("./routes/admin_products.js");
+// Define route modules
+// const pages = require("./routes/pages.js");
+// app.use("/", pages);
 
-// app.use("/admin/pages", adminPages);
+const adminPages = require("./routes/admin-pages.js");
+app.use("/admin/pages", adminPages);
+
+// const products = require("./routes/products.js");
+// const cart = require("./routes/cart.js");
+// const users = require("./routes/users.js");
+// const adminCategories = require("./routes/admin_categories.js");
+// const adminProducts = require("./routes/admin_products.js");
+
 // app.use("/admin/categories", adminCategories);
 // app.use("/admin/products", adminProducts);
 // app.use("/products", products);
 // app.use("/cart", cart);
 // app.use("/users", users);
-// app.use("/", pages);
 
 // Start the server
-var port = 3000;
+const port = 3000;
 app.listen(port, function() {
-  console.log("Server started on port " + port);
+  console.log(`Server started on port ${port}`);
 });

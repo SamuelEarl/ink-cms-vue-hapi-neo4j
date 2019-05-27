@@ -16,8 +16,8 @@
         <router-link :to="{ name: 'home' }" exact id="home-link" title="Home"><img id="logo" src="@/client/assets/logo-20x20.png" alt="logo"></router-link>
         <div v-if="$route.path.startsWith('/admin')">
           <router-link :to="{ name: 'admin-pages' }" exact>Pages</router-link>
-          <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
-          <router-link :to="{ name: 'admin-products' }" exact>Products</router-link>
+          <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
+          <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
         </div>
         <div v-else>
           <router-link :to="{ name: 'about' }" exact>About</router-link>
