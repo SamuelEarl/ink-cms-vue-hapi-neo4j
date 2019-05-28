@@ -11,67 +11,46 @@ If your operating system is a...
   * Install “Docker Community Edition (CE)”. Go to this link: [About Docker CE](https://docs.docker.com/install/). Look for the “Linux” link in the left navigation panel. Find your Linux distro and follow the installation instructions for Docker CE.
   * Install [Docker Compose](https://docs.docker.com/compose/overview/).
 
-# `make` Commands
-Navigate to the project root folder (where the `Makefile` is located) the run the following `make` commands.
+---
 
+# How to run the app
+After cloning the repo to your computer, navigate to the project root folder (where the `Makefile` is located) and run the following `make` commands to work within a Docker development environment:
 
-# TROUBLESHOOTING
-## `ERROR: Pool overlaps with other one on this address space`
-After running `make dev`, if you get the following error: `ERROR: Pool overlaps with other one on this address space`, then it means that some existing networks are conflicting with the network that you are trying to create. To remove those networks, run `docker network prune`. At this point, if `make dev` still does not work, then it might be because you still have existing containers that are still using the network. So you need to remove the containers first, then you can run `docker network prune`. Once the networks are removed, the `make dev` command should work.
+---
 
-Source: https://github.com/maxking/docker-mailman/issues/85#issuecomment-349429246
+## Development Environment
 
-
-# DEVELOPMENT
-
-## Run the app in a development environment
+### Run the app in a development environment
 The `make dev` command will start the containers in development mode. If no containers exist, then this command will create new containers. Development mode means that the app will run and show all errors and messages in the terminal.
 ```
 make dev
 ```
 You can access the development app in a browser at `http://localhost:8080/`.
 
-## Stop the development app
+
+### Stop the development app
 You can stop the containers with `Ctrl + C`. You will be put back in your host terminal where you can run Git commands or any other command.
 
-## Access MongoDB Compass (the MongoDB GUI)
-You will first need to install MongoDB Compass. Go to the [Download and Install Compass](https://docs.mongodb.com/compass/master/install/) page and select the tab for your operating system.
 
-After you run the MongoDB container (with one of the `make` commands), you can open MongoDB Compass and access your database. You can use the default "Port" number `27017`. If that does not work, then try `27020`. Click "CONNECT".
-
-
-NOTES:
-* The port number that is used is the one that is configured in the `docker-compose.dev.yml` file.
-
-## Rebuild the development images without cache
+### Rebuild the development images without cache
 If you want to rebuild the images without using the cache, then run this command first, then run `make dev` to start the newly built development containers.
 ```
 make dev-rebuild
 ```
 
-## Run the development containers in daemon mode
+
+### Run the development containers in daemon mode
 To run the containers in the background (i.e., no terminal messages by default), run:
 ```
 make dev-daemon
 ```
 
-## Stop and delete the development containers
+
+### Stop and delete the development containers
 `make dev-down` will stop and delete any running containers. It deletes containers and networks, but not volumes and images.
 ```
 make dev-down
 ```
-
-## Using Vue CLI
-The development image installs Vue CLI, so you can access Vue CLI commands by accessing a running container's terminal. While the development containers are running, open a new terminal window or tab and execute the following command:
-
-```
-docker container exec -it <container_name> bash
-```
-
-NOTES:
-  * To get the container_name, run `docker container ls` and replace `<container_name>` with the name of the running container you are trying to access.
-  * If you are using VSCode, you can also click on the Docker tab in the left column, right-click the container whose terminal you want to access and then select "Attach Shell" in the context menu. That will open an interactive terminal for that container in the VSCode terminal window.
-  * FYI: Since the development image installs Vue CLI, you can use this image for new projects. Simply run the app container, then run `docker container exec -it <container name> bash` to access the container's terminal, then `vue create <app-name>`. Follow the prompts to create a new Vue app.
 
 <!-- ---
 
@@ -104,6 +83,39 @@ make prod-daemon
 ```
 make prod-down
 ``` -->
+
+---
+
+# Using Vue CLI
+The development image installs Vue CLI, so you can access Vue CLI commands by accessing a running container's terminal. While the development containers are running, open a new terminal window or tab and execute the following command:
+
+```
+docker container exec -it <container_name> bash
+```
+
+NOTES:
+  * To get the container_name, run `docker container ls` and replace `<container_name>` with the name of the running container you are trying to access.
+  * If you are using VSCode, you can also click on the Docker tab in the left column, right-click the container whose terminal you want to access and then select "Attach Shell" in the context menu. That will open an interactive terminal for that container in the VSCode terminal window.
+  * FYI: Since the development image installs Vue CLI, you can use this image for new projects. Simply run the app container, then run `docker container exec -it <container name> bash` to access the container's terminal, then `vue create <app-name>`. Follow the prompts to create a new Vue app.
+
+---
+
+# Access MongoDB Compass (the MongoDB GUI)
+You will first need to install MongoDB Compass. Go to the [Download and Install Compass](https://docs.mongodb.com/compass/master/install/) page and select the tab for your operating system.
+
+After you run the MongoDB container (with one of the `make` commands), you can open MongoDB Compass and access your database. You can use the default "Port" number `27017`. If that does not work, then try `27020`. Click "CONNECT".
+
+
+NOTES:
+* The port number that is used is the one that is configured in the `docker-compose.dev.yml` file.
+
+---
+
+# TROUBLESHOOTING
+## `ERROR: Pool overlaps with other one on this address space`
+After running `make dev`, if you get the following error: `ERROR: Pool overlaps with other one on this address space`, then it means that some existing networks are conflicting with the network that you are trying to create. To remove those networks, run `docker network prune`. At this point, if `make dev` still does not work, then it might be because you still have existing containers that are still using the network. So you need to remove the containers first, then you can run `docker network prune`. Once the networks are removed, the `make dev` command should work.
+
+Source: https://github.com/maxking/docker-mailman/issues/85#issuecomment-349429246
 
 ---
 
