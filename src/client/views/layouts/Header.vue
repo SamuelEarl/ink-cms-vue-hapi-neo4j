@@ -19,7 +19,7 @@
           <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
           <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
         </div>
-        <div v-else v-for="page in pages" :key="page._id">
+        <div v-else v-for="page in getPages" :key="page._id">
           <router-link :to="{ name: page.slug }" exact>
             {{ page.title | capitalize }}
           </router-link>
@@ -50,7 +50,6 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import deepEqual from "deep-equal";
 
 export default {
   name: "Header",
@@ -59,7 +58,6 @@ export default {
   data() {
     return {
       groups: [ "admin" ],
-      pages: []
     }
   },
 
@@ -69,33 +67,26 @@ export default {
     }),
   },
 
-  watch: {
-    getPages(currentPagesArray, prevPagesArray) {
-      if (deepEqual(currentPagesArray, prevPagesArray)) {
-        return;
-      }
-      this.populatePages();
-    }
-  },
-
   /**
    * When this component is first created, it calls the "setPagesAction", which populates
    * the "pages" state property in the Vuex module. Then the watch property above watches for
    * changes to the "getPages" property in the Vuex module. If there are changes, then the
    * "pages" property in this component will be updated with those changes.
    */
-  created() {
-    this.setPagesAction();
+  async created() {
+    // Since the "setPagesAction" will also be called when the "pages-list" route is loaded
+    // we don't want it to be called twice unnecessarily. So we will return with no value if
+    // the "pages-list" route is being loaded.
+    if (this.$route.name === "pages-list") {
+      return;
+    }
+    await this.setPagesAction();
   },
 
   methods: {
     ...mapActions({
       setPagesAction: "pages/setPagesAction",
     }),
-
-    populatePages() {
-      this.pages = this.getPages;
-    },
 
     toggleNav() {
       const nav = document.getElementById("nav");

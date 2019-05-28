@@ -27,7 +27,7 @@
           @end="onEnd"
           tag="tbody"
         >
-          <tr v-for="(page, index) in pages" :key="page.id">
+          <tr v-for="(page, index) in getPages" :key="page.id">
             <td>
               <button class="btn-table btn-sort" title="Drag &amp; Drop">
                 <font-awesome-icon icon="sort" />
@@ -60,7 +60,6 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import deepEqual from "deep-equal";
 import Draggable from "vuedraggable";
 
 export default {
@@ -71,7 +70,7 @@ export default {
 
   data() {
     return {
-      pages: []
+      // pages: []
     }
   },
 
@@ -90,23 +89,12 @@ export default {
     }
   },
 
-  watch: {
-    getPages(currentPagesArray, prevPagesArray) {
-      console.log("CURRENT:", currentPagesArray, "PREVIOUS:", prevPagesArray);
-      console.log(deepEqual(currentPagesArray, prevPagesArray));
-      if (deepEqual(currentPagesArray, prevPagesArray)) {
-        return;
-      }
-      this.populatePages();
-    }
-  },
-
   /**
    * To understand what is going on in this component, see the comment above the "created" hook
    * in the "Header.vue" component file.
    */
-  created() {
-    this.setPagesAction();
+  async created() {
+    await this.setPagesAction();
   },
 
   methods: {
@@ -114,11 +102,8 @@ export default {
       setPagesAction: "pages/setPagesAction",
     }),
 
-    populatePages() {
-      this.pages = this.getPages;
-    },
-
     async deletePage(id, index, title) {
+// I need to rewrite this. I will delete the page on the server first, then use a Vuex action to remove the page in Vuex.
       try {
         if (index > -1) {
           this.pages.splice(index, 1);
@@ -139,6 +124,7 @@ export default {
     //   console.log("Pages have been reordered!");
     //   // this.reorderPages();
     // }, 3000),
+
     async onEnd(event) {
       // To see which Draggable properties are available on the event object, look at
       // https://github.com/SortableJS/Sortable#options under the "onEnd" method.
