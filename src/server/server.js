@@ -96,7 +96,7 @@ else {
       },
       // { plugin: require("bell") },
       // { plugin: require("hapi-auth-cookie") },
-      { plugin: require("./plugins/auth") },
+      // { plugin: require("./plugins/auth") },
       // { plugin: require("./plugins/users") },
       { plugin: require("@hapi/inert") },
       // Route handlers to serve static files (HTML, CSS, JS, images)

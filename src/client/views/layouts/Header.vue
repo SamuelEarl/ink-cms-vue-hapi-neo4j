@@ -42,7 +42,7 @@
         >
           <font-awesome-icon icon="user-shield" />
         </router-link>
-        <router-link :to="{ name: 'login' }" exact>Login</router-link>
+        <button>Login</button>
       </div>
     </nav>
   </header>

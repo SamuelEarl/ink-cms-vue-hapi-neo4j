@@ -6,6 +6,7 @@ import PagesList from "./views/admin/PagesList.vue";
 import Page from "./views/admin/Page.vue";
 import Categories from "./views/admin/Categories.vue";
 import Products from "./views/admin/Products.vue";
+import ShoppingCart from "./views/shopping-cart/ShoppingCart.vue";
 
 Vue.use(Router)
 
@@ -49,5 +50,10 @@ export default new Router({
         },
       ]
     },
+    {
+      path: "shopping-cart",
+      name: "shopping-cart",
+      component: ShoppingCart
+    }
   ]
 })
