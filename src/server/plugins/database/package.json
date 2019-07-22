@@ -1,0 +1,11 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "A plugin that establishes a database connection, creates a database object from that connection, and saves the database object to server.app.session. Other plugins can reference server.app.session in order to get access to the database.",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "author": "",
+  "license": ""
+}

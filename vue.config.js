@@ -8,7 +8,7 @@ module.exports = {
   outputDir: path.join(__dirname, "dist/client"),
 
   devServer: {
-    proxy: "http://localhost:3000"
+    proxy: "http://localhost:4000"
   },
 
   chainWebpack: config => {

@@ -1,4 +1,4 @@
-# In order to get the app and the database to communicate with each other, you have to setup static IP addresses on each container. Then, when registering MongoDB with Express in Express’s `server.js` file, you reference the static IP that you set for MongoDB in this file.
+# In order to get the app and the database to communicate with each other, you have to setup static IP addresses on each container. Then, when registering Neo4j with hapi in hapi’s `server.js` file, you reference the static IP that you set for Neo4j in this file.
 
 version: "3.7"
 
@@ -21,23 +21,25 @@ services:
       app_net:
         ipv4_address: 172.28.1.1
     depends_on:
-      - dev-mongodb
+      - dev-neo4j
 
-  dev-mongodb:
-    image: bitnami/mongodb:latest
+  dev-neo4j:
+    image: bitnami/neo4j:3.5.3
     ports:
-      - "27020:27017"
-    # Volumes allow you to persist data. See the README to find out where the MongoDB data are stored on the host machine.
+      - "7474:7474"
+      - "7473:7473"
+      - "7687:7687"
+    # Volumes allow you to persist data. See the README to find out where the Neo4j data are stored on the host machine.
     volumes:
       - type: volume
-        source: mongodb_data_dev
+        source: neo4j_data_dev
         target: /bitnami
     networks:
       app_net:
         ipv4_address: 172.28.1.2
 
 volumes:
-  mongodb_data_dev:
+  neo4j_data_dev:
     driver: local
 
 networks:
