@@ -4,9 +4,14 @@
 
     <br>
 
-    <router-link :to="{ name: 'add-page' }" exact>
-      <button class="btn-primary">Add a new page</button>
-    </router-link>
+    <!-- <router-link :to="{ name: 'add-page' }" exact> -->
+      <button
+        @click="addPage"
+        class="btn-primary"
+      >
+        Add a new page <span class="bold">&rsaquo;</span>
+      </button>
+    <!-- </router-link> -->
 
     <br><br><br>
 
@@ -101,6 +106,23 @@ export default {
     ...mapActions({
       setPagesAction: "pages/setPagesAction",
     }),
+
+    addPage() {
+      // Set the new chapter's sortPosition number to 1 greater than the largest existing sortPosition number.
+      let sortPosition = 0;
+      for (let i = 0; i < this.getPages.length; i++) {
+        if (this.getPages[i].sortPosition >= sortPosition) {
+          sortPosition = this.getPages[i].sortPosition + 1;
+        }
+      }
+
+      this.$router.push({
+        name: "add-page",
+        params: {
+          sortPosition: sortPosition
+        }
+      });
+    },
 
     async deletePage(id, index, title) {
 // I need to rewrite this. I will delete the page on the server first, then use a Vuex action to remove the page in Vuex.

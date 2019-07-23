@@ -7,7 +7,7 @@
 
     <router-link :to="{ name: 'pages-list' }" exact>
       <button class="btn-primary">
-        Back to all pages
+        <span class="bold">&lsaquo;</span> Back to all pages
       </button>
     </router-link>
 
@@ -33,7 +33,20 @@
 
       <br><br>
 
-      <button @click="submitPageData" class="btn-primary">Submit</button>
+      <button
+        v-if="$route.name === 'add-page'"
+        @click="submitPageData('add')"
+        class="btn-primary"
+      >
+        Submit <span class="bold">&rsaquo;</span>
+      </button>
+      <button
+        v-if="$route.name === 'edit-page'"
+        @click="submitPageData('edit')"
+        class="btn-primary"
+      >
+        Update Page <span class="bold">&rsaquo;</span>
+      </button>
     </form>
   </div>
 </template>
@@ -53,7 +66,8 @@ export default {
     return {
       title: "",
       slug: "",
-      content: ""
+      content: "",
+      sortPosition: this.$route.params.sortPosition
     }
   },
 
@@ -68,13 +82,24 @@ export default {
   },
 
   methods: {
-    async submitPageData() {
-      const method = "POST";
-      const url = "/pages/add-page";
+    async submitPageData(type) {
+      let method;
+      let url;
+
+      if (type === "add") {
+        method = "POST";
+        url = "/admin-pages/add-page";
+      }
+      if (type === "edit") {
+        method = "PUT";
+        url = "/admin-pages/edit-page";
+      }
+
       const payload = {
         title: this.title,
         slug: this.slug,
-        content: this.content
+        content: this.content,
+        sortPosition: this.sortPosition
       };
 
       const response = await Axios({
@@ -85,10 +110,15 @@ export default {
 
       console.log("RESPONSE:", response.data);
 
-      if (typeof response.data === "object") {
+      if (response.data.error) {
+        // Call flashAction with error message.
+        const msg = response.data.error.output.payload.message;
+      }
+      else {
+        // Call flashAction with success message.
         this.$router.push({ name: "pages-list" });
       }
-    }
+    },
   }
 }
 </script>

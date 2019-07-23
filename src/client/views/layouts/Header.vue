@@ -69,9 +69,7 @@ export default {
 
   /**
    * When this component is first created, it calls the "setPagesAction", which populates
-   * the "pages" state property in the Vuex module. Then the watch property above watches for
-   * changes to the "getPages" property in the Vuex module. If there are changes, then the
-   * "pages" property in this component will be updated with those changes.
+   * the "pages" state property in the "pages" Vuex module.
    */
   async created() {
     // Since the "setPagesAction" will also be called when the "pages-list" route is loaded
