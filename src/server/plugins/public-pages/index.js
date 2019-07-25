@@ -69,7 +69,7 @@ exports.plugin = {
 
           session.close();
 
-          return { pagesArray };
+          return pagesArray;
         }
         catch(err) {
           const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;

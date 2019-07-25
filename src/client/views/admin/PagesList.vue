@@ -26,13 +26,13 @@
           </tr>
         </thead>
         <Draggable
-          v-model="pages"
+          v-model="pagesList"
           handle=".btn-sort"
           v-bind="dragOptions"
           @end="onEnd"
           tag="tbody"
         >
-          <tr v-for="(page, index) in getPages" :key="page.id">
+          <tr v-for="(page, index) in pagesList" :key="page.id">
             <td>
               <button class="btn-table btn-sort" title="Drag &amp; Drop">
                 <font-awesome-icon icon="sort" />
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import Draggable from "vuedraggable";
 
 export default {
@@ -81,8 +81,17 @@ export default {
 
   computed: {
     ...mapGetters({
-      getPages: "pages/getPages",
+      //
     }),
+
+    pagesList: {
+      get() {
+        return this.$store.state.pages.pages;
+      },
+      set(pagesArray) {
+        this.$store.commit("pages/setPages", pagesArray);
+      }
+    },
 
     dragOptions() {
       return {
@@ -105,14 +114,15 @@ export default {
   methods: {
     ...mapActions({
       setPagesAction: "pages/setPagesAction",
+      reorderPagesAction: "pages/reorderPagesAction",
     }),
 
     addPage() {
       // Set the new chapter's sortPosition number to 1 greater than the largest existing sortPosition number.
       let sortPosition = 0;
-      for (let i = 0; i < this.getPages.length; i++) {
-        if (this.getPages[i].sortPosition >= sortPosition) {
-          sortPosition = this.getPages[i].sortPosition + 1;
+      for (let i = 0; i < this.pagesList.length; i++) {
+        if (this.pagesList[i].sortPosition >= sortPosition) {
+          sortPosition = this.pagesList[i].sortPosition + 1;
         }
       }
 
@@ -139,20 +149,12 @@ export default {
       }
     },
 
-    // onEnd: debounce(async function(event) {
-    //   // To see which Draggable properties are available on the event object, look at
-    //   // https://github.com/SortableJS/Sortable#options under the "onEnd" method.
-
-    //   console.log("Pages have been reordered!");
-    //   // this.reorderPages();
-    // }, 3000),
-
     async onEnd(event) {
       // To see which Draggable properties are available on the event object, look at
       // https://github.com/SortableJS/Sortable#options under the "onEnd" method.
 
       console.log("Pages have been reordered!");
-      // this.reorderPages();
+      this.reorderPagesAction();
     },
   }
 }

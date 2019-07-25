@@ -3,39 +3,69 @@
 
 // computed: {
 //   ...mapGetters({
-//     pages: "pages/getPages"
+//     pagesList: "pages/getPagesList"
 //   })
 // }
 
 import * as Axios from "axios";
+import debounce from "lodash.debounce";
 
 const state = {
-  pages: [],
+  pagesList: [],
 };
 
 
 const getters = {
-  getPages: (state) => {
-    console.log("GET VUEX PAGES:", state.pages);
-    return state.pages;
+  getPagesList: (state) => {
+    console.log("GET VUEX PAGES:", state.pagesList);
+    return state.pagesList;
   },
 };
 
 
 const mutations = {
-  setPages: (state, pages) => {
-    state.pages = pages;
-    console.log("VUEX PAGES:", state.pages);
+  setPagesList: (state, pagesArray) => {
+    console.log("VUEX PAGES:", pagesArray);
+    state.pagesList = pagesArray;
   },
 };
 
 
 const actions = {
-  setPagesAction: async ({ commit }) => {
+  setPagesListAction: async ({ commit }) => {
     const response = await Axios.get("/public-pages/get-all-pages");
     const pagesArray = response.data;
     commit("setPages", pagesArray);
   },
+
+  /**
+   * Reorganizing the pages in the database is a bit of an expensive operation, so wait 5 seconds
+   * before you send the request to reorganize the pages to make sure that the user has completed
+   * at least most of their reorganizing.
+   */
+  reorderPagesAction: debounce(async ({ commit, state }) => {
+    try {
+      const reorderedPagesList = state.pagesList;
+
+      const method = "PUT";
+      const url = "/admin-pages/reorder-pages";
+      const payload = {
+        pagesList: reorderedPagesList
+      };
+
+      const response = await Axios({
+        method: method,
+        url: url,
+        data: payload
+      });
+
+      // Display flash message for error (Error: Page reordering not saved) or successful reordering (Success: Page reordering successfully saved).
+    }
+    catch(err) {
+      console.log(err);
+    }
+
+  }, 5000),
 };
 
 

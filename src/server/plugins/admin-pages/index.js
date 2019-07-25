@@ -56,7 +56,7 @@ exports.plugin = {
             return { error, pageData };
           }
           else {
-            // Create new page
+            // Create new page in Neo4j
             const newPage = await session.run(
               `CREATE (p:Page {
                 title: { titleParam },
@@ -87,5 +87,41 @@ exports.plugin = {
       }
     });
 
+    /**
+     * Reorder pages
+     */
+    server.route({
+      method: "PUT",
+      path: "/admin-pages/reorder-pages",
+      handler: async function(request, h) {
+        let error = null;
+
+        try {
+          const pagesList = request.payload.pagesList;
+
+          // Loop through "pagesList" and update the "sortPosition" property of each page node in Neo4j.
+          // I need to "Take advantage of parallel async operations" (see my "ES6 and Beyond" Google Doc) when reordering these pages.
+
+          // // Find the page with the matching slug and update the "sortPosition" property.
+          // const pageWithSlug = await session.run(
+          //   `MATCH (p:Page {
+          //     slug: { slugParam }
+          //   })
+          //   RETURN p`, {
+          //     slugParam: slug
+          //   }
+          // );
+
+          session.close();
+
+          return error;
+        }
+        catch(err) {
+          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errorMessage);
+        }
+
+      }
+    });
   }
 };
