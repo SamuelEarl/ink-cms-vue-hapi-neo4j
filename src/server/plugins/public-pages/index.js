@@ -21,10 +21,11 @@ exports.plugin = {
       path: "/public-pages/get-page/{slug}",
       handler: async function(request, h) {
         const slug = request.params.slug;
+        let pageData = null;
 
         try {
-          // Retrieve the home page from Neo4j
-          const pageData = await session.run(
+          // Retrieve the page content from Neo4j
+          const page = await session.run(
             `MATCH (p:Page {
               slug: { slugParam }
             })
@@ -32,6 +33,10 @@ exports.plugin = {
               slugParam: slug
             }
           );
+
+          // if (page.records.length > 0) {
+            pageData = page.records[0]._fields[0].properties;
+          // }
 
           session.close();
 
@@ -59,7 +64,7 @@ exports.plugin = {
           const pages = await session.run(
             `MATCH (p:Page)
             RETURN p
-            ORDER BY p.position`
+            ORDER BY p.sortPosition`
           );
 
           const pagesArray = [];

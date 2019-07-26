@@ -1,6 +1,6 @@
 <template>
   <div id="page">
-    {{ content }}
+    <div v-html="content"></div>
   </div>
 </template>
 
@@ -9,12 +9,11 @@
 import * as Axios from "axios";
 
 export default {
-  name: "page",
+  name: "PublicPage",
   components: {},
 
   data() {
     return {
-      slug: this.$route.params.slug,
       content: "Default Page Content"
     }
   },
@@ -22,11 +21,26 @@ export default {
   /**
    * When the page is created, retrieve its data from Neo4j
    */
-  async created() {
-    const url = `/public-pages/get-page/${this.slug}`;
-    const response = await Axios.get(url);
-    if (response.data.content) {
-      this.content = response.data.content;
+  created() {
+    this.loadPageContent();
+  },
+
+  watch: {
+    // When the route changes, call the "loadPageContent" method.
+    $route() {
+      this.loadPageContent();
+    }
+  },
+
+  methods: {
+    async loadPageContent() {
+      const slug = this.$route.params.slug;
+      const url = `/public-pages/get-page/${slug}`;
+      const response = await Axios.get(url);
+      console.log("RESPONSE:", response.data.pageData);
+      if (response.data.pageData) {
+        this.content = response.data.pageData.content;
+      }
     }
   }
 }

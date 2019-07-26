@@ -15,7 +15,21 @@
 
     <br><br><br>
 
-    <div class="w3-responsive">
+    <p v-if="pagesList.length > 0">
+      <em>
+        NOTE: The page in the first position is designated as the home page
+      </em>
+    </p>
+
+    <br>
+
+    <p v-if="pagesList.length === 0">
+      <em>
+        You have not created any pages
+      </em>
+    </p>
+
+    <div v-else class="w3-responsive">
       <table class="w3-table-all w3-hoverable">
         <thead>
           <tr>
@@ -43,7 +57,7 @@
               <router-link :to="{
                 name: 'edit-page',
                 params: {
-                  pageId: page._id
+                  pageId: page.id
                 }
               }" exact>
                 <button class="btn-table">

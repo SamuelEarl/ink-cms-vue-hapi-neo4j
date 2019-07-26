@@ -16,13 +16,13 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: "/",
+      path: "/:slug",
       name: "home",
       component: PublicPage
     },
     {
       path: "/page/:slug",
-      name: "content-page",
+      name: "public-page",
       component: PublicPage
     },
     {

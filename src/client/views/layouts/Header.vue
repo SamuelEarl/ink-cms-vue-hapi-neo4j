@@ -13,14 +13,27 @@
     </div>
     <nav id="nav" class="container">
       <div id="left-nav">
-        <router-link :to="{ name: 'home' }" exact id="home-link" title="Home"><img id="logo" src="@/client/assets/logo-20x20.png" alt="logo"></router-link>
+
+        <!-- Home link -->
+        <router-link :to="{ name: 'home' }" exact id="home-link" title="Home">
+          <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+        </router-link>
+
+        <!-- Admin header links -->
         <div v-if="$route.path.startsWith('/admin')">
           <router-link :to="{ name: 'pages-list' }" exact>Pages</router-link>
           <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
           <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
         </div>
-        <div v-else v-for="page in getPages" :key="page._id">
-          <router-link :to="{ name: page.slug }" exact>
+
+        <!-- Public header links -->
+        <div v-else v-for="page in getPagesList" :key="page.id">
+          <router-link :to="{
+            name: 'public-page',
+            params: {
+              slug: page.slug
+            }
+          }" exact>
             {{ page.title | capitalize }}
           </router-link>
         </div>
@@ -63,27 +76,27 @@ export default {
 
   computed: {
     ...mapGetters({
-      getPages: "pages/getPages",
+      getPagesList: "pages/getPagesList",
     }),
   },
 
   /**
-   * When this component is first created, it calls the "setPagesAction", which populates
+   * When this component is first created, it calls the "setPagesListAction", which populates
    * the "pages" state property in the "pages" Vuex module.
    */
   async created() {
-    // Since the "setPagesAction" will also be called when the "pages-list" route is loaded
+    // Since the "setPagesListAction" will also be called when the "pages-list" route is loaded
     // we don't want it to be called twice unnecessarily. So we will return with no value if
     // the "pages-list" route is being loaded.
     if (this.$route.name === "pages-list") {
       return;
     }
-    await this.setPagesAction();
+    await this.setPagesListAction();
   },
 
   methods: {
     ...mapActions({
-      setPagesAction: "pages/setPagesAction",
+      setPagesListAction: "pages/setPagesListAction",
     }),
 
     toggleNav() {
