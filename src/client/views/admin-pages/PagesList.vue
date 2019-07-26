@@ -17,7 +17,7 @@
 
     <p v-if="pagesList.length > 0">
       <em>
-        NOTE: The page in the first position is designated as the home page
+        NOTE: The page that has the slug "home" will be designated as the home page by default.
       </em>
     </p>
 

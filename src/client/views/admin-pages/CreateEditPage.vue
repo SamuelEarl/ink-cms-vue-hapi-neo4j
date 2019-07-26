@@ -19,6 +19,7 @@
 
       <br><br>
 
+<!-- I need to use Vuelidate to prevent the slug from being "home" -->
       <label><b>Slug</b></label>
       <input type="text" class="w3-input" name="slug" v-model="slug">
 

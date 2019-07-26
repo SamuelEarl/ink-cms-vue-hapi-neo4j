@@ -17,6 +17,7 @@ exports.plugin = {
     /**
      * Create a new page
      */
+// Use Joi to prevent a user from adding a page with "home" as the slug.
     server.route({
       method: "POST",
       path: "/admin-pages/create-page",
@@ -94,6 +95,80 @@ exports.plugin = {
 
       }
     });
+
+
+    /**
+     * Edit an existing page
+     */
+    server.route({
+      method: "PUT",
+      path: "/admin-pages/edit-page",
+      handler: async function(request, h) {
+        let error = null;
+        let pageData = null;
+        const id = request.payload.id;
+        // I don't think I will worry about trying to reserve the "home" slug for only the home page.
+        // The home page is the only one that won't have a slug at first the beginning, so
+        const slug = request.payload.slug ? request.payload.slug : "home";
+
+        try {
+          // // See if a page already exists with the same slug.
+          // const pageWithSlug = await session.run(
+          //   `MATCH (p:Page {
+          //     slug: { slugParam }
+          //   })
+          //   RETURN p`, {
+          //     slugParam: slug
+          //   }
+          // );
+
+          /**
+           * If a page already exists with the same slug, then return with an error message.
+           * If there are no matching nodes in a Neo4j query, then the return statement will have a
+           * "records" array with length of 0, which means that there are no pages that exist with
+           * the same slug. So if the "records" array has a length of 0, then create a new page in
+           * Neo4j. If the "records" array has a length greater than 0, then there is a page that
+           * exists with the same slug and you need to return with an error message.
+           */
+          if (pageWithSlug.records.length > 0) {
+            error = Boom.badRequest("A page with this slug already exists. Please choose a different slug.");
+            pageData = pageWithSlug;
+            return { error, pageData };
+          }
+          else {
+            // Create new page in Neo4j
+            const newPage = await session.run(
+              `CREATE (p:Page {
+                id: { idParam },
+                title: { titleParam },
+                slug: { slugParam },
+                content: { contentParam },
+                sortPosition: { sortPositionParam }
+              })
+              RETURN p`, {
+                idParam: pageId,
+                titleParam: title,
+                slugParam: slug,
+                contentParam: content,
+                sortPositionParam: sortPosition
+              }
+            );
+
+            pageData = newPage;
+          }
+
+          session.close();
+
+          return { error, pageData };
+        }
+        catch(err) {
+          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errorMessage);
+        }
+
+      }
+    });
+
 
     /**
      * Reorder pages

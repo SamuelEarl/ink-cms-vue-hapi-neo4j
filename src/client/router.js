@@ -1,12 +1,12 @@
 import Vue from "vue";
 import Router from "vue-router";
 // import Home from "./views/home/Home.vue";
-import PublicPage from "./views/public/PublicPage.vue";
-import Admin from "./views/admin/Admin.vue";
-import PagesList from "./views/admin/PagesList.vue";
-import CreateEditPage from "./views/admin/CreateEditPage.vue";
-import Categories from "./views/admin/Categories.vue";
-import Products from "./views/admin/Products.vue";
+import PublicPage from "./views/public-pages/PublicPage.vue";
+import Admin from "./views/admin-pages/Admin.vue";
+import PagesList from "./views/admin-pages/PagesList.vue";
+import CreateEditPage from "./views/admin-pages/CreateEditPage.vue";
+import Categories from "./views/admin-pages/Categories.vue";
+import Products from "./views/admin-pages/Products.vue";
 import ShoppingCart from "./views/shopping-cart/ShoppingCart.vue";
 
 Vue.use(Router)
@@ -16,7 +16,7 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: "/:slug",
+      path: "/",
       name: "home",
       component: PublicPage
     },

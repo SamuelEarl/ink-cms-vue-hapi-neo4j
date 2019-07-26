@@ -12,32 +12,68 @@
       </div>
     </div>
     <nav id="nav" class="container">
-      <div id="left-nav">
 
-        <!-- Home link -->
-        <router-link :to="{ name: 'home' }" exact id="home-link" title="Home">
-          <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
-        </router-link>
+      <!-- Admin Left Nav -->
+      <div v-if="$route.path.startsWith('/admin')" id="left-nav">
+        <div>
 
-        <!-- Admin header links -->
-        <div v-if="$route.path.startsWith('/admin')">
+          <!-- Home link with icon -->
+          <router-link
+            :to="{ name: 'home' }"
+            exact
+            id="home-link"
+            title="Home"
+          >
+            <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+          </router-link>
+
+          <!-- Admin Left Nav Links -->
           <router-link :to="{ name: 'pages-list' }" exact>Pages</router-link>
           <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
           <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
-        </div>
 
-        <!-- Public header links -->
-        <div v-else v-for="page in getPagesList" :key="page.id">
-          <router-link :to="{
-            name: 'public-page',
-            params: {
-              slug: page.slug
-            }
-          }" exact>
-            {{ page.title | capitalize }}
-          </router-link>
         </div>
       </div>
+
+      <!-- Public Left Nav -->
+      <div v-else id="left-nav">
+
+        <!-- If the user has not created any pages, then provide a default home page. -->
+        <router-link
+          v-if="getPagesList.length === 0"
+          :to="{ name: 'home' }"
+          exact
+          id="home-link"
+          title="Home"
+        >
+          <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+        </router-link>
+
+        <div v-for="page in getPagesList" :key="page.id">
+
+          <!-- Home link with icon -->
+          <router-link
+            v-if="page.slug === 'home'"
+            :to="{ name: 'home' }"
+            exact
+            id="home-link"
+            title="Home"
+          >
+            <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+          </router-link>
+
+          <!-- Public header links -->
+          <router-link
+            v-else
+            :to="{ name: 'public-page', params: { slug: page.slug } }"
+            exact
+          >
+            {{ page.title | capitalize }}
+          </router-link>
+
+        </div>
+      </div>
+
       <div id="right-nav">
         <router-link
           v-if="!$route.path.startsWith('/admin')"

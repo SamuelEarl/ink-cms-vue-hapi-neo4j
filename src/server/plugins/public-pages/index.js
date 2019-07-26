@@ -16,11 +16,12 @@ exports.plugin = {
     /**
      * Get an individual page
      */
+// Use the sanitize-html library (https://www.npmjs.com/package/sanitize-html) to escape output that is being sent to the browser. Only the data that is in the form of HTML strings and that will be displayed in an element with the "v-html" directive needs to be escaped.
     server.route({
       method: "GET",
-      path: "/public-pages/get-page/{slug}",
+      path: "/public-pages/get-page/{slug?}",
       handler: async function(request, h) {
-        const slug = request.params.slug;
+        const slug = request.params.slug ? request.params.slug : "home";
         let pageData = null;
 
         try {
@@ -34,9 +35,9 @@ exports.plugin = {
             }
           );
 
-          // if (page.records.length > 0) {
+          if (page.records.length > 0) {
             pageData = page.records[0]._fields[0].properties;
-          // }
+          }
 
           session.close();
 
