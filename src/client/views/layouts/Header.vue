@@ -5,7 +5,7 @@
         <button id="toggle-nav" class="mobile-menu-btn" title="Toggle Navigation" v-on:click="toggleNav"><font-awesome-icon icon="bars" /></button>
       </div>
       <div>
-        <div id="mobile-logo"><router-link to="/" exact><img id="logo" src="@/client/assets/logo-30x30.png" alt="logo"></router-link></div>
+        <div id="mobile-logo"><router-link to="/" exact><img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo"></router-link></div>
       </div>
       <div>
         <button id="placeholder-btn" class="mobile-menu-btn"><font-awesome-icon icon="bars" /></button>
@@ -24,7 +24,7 @@
             id="home-link"
             title="Home"
           >
-            <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+            <img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo">
           </router-link>
 
           <!-- Admin Left Nav Links -->
@@ -46,7 +46,7 @@
           id="home-link"
           title="Home"
         >
-          <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+          <img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo">
         </router-link>
 
         <div v-for="page in getPagesList" :key="page.id">
@@ -59,7 +59,7 @@
             id="home-link"
             title="Home"
           >
-            <img id="logo" src="@/client/assets/logo-20x20.png" alt="logo">
+            <img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo">
           </router-link>
 
           <!-- Public header links -->
@@ -152,7 +152,7 @@ export default {
 @media $s-up {
   header {
     width: 100%;
-    background-color: navy;
+    background-color: $ink-blue;
 
     button {
       color: white;
@@ -170,7 +170,7 @@ export default {
       z-index: 50;
       width: 100%;
       height: 50px;
-      background-color: navy;
+      background-color: $ink-blue;
       box-shadow: 0 0 5px gray;
 
       .mobile-menu-btn {

@@ -178,7 +178,7 @@ export default {
 @media $s-up {
   thead {
     tr, th {
-      background-color: navy;
+      background-color: $ink-blue;
       color: white;
     }
   }
