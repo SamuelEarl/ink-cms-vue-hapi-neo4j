@@ -4,7 +4,7 @@ import Router from "vue-router";
 import PublicPage from "./views/public/PublicPage.vue";
 import Admin from "./views/admin/Admin.vue";
 import PagesList from "./views/admin/PagesList.vue";
-import AddEditPage from "./views/admin/AddEditPage.vue";
+import CreateEditPage from "./views/admin/CreateEditPage.vue";
 import Categories from "./views/admin/Categories.vue";
 import Products from "./views/admin/Products.vue";
 import ShoppingCart from "./views/shopping-cart/ShoppingCart.vue";
@@ -35,14 +35,14 @@ export default new Router({
           component: PagesList
         },
         {
-          path: "add-page/:sortPosition",
-          name: "add-page",
-          component: AddEditPage
+          path: "create-page/:sortPosition",
+          name: "create-page",
+          component: CreateEditPage
         },
         {
           path: "edit-page/:pageId",
           name: "edit-page",
-          component: AddEditPage
+          component: CreateEditPage
         },
         {
           path: "categories",

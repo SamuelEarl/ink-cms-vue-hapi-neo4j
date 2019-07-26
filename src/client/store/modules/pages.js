@@ -35,11 +35,11 @@ const actions = {
   setPagesListAction: async ({ commit }) => {
     const response = await Axios.get("/public-pages/get-all-pages");
     const pagesArray = response.data;
-    commit("setPages", pagesArray);
+    commit("setPagesList", pagesArray);
   },
 
   /**
-   * Reorganizing the pages in the database is a bit of an expensive operation, so wait 5 seconds
+   * Reorganizing the pages in the database is a bit of an expensive operation, so wait 2 seconds
    * before you send the request to reorganize the pages to make sure that the user has completed
    * at least most of their reorganizing.
    */
@@ -65,7 +65,7 @@ const actions = {
       console.log(err);
     }
 
-  }, 5000),
+  }, 2000),
 };
 
 

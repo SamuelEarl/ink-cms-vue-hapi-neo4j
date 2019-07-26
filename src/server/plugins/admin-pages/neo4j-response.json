@@ -1,0 +1,86 @@
+{
+  "records": [
+    {
+      "keys": [
+        "p"
+      ],
+      "length": 1,
+      "_fields": [
+        {
+          "identity": {
+            "low": 0,
+            "high": 0
+          },
+          "labels": [
+            "Page"
+          ],
+          "properties": {
+            "id": "08f4c77b-32ef-4dd7-b5e5-b87dc3a8b8ba-1564155137944",
+            "title": "Test Page",
+            "sortPosition": 0,
+            "content": "<p>Hello!</p>",
+            "slug": "test-page"
+          }
+        }
+      ],
+      "_fieldLookup": {
+        "p": 0
+      }
+    }
+  ],
+  "summary": {
+    "statement": {
+      "text": "MATCH (p:Page {\n                  id: { idParam }\n                })\n                SET p.sortPosition={ sortPositionParam }\n                RETURN p",
+      "parameters": {
+        "idParam": "08f4c77b-32ef-4dd7-b5e5-b87dc3a8b8ba-1564155137944",
+        "sortPositionParam": 0
+      }
+    },
+    "statementType": "rw",
+    "counters": {
+      "_stats": {
+        "nodesCreated": 0,
+        "nodesDeleted": 0,
+        "relationshipsCreated": 0,
+        "relationshipsDeleted": 0,
+        "propertiesSet": 1,
+        "labelsAdded": 0,
+        "labelsRemoved": 0,
+        "indexesAdded": 0,
+        "indexesRemoved": 0,
+        "constraintsAdded": 0,
+        "constraintsRemoved": 0
+      }
+    },
+    "updateStatistics": {
+      "_stats": {
+        "nodesCreated": 0,
+        "nodesDeleted": 0,
+        "relationshipsCreated": 0,
+        "relationshipsDeleted": 0,
+        "propertiesSet": 1,
+        "labelsAdded": 0,
+        "labelsRemoved": 0,
+        "indexesAdded": 0,
+        "indexesRemoved": 0,
+        "constraintsAdded": 0,
+        "constraintsRemoved": 0
+      }
+    },
+    "plan": false,
+    "profile": false,
+    "notifications": [],
+    "server": {
+      "address": "172.28.1.2:7687",
+      "version": "Neo4j/3.5.3"
+    },
+    "resultConsumedAfter": {
+      "low": 1,
+      "high": 0
+    },
+    "resultAvailableAfter": {
+      "low": 1,
+      "high": 0
+    }
+  }
+}

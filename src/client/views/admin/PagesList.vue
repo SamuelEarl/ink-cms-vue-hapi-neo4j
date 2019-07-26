@@ -4,12 +4,12 @@
 
     <br>
 
-    <!-- <router-link :to="{ name: 'add-page' }" exact> -->
+    <!-- <router-link :to="{ name: 'create-page' }" exact> -->
       <button
-        @click="addPage"
+        @click="createPage"
         class="btn-primary"
       >
-        Add a new page <span class="bold">&rsaquo;</span>
+        Create a new page <span class="bold">&rsaquo;</span>
       </button>
     <!-- </router-link> -->
 
@@ -86,10 +86,10 @@ export default {
 
     pagesList: {
       get() {
-        return this.$store.state.pages.pages;
+        return this.$store.state.pages.pagesList;
       },
       set(pagesArray) {
-        this.$store.commit("pages/setPages", pagesArray);
+        this.$store.commit("pages/setPagesList", pagesArray);
       }
     },
 
@@ -108,16 +108,16 @@ export default {
    * in the "Header.vue" component file.
    */
   async created() {
-    await this.setPagesAction();
+    await this.setPagesListAction();
   },
 
   methods: {
     ...mapActions({
-      setPagesAction: "pages/setPagesAction",
+      setPagesListAction: "pages/setPagesListAction",
       reorderPagesAction: "pages/reorderPagesAction",
     }),
 
-    addPage() {
+    createPage() {
       // Set the new chapter's sortPosition number to 1 greater than the largest existing sortPosition number.
       let sortPosition = 0;
       for (let i = 0; i < this.pagesList.length; i++) {
@@ -127,7 +127,7 @@ export default {
       }
 
       this.$router.push({
-        name: "add-page",
+        name: "create-page",
         params: {
           sortPosition: sortPosition
         }

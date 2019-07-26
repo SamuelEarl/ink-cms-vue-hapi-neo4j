@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 v-if="$route.name === 'add-page'">Add a page</h1>
+    <h1 v-if="$route.name === 'create-page'">Create a page</h1>
     <h1 v-if="$route.name === 'edit-page'">Edit page</h1>
 
     <br>
@@ -34,11 +34,11 @@
       <br><br>
 
       <button
-        v-if="$route.name === 'add-page'"
-        @click="submitPageData('add')"
+        v-if="$route.name === 'create-page'"
+        @click="submitPageData('create')"
         class="btn-primary"
       >
-        Submit <span class="bold">&rsaquo;</span>
+        Create Page <span class="bold">&rsaquo;</span>
       </button>
       <button
         v-if="$route.name === 'edit-page'"
@@ -86,9 +86,9 @@ export default {
       let method;
       let url;
 
-      if (type === "add") {
+      if (type === "create") {
         method = "POST";
-        url = "/admin-pages/add-page";
+        url = "/admin-pages/create-page";
       }
       if (type === "edit") {
         method = "PUT";
