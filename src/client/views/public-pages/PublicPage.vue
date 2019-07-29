@@ -1,5 +1,6 @@
 <template>
   <div id="page">
+    <h1 v-html="title"></h1>
     <div v-html="content"></div>
   </div>
 </template>
@@ -14,6 +15,7 @@ export default {
 
   data() {
     return {
+      title: "",
       content: "You are seeing this message because you have not create a home page yet. <br> Please sign into the Admin area and create a custom home page. <br> Feel free to also create any other custom pages you want."
     }
   },
@@ -46,6 +48,7 @@ export default {
       const response = await Axios.get(url);
       console.log("GET PAGE RESPONSE:", response.data.pageData);
       if (response.data.pageData) {
+        this.title = response.data.pageData.title;
         this.content = response.data.pageData.content;
       }
     }

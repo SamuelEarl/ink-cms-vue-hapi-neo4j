@@ -17,7 +17,6 @@ exports.plugin = {
     /**
      * Create a new page
      */
-// Use Joi to prevent a user from adding a page with "home" as the slug.
     server.route({
       method: "POST",
       path: "/admin-pages/create-page",
@@ -97,6 +96,64 @@ exports.plugin = {
     });
 
 
+// I need to finish this route
+    /**
+     * Get the page data for the "Edit page" view
+     */
+    server.route({
+      method: "GET",
+      path: "/admin-pages/edit-page/{pageId}",
+      handler: async function(request, h) {
+        console.log("EDIT PAGE PARAMS:", request.params);
+        let error = null;
+        let pageData = null;
+        const pageId = request.params.pageId;
+        console.log("pageId:", pageId);
+
+        try {
+          // Find the page node with the matching pageId.
+          const pageWithMatchingId = await session.run(
+            `MATCH (p:Page {
+              pageId: { pageIdParam }
+            })
+            RETURN p`, {
+              pageIdParam: pageId
+            }
+          );
+
+          session.close();
+
+          console.log("pageWithMatchingId.records:", pageWithMatchingId.records);
+
+          /**
+           * If a page already exists with the same slug, then return with an error message.
+           * If there are no matching nodes in a Neo4j query, then the return statement will have a
+           * "records" array with length of 0, which means that there are no pages that exist with
+           * the same slug. So if the "records" array has a length of 0, then create a new page in
+           * Neo4j. If the "records" array has a length greater than 0, then there is a page that
+           * exists with the same slug and you need to return with an error message.
+           */
+          // The page exists and return the pageData.
+          if (pageWithMatchingId.records.length > 0) {
+            pageData = pageWithMatchingId;
+            return { error, pageData };
+          }
+          // The page does not exist and return an error.
+          else {
+            error = Boom.badRequest("A page with this slug already exists. Please choose a different slug.");
+            return { error, pageData };
+          }
+        }
+        catch(err) {
+          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errorMessage);
+        }
+
+      }
+    });
+
+
+// I need to finish this route
     /**
      * Edit an existing page
      */
@@ -122,6 +179,7 @@ exports.plugin = {
           //   }
           // );
 
+// I need to keep this logic so that a user does not edit a page's slug and, in the process, create a slug that is already being used.
           /**
            * If a page already exists with the same slug, then return with an error message.
            * If there are no matching nodes in a Neo4j query, then the return statement will have a

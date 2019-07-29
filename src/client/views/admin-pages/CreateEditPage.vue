@@ -19,7 +19,6 @@
 
       <br><br>
 
-<!-- I need to use Vuelidate to prevent the slug from being "home" -->
       <label><b>Slug</b></label>
       <input type="text" class="w3-input" name="slug" v-model="slug">
 
@@ -72,6 +71,12 @@ export default {
     }
   },
 
+  created() {
+    if (this.$route.name === "edit-page") {
+      this.getPageData();
+    }
+  },
+
   computed: {
     getEditorApiKey() {
       return this.$editorApiKey;
@@ -120,6 +125,25 @@ export default {
         this.$router.push({ name: "pages-list" });
       }
     },
+
+    async getPageData() {
+      const pageId = this.$route.params.pageId;
+      const method = "GET";
+      const url = `/admin-pages/edit-page/${pageId}`;
+
+      const response = await Axios({
+        method: method,
+        url: url
+      });
+
+      console.log("RESPONSE:", response);
+
+      if (response.data.pageData) {
+        this.title = response.data.pageData.title;
+        this.slug = response.data.pageData.slug;
+        this.content = response.data.pageData.content;
+      }
+    }
   }
 }
 </script>

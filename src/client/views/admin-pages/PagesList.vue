@@ -17,7 +17,7 @@
 
     <p v-if="pagesList.length > 0">
       <em>
-        NOTE: The page that has the slug "home" will be designated as the home page by default.
+        NOTE: If you give a page the slug "home" it will be designated as your home page.
       </em>
     </p>
 
@@ -54,12 +54,15 @@
             </td>
             <td>{{ page.title | capitalize }}</td>
             <td class="center">
-              <router-link :to="{
-                name: 'edit-page',
-                params: {
-                  pageId: page.id
-                }
-              }" exact>
+              <router-link
+                :to="{
+                  name: 'edit-page',
+                  params: {
+                    pageId: page.id
+                  }
+                }"
+                exact
+              >
                 <button class="btn-table">
                   <font-awesome-icon icon="edit" />
                 </button>
