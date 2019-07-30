@@ -22,12 +22,12 @@ exports.plugin = {
       path: "/admin-pages/create-page",
       handler: async function(request, h) {
         let error = null;
-        let pageData = null;
-        const uuid = uuidv4();
-        const currentTime = new Date().getTime();
-        const pageId = `${uuid}-${currentTime}`;
+        let flash = null;
 
         try {
+          const uuid = uuidv4();
+          const currentTime = new Date().getTime();
+          const pageId = `${uuid}-${currentTime}`;
           const title = request.payload.title;
           // For the slug value that was entered by the user, replace any spaces with hyphens and make all characters lowercase.
           let slug = request.payload.slug.replace(/\s+/g, "-").toLowerCase();
@@ -39,7 +39,7 @@ exports.plugin = {
           const sortPosition = request.payload.sortPosition;
 
           // See if a page already exists with the same slug.
-          const pageWithSlug = await session.run(
+          const pageWithMatchingSlug = await session.run(
             `MATCH (p:Page {
               slug: { slugParam }
             })
@@ -49,30 +49,31 @@ exports.plugin = {
           );
 
           /**
-           * If a page already exists with the same slug, then return with an error message.
-           * If there are no matching nodes in a Neo4j query, then the return statement will have a
-           * "records" array with length of 0, which means that there are no pages that exist with
+           * If there are no matching nodes in the Neo4j query, then the return statement will have
+           * a "records" array with length of 0, which means that there are no pages that exist with
            * the same slug. So if the "records" array has a length of 0, then create a new page in
            * Neo4j. If the "records" array has a length greater than 0, then there is a page that
-           * exists with the same slug and you need to return with an error message.
+           * exists with the same slug, so set "flash" to an alert message and "error" to a Boom
+           * error.
            */
-          if (pageWithSlug.records.length > 0) {
-            error = Boom.badRequest("A page with this slug already exists. Please choose a different slug.");
-            pageData = pageWithSlug;
-            return { error, pageData };
+          // If a page already exists with the same slug, then set "flash" to an alert message and
+          // "error" to a Boom error.
+          if (pageWithMatchingSlug.records.length > 0) {
+            flash = "A page with this slug already exists. Please choose a different slug.";
+            error = Boom.badRequest(flash);
           }
+          // Otherwise create a new page in Neo4j and set "flash" to a success message.
           else {
-            // Create new page in Neo4j
-            const newPage = await session.run(
+            await session.run(
               `CREATE (p:Page {
-                id: { idParam },
+                pageId: { pageIdParam },
                 title: { titleParam },
                 slug: { slugParam },
                 content: { contentParam },
                 sortPosition: { sortPositionParam }
               })
               RETURN p`, {
-                idParam: pageId,
+                pageIdParam: pageId,
                 titleParam: title,
                 slugParam: slug,
                 contentParam: content,
@@ -80,23 +81,29 @@ exports.plugin = {
               }
             );
 
-            pageData = newPage;
+            flash = "New page successfully created!";
+            // NOTE: If there is an error while trying to create the new page in Neo4j, then the
+            // execution will skip to the "catch" block where you can handle the error and return
+            // an alert message to the user as user feedback.
           }
 
           session.close();
 
-          return { error, pageData };
+          return { error, flash };
         }
         catch(err) {
-          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errorMessage);
+          // Log the error...
+          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errMsg);
+          // ...and return the error to the user to provide user feedback.
+          flash = err;
+          error = Boom.badRequest(flash);
+          return { error, flash };
         }
-
       }
     });
 
 
-// I need to finish this route
     /**
      * Get the page data for the "Edit page" view
      */
@@ -104,13 +111,13 @@ exports.plugin = {
       method: "GET",
       path: "/admin-pages/edit-page/{pageId}",
       handler: async function(request, h) {
-        console.log("EDIT PAGE PARAMS:", request.params);
         let error = null;
+        let flash = null;
         let pageData = null;
-        const pageId = request.params.pageId;
-        console.log("pageId:", pageId);
 
         try {
+          const pageId = request.params.pageId;
+
           // Find the page node with the matching pageId.
           const pageWithMatchingId = await session.run(
             `MATCH (p:Page {
@@ -123,111 +130,130 @@ exports.plugin = {
 
           session.close();
 
-          console.log("pageWithMatchingId.records:", pageWithMatchingId.records);
-
           /**
-           * If a page already exists with the same slug, then return with an error message.
-           * If there are no matching nodes in a Neo4j query, then the return statement will have a
-           * "records" array with length of 0, which means that there are no pages that exist with
-           * the same slug. So if the "records" array has a length of 0, then create a new page in
-           * Neo4j. If the "records" array has a length greater than 0, then there is a page that
-           * exists with the same slug and you need to return with an error message.
+           * If there are no matching nodes from the Neo4j query, then the return statement will
+           * have a "records" array with length of 0, which means that there are no pages that exist
+           * with a matching pageId. So if the "records" array has a length of 0, then return an
+           * error. If the "records" array has a length greater than 0, then there is a page with a
+           * matching pageId, so return the pageData.
            */
-          // The page exists and return the pageData.
+          // If the page exists, then set pageData to equal the node's properties.
           if (pageWithMatchingId.records.length > 0) {
-            pageData = pageWithMatchingId;
-            return { error, pageData };
+            pageData = pageWithMatchingId.records[0]._fields[0].properties;
           }
-          // The page does not exist and return an error.
+          // Otherwise set "flash" to an alert message and "error" to a Boom error.
           else {
-            error = Boom.badRequest("A page with this slug already exists. Please choose a different slug.");
-            return { error, pageData };
+            flash = "That page does not exist.";
+            error = Boom.badRequest(flash);
           }
+
+          return { error, flash, pageData };
         }
         catch(err) {
-          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errorMessage);
+          // Log the error...
+          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errMsg);
+          // ...and return the error to the user to provide user feedback.
+          flash = err;
+          error = Boom.badRequest(flash);
+          return { error, flash, pageData };
         }
-
       }
     });
 
 
-// I need to finish this route
     /**
-     * Edit an existing page
+     * Edit (or update) an existing page
      */
     server.route({
       method: "PUT",
-      path: "/admin-pages/edit-page",
+      path: "/admin-pages/edit-page/{pageId}",
       handler: async function(request, h) {
         let error = null;
-        let pageData = null;
-        const id = request.payload.id;
-        // I don't think I will worry about trying to reserve the "home" slug for only the home page.
-        // The home page is the only one that won't have a slug at first the beginning, so
-        const slug = request.payload.slug ? request.payload.slug : "home";
+        let flash = null;
 
         try {
-          // // See if a page already exists with the same slug.
-          // const pageWithSlug = await session.run(
-          //   `MATCH (p:Page {
-          //     slug: { slugParam }
-          //   })
-          //   RETURN p`, {
-          //     slugParam: slug
-          //   }
-          // );
-
-// I need to keep this logic so that a user does not edit a page's slug and, in the process, create a slug that is already being used.
-          /**
-           * If a page already exists with the same slug, then return with an error message.
-           * If there are no matching nodes in a Neo4j query, then the return statement will have a
-           * "records" array with length of 0, which means that there are no pages that exist with
-           * the same slug. So if the "records" array has a length of 0, then create a new page in
-           * Neo4j. If the "records" array has a length greater than 0, then there is a page that
-           * exists with the same slug and you need to return with an error message.
-           */
-          if (pageWithSlug.records.length > 0) {
-            error = Boom.badRequest("A page with this slug already exists. Please choose a different slug.");
-            pageData = pageWithSlug;
-            return { error, pageData };
+          const pageId = request.params.pageId;
+          const title = request.payload.title;
+          // For the slug value that was entered by the user, replace any spaces with hyphens and make all characters lowercase.
+          let slug = request.payload.slug.replace(/\s+/g, "-").toLowerCase();
+          // If no slug is entered, then use the title as the slug.
+          if (slug === "") {
+            slug = title.replace(/\s+/g, "-").toLowerCase();
           }
+          const content = request.payload.content;
+
+          // See if the slug is unique or if another page is already using this slug. If you find
+          // another node that has the same slug but has a different ID than the current node, then
+          // you know that the slug you are trying to use is not unique and you need to use a
+          // different slug.
+          const pageWithMatchingSlug = await session.run(
+            `MATCH (p:Page {
+              slug: { slugParam },
+              pageId: { pageIdParam }
+            })
+            RETURN p`, {
+              slugParam: slug,
+              pageIdParam: { pageId }
+            }
+          );
+
+          /**
+           * If there are no matching nodes in the Neo4j query, then the return statement will have
+           * a "records" array with length of 0, which means that there are no pages that exist with
+           * the same slug. So if the "records" array has a length of 0, then update the existing
+           * page in Neo4j. If the "records" array has a length greater than 0, then there is a page
+           * that exists with the same slug, so set "flash" to an alert message and "error" to a
+           * Boom error.
+           */
+          // If a page already exists with the same slug, then set "flash" to an alert message and
+          // "error" to a Boom error.
+          if (pageWithMatchingSlug.records.length > 0) {
+            flash = "A page with this slug already exists. Please choose a different slug.";
+            error = Boom.badRequest(flash);
+          }
+          // Otherwise update the existing page in Neo4j and set "flash" to a success message.
           else {
-            // Create new page in Neo4j
-            const newPage = await session.run(
-              `CREATE (p:Page {
-                id: { idParam },
-                title: { titleParam },
-                slug: { slugParam },
-                content: { contentParam },
-                sortPosition: { sortPositionParam }
+            await session.run(
+              `MATCH (p:Page {
+                pageId: { pageIdParam }
               })
+              SET
+                p.title={ titleParam },
+                p.slug={ slugParam },
+                p.content={ contentParam }
               RETURN p`, {
-                idParam: pageId,
+                pageIdParam: pageId,
                 titleParam: title,
                 slugParam: slug,
-                contentParam: content,
-                sortPositionParam: sortPosition
+                contentParam: content
               }
             );
 
-            pageData = newPage;
+            flash = "Page successfully updated!";
+            // NOTE: If there is an error while trying to create the new page in Neo4j, then the
+            // execution will skip to the "catch" block where you can handle the error and return
+            // a flash message to the user as user feedback.
           }
 
           session.close();
 
-          return { error, pageData };
+          return { error, flash };
         }
         catch(err) {
-          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errorMessage);
+          // Log the error...
+          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errMsg);
+          // ...and return the error and flash message to the user to provide user feedback.
+          flash = err;
+          error = Boom.badRequest(flash);
+          return { error, flash };
         }
-
       }
     });
 
 
+// I need to update this endpoint to match the ones above (with flash and error messages).
     /**
      * Reorder pages
      */
@@ -246,11 +272,11 @@ exports.plugin = {
             try {
               const response = await session.run(
                 `MATCH (p:Page {
-                  id: { idParam }
+                  pageId: { pageIdParam }
                 })
                 SET p.sortPosition={ sortPositionParam }
                 RETURN p`, {
-                  idParam: page.id,
+                  pageIdParam: page.pageId,
                   sortPositionParam: index
                 }
               );
@@ -269,25 +295,16 @@ exports.plugin = {
           // The "records[i]._fields[i].properties" property is an object that contains the properties of the node that is returned. For every node that is returned from the query, we are going to push that "properties" object into an array. The result will be an array of objects and we will return that array of objects to the browser. (Or should we simply return a success message?)
           for (const pagePromise of pagesListPromises) {
             const resolvedPromise = await pagePromise;
-            // console.log("pagePromise:", pagePromise);
-            // Log the DB response along with the response payload
             resolvedPromise.records.forEach(async function(record) {
               reorderedPages.push(record._fields[0].properties);
             });
           }
 
-          // Cannot read property 'forEach' of undefined
-          // pagesListPromises.records.forEach(async function(record) {
-          //   await reorderedPages.push(record._fields[0].properties);
-          // });
-
-          console.log("reorderedPages:", reorderedPages);
-
           return { boomError, reorderedPages };
         }
         catch(err) {
-          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errorMessage);
+          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errMsg);
           boomError = Boom.badRequest(err);
           return { boomError, reorderedPages };
         }

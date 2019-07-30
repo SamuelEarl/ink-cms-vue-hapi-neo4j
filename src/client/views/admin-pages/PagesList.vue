@@ -17,7 +17,7 @@
 
     <p v-if="pagesList.length > 0">
       <em>
-        NOTE: If you give a page the slug "home" it will be designated as your home page.
+        NOTE: To create a home page, give one of your pages the slug "home".
       </em>
     </p>
 
@@ -58,7 +58,7 @@
                 :to="{
                   name: 'edit-page',
                   params: {
-                    pageId: page.id
+                    pageId: page.pageId
                   }
                 }"
                 exact

@@ -13,6 +13,14 @@
 
     <br><br><br>
 
+    <p>
+      <em>
+        NOTE: To create a home page, give one of your pages the slug "home".
+      </em>
+    </p>
+
+    <br>
+
     <form @submit.prevent>
       <label><b>Title</b></label>
       <input type="text" class="w3-input" name="title" v-model="title">
@@ -89,40 +97,49 @@ export default {
 
   methods: {
     async submitPageData(type) {
-      let method;
-      let url;
+      try {
+        let method;
+        let url;
+        const pageId = this.$route.params.pageId;
 
-      if (type === "create") {
-        method = "POST";
-        url = "/admin-pages/create-page";
+        if (type === "create") {
+          method = "POST";
+          url = "/admin-pages/create-page";
+        }
+        if (type === "edit") {
+          method = "PUT";
+          url = `/admin-pages/edit-page/${pageId}`;
+        }
+
+        const payload = {
+          title: this.title,
+          slug: this.slug,
+          content: this.content,
+          sortPosition: this.sortPosition
+        };
+
+        const response = await Axios({
+          method: method,
+          url: url,
+          data: payload
+        });
+
+        console.log("RESPONSE:", response.data);
+
+        // If there is an error, then display the error message.
+        if (response.data.error) {
+          const msg = response.data.flash;
+          // this.flashAction({ type: "alert", msg: msg });
+        }
+        // Otherwise redirect the user back to the "pages-list" page and display a success message.
+        else {
+          this.$router.push({ name: "pages-list" });
+          const msg = response.data.flash;
+          // this.flashAction({ type: "success", msg: msg });
+        }
       }
-      if (type === "edit") {
-        method = "PUT";
-        url = "/admin-pages/edit-page";
-      }
-
-      const payload = {
-        title: this.title,
-        slug: this.slug,
-        content: this.content,
-        sortPosition: this.sortPosition
-      };
-
-      const response = await Axios({
-        method: method,
-        url: url,
-        data: payload
-      });
-
-      console.log("RESPONSE:", response.data);
-
-      if (response.data.error) {
-        // Call flashAction with error message.
-        const msg = response.data.error.output.payload.message;
-      }
-      else {
-        // Call flashAction with success message.
-        this.$router.push({ name: "pages-list" });
+      catch(err) {
+        console.log("submitPageData Error:", err);
       }
     },
 
