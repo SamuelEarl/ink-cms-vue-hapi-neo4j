@@ -17,7 +17,7 @@ const state = {
 
 const getters = {
   getPagesList: (state) => {
-    console.log("GET VUEX PAGES:", state.pagesList);
+    console.log("VUEX getPagesList:", state.pagesList);
     return state.pagesList;
   },
 };
@@ -25,8 +25,13 @@ const getters = {
 
 const mutations = {
   setPagesList: (state, pagesArray) => {
-    console.log("VUEX PAGES:", pagesArray);
+    console.log("VUEX setPagesList:", pagesArray);
     state.pagesList = pagesArray;
+  },
+
+  removePageFromPagesList: (state, index) => {
+    console.log("removePageFromPagesList:", index);
+    state.pagesList.splice(index, 1);
   },
 };
 
@@ -36,6 +41,11 @@ const actions = {
     const response = await Axios.get("/public-pages/get-all-pages");
     const pagesArray = response.data;
     commit("setPagesList", pagesArray);
+  },
+
+  removePageAction: ({ commit }, index) => {
+    console.log("removePageAction:", index);
+    commit("removePageFromPagesList", index);
   },
 
   /**

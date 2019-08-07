@@ -46,7 +46,7 @@
           @end="onEnd"
           tag="tbody"
         >
-          <tr v-for="(page, index) in pagesList" :key="page.id">
+          <tr v-for="(page, index) in pagesList" :key="page.pageId">
             <td>
               <button class="btn-table btn-sort" title="Drag &amp; Drop">
                 <font-awesome-icon icon="sort" />
@@ -69,7 +69,7 @@
               </router-link>
             </td>
             <td class="center">
-              <button v-on:click="deletePage(page.id, index, page.title)" class="btn-table">
+              <button v-on:click="deletePage(page.pageId, index, page.title)" class="btn-table">
                 <font-awesome-icon icon="times-circle" />
               </button>
             </td>
@@ -83,6 +83,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import Draggable from "vuedraggable";
+import * as Axios from "axios";
 
 export default {
   name: "Pages",
@@ -131,6 +132,7 @@ export default {
   methods: {
     ...mapActions({
       setPagesListAction: "pages/setPagesListAction",
+      removePageAction: "pages/removePageAction",
       reorderPagesAction: "pages/reorderPagesAction",
     }),
 
@@ -151,14 +153,47 @@ export default {
       });
     },
 
-    async deletePage(id, index, title) {
-// I need to rewrite this. I will delete the page on the server first, then use a Vuex action to remove the page in Vuex.
+    async deletePage(pageId, index, title) {
+      let flash;
+
+      // Delete the page on the server first, then use a Vuex action to remove the page in Vuex.
       try {
-        if (index > -1) {
-          this.pages.splice(index, 1);
-        }
-        else {
-          console.log("Error when deleting the page.");
+        const confirm = window.confirm(`Are you sure you want to delete the "${title}" page?`);
+        if (confirm) {
+          const method = "DELETE";
+          const url = `/admin-pages/delete-page`;
+          const payload = {
+            pageId: pageId,
+            title: title
+          };
+
+          const response = await Axios({
+            method: method,
+            url: url,
+            data: payload
+          });
+
+          console.log("RESPONSE:", response.data);
+
+          // If there is an error, then display the error message.
+          if (response.data.error) {
+            flash = response.data.flash;
+            console.log("Remove Page Error:", flash);
+            // this.flashAction({ type: "alert", msg: flash });
+          }
+          // Otherwise use a Vuex action to remove the page in Vuex and display a success message.
+          else {
+            if (index > -1) {
+              this.removePageAction(index, 1);
+              flash = response.data.flash;
+              // this.flashAction({ type: "success", msg: flash });
+              console.log("Remove Page Message:", flash);
+            }
+            else {
+              flash = "UI error while deleting the page.";
+              // this.flashAction({ type: "alert", msg: flash });
+            }
+          }
         }
       }
       catch(err) {

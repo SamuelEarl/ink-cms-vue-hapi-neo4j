@@ -163,7 +163,7 @@ exports.plugin = {
 
 
     /**
-     * Edit (or update) an existing page
+     * Edit (or update) the data for an existing page
      */
     server.route({
       method: "PUT",
@@ -237,6 +237,49 @@ exports.plugin = {
           }
 
           session.close();
+
+          return { error, flash };
+        }
+        catch(err) {
+          // Log the error...
+          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
+          console.log(errMsg);
+          // ...and return the error and flash message to the user to provide user feedback.
+          flash = err;
+          error = Boom.badRequest(flash);
+          return { error, flash };
+        }
+      }
+    });
+
+
+    /**
+     * Delete the node for an existing page
+     */
+    server.route({
+      method: "DELETE",
+      path: "/admin-pages/delete-page",
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+
+        try {
+          const pageId = request.payload.pageId;
+          const title = request.payload.title;
+
+          await session.run(
+            `MATCH (p:Page {
+              pageId: { pageIdParam }
+            })
+            DELETE p
+            RETURN p`, {
+              pageIdParam: pageId
+            }
+          );
+
+          session.close();
+
+          flash = `The "${title}" page was successfully deleted!`;
 
           return { error, flash };
         }
