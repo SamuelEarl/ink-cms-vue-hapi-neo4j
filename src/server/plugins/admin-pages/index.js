@@ -262,11 +262,10 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        const pageId = request.payload.pageId;
+        const title = request.payload.title;
 
         try {
-          const pageId = request.payload.pageId;
-          const title = request.payload.title;
-
           await session.run(
             `MATCH (p:Page {
               pageId: { pageIdParam }
@@ -280,16 +279,22 @@ exports.plugin = {
           session.close();
 
           flash = `The "${title}" page was successfully deleted!`;
-
-          return { error, flash };
         }
-        catch(err) {
-          // Log the error...
-          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errMsg);
-          // ...and return the error and flash message to the user to provide user feedback.
-          flash = err;
-          error = Boom.badRequest(flash);
+        catch(e) {
+          // Be careful that you do not send error messages to the client that could give sensitive
+          // information about the internals of your system.
+
+          // Set the error message to a Boom error and log the error for internal use.
+          // Boom errors are safe to send back to the client.
+          error = new Boom(e);
+          console.log(` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `);
+        }
+        finally {
+          // Return the error and flash message to the user to provide user feedback.
+          // NOTE: If there is an error, then in the "onPreResponse" hook the "error" variable will
+          // be set to the HTTP status message (e.g., "Bad Request", "Internal Server Error") and
+          // the "flash" variable will be set to the error message that is derived from
+          // `error.message` (e.g., "An internal server error occurred").
           return { error, flash };
         }
       }

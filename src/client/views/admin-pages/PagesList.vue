@@ -93,13 +93,13 @@ export default {
 
   data() {
     return {
-      // pages: []
+      // properties
     }
   },
 
   computed: {
     ...mapGetters({
-      //
+      // getters
     }),
 
     pagesList: {
@@ -187,7 +187,7 @@ export default {
               this.removePageAction(index, 1);
               flash = response.data.flash;
               // this.flashAction({ type: "success", msg: flash });
-              console.log("Remove Page Message:", flash);
+              console.log("deletePage Flash Message:", flash);
             }
             else {
               flash = "UI error while deleting the page.";
