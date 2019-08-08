@@ -41,8 +41,8 @@ const dbName = "inkcms";
     const mongoServer = dbConnection.s.options.servers[0];
     console.log("Connected to MongoDB server at", mongoServer);
   }
-  catch(err) {
-    console.log(`MongoDB connection error: ${err}`);
+  catch(e) {
+    console.error(`MongoDB connection error: ${e}`);
   }
 })();
 

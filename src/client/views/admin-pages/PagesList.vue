@@ -86,7 +86,7 @@ import Draggable from "vuedraggable";
 import * as Axios from "axios";
 
 export default {
-  name: "Pages",
+  name: "PagesList",
   components: {
     Draggable
   },
@@ -134,6 +134,7 @@ export default {
       setPagesListAction: "pages/setPagesListAction",
       removePageAction: "pages/removePageAction",
       reorderPagesAction: "pages/reorderPagesAction",
+      flashAction: "userFeedback/flashAction",
     }),
 
     createPage() {
@@ -154,8 +155,6 @@ export default {
     },
 
     async deletePage(pageId, index, title) {
-      let flash;
-
       // Delete the page on the server first, then use a Vuex action to remove the page in Vuex.
       try {
         const confirm = window.confirm(`Are you sure you want to delete the "${title}" page?`);
@@ -173,31 +172,31 @@ export default {
             data: payload
           });
 
-          console.log("RESPONSE:", response.data);
+          console.log("deletePage RESPONSE:", response.data);
+
+          const res = response.data;
+          let msg = res.flash;
 
           // If there is an error, then display the error message.
-          if (response.data.error) {
-            flash = response.data.flash;
-            console.log("Remove Page Error:", flash);
-            // this.flashAction({ type: "alert", msg: flash });
+          if (res.error) {
+            console.log("Remove Page Error:", msg);
+            this.flashAction({ flashType: "error", flashMsg: msg });
+            return;
           }
+
           // Otherwise use a Vuex action to remove the page in Vuex and display a success message.
+          if (index > -1) {
+            this.removePageAction(index, 1);
+            this.flashAction({ flashType: "success", flashMsg: msg });
+          }
           else {
-            if (index > -1) {
-              this.removePageAction(index, 1);
-              flash = response.data.flash;
-              // this.flashAction({ type: "success", msg: flash });
-              console.log("deletePage Flash Message:", flash);
-            }
-            else {
-              flash = "UI error while deleting the page.";
-              // this.flashAction({ type: "alert", msg: flash });
-            }
+            msg = "A UI error occurred while deleting the page. Please refresh your browser.";
+            this.flashAction({ flashType: "error", flashMsg: msg });
           }
         }
       }
-      catch(err) {
-        console.log(err);
+      catch(e) {
+        console.error("deletePage:", e);
       }
     },
 

@@ -43,9 +43,9 @@ exports.plugin = {
 
           return { pageData };
         }
-        catch(err) {
-          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errorMessage);
+        catch(e) {
+          const errorLog = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${e} `;
+          console.error(errorLog);
         }
 
       }
@@ -77,9 +77,9 @@ exports.plugin = {
 
           return pagesArray;
         }
-        catch(err) {
-          const errorMessage = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errorMessage);
+        catch(e) {
+          const errorLog = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${e} `;
+          console.error(errorLog);
         }
 
       }

@@ -21,13 +21,13 @@ function updateAppLocalsPages(request) {
 
         req.app.locals.pages = pages;
       }
-      catch(err) {
-        console.log("pages.js, updateAppLocalsPages returned function Error:", err);
+      catch(e) {
+        console.error("pages.js, updateAppLocalsPages returned function Error:", e);
       }
     }
   }
-  catch(err) {
-    console.log("pages.js, updateAppLocalsPages Error:", err);
+  catch(e) {
+    console.error("pages.js, updateAppLocalsPages Error:", e);
   }
 }
 
@@ -85,9 +85,9 @@ router.post("/add-page", async (req, res, next) => {
 
     res.send(flash);
   }
-  catch(err) {
-    console.log(`\n [ENDPONT]: ${req.path} \n [ERROR]: ${err} `);
-    next(err);
+  catch(e) {
+    console.error(`\n [ENDPONT]: ${req.path} \n [ERROR]: ${e} `);
+    next(e);
   }
 
     // const errors = req.validationErrors();
@@ -149,9 +149,9 @@ router.get("/get-all-pages", async (req, res, next) => {
     //   });
     // });
   }
-  catch(err) {
-    console.log(`\n [ENDPONT]: ${req.path} \n [ERROR]: ${err} `);
-    next(err);
+  catch(e) {
+    console.error(`\n [ENDPONT]: ${req.path} \n [ERROR]: ${e} `);
+    next(e);
   }
 });
 

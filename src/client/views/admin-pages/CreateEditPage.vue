@@ -63,6 +63,7 @@
 // TinyMCE Vue docs: https://github.com/tinymce/tinymce-vue
 import Editor from "@tinymce/tinymce-vue";
 import * as Axios from "axios";
+import { mapActions } from "vuex";
 
 export default {
   name: "Page",
@@ -96,6 +97,10 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      flashAction: "userFeedback/flashAction",
+    }),
+
     async submitPageData(type) {
       try {
         let method;
@@ -124,22 +129,24 @@ export default {
           data: payload
         });
 
-        console.log("RESPONSE:", response.data);
+        console.log("submitPageData RESPONSE:", response.data);
+
+        const res = response.data;
+        const msg = res.flash;
 
         // If there is an error, then display the error message.
-        if (response.data.error) {
-          const msg = response.data.flash;
-          // this.flashAction({ type: "alert", msg: msg });
+        if (res.error) {
+          this.flashAction({ flashType: "error", flashMsg: msg });
+          return;
         }
         // Otherwise redirect the user back to the "pages-list" page and display a success message.
         else {
           this.$router.push({ name: "pages-list" });
-          const msg = response.data.flash;
-          // this.flashAction({ type: "success", msg: msg });
+          this.flashAction({ flashType: "success", flashMsg: msg });
         }
       }
-      catch(err) {
-        console.log("submitPageData Error:", err);
+      catch(e) {
+        console.error("submitPageData Error:", e);
       }
     },
 
@@ -153,12 +160,21 @@ export default {
         url: url
       });
 
-      console.log("RESPONSE:", response);
+      console.log("getPageData RESPONSE:", response);
 
-      if (response.data.pageData) {
-        this.title = response.data.pageData.title;
-        this.slug = response.data.pageData.slug;
-        this.content = response.data.pageData.content;
+      const res = response.data;
+      const msg = res.flash;
+
+      if (res.error) {
+        this.flashAction({ flashType: "error", flashMsg: msg });
+        return;
+      }
+
+      if (res.pageData) {
+        const pageData = res.pageData;
+        this.title = pageData.title;
+        this.slug = pageData.slug;
+        this.content = pageData.content;
       }
     }
   }

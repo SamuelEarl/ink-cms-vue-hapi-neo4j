@@ -1,10 +1,14 @@
 <template>
   <div id="layout">
     <Header />
+
+    <FlashMessages />
+
     <div class="container">
       <br>
       <router-view />
     </div>
+
     <Footer />
   </div>
 </template>
@@ -13,12 +17,14 @@
 import { mapActions } from "vuex";
 import Header from "./Header";
 import Footer from "./Footer";
+import FlashMessages from "../../components/FlashMessages.vue";
 
 export default {
   name: "Layout",
   components: {
     Header,
-    Footer
+    Footer,
+    FlashMessages
   },
 }
 </script>

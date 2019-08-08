@@ -31,8 +31,8 @@ exports.plugin = {
             );
           }
         }
-        catch(err) {
-          console.log(`\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `);
+        catch(e) {
+          console.error(`\n [ENDPONT]: ${request.path} \n [ERROR]: ${e} `);
         }
       }
     });
@@ -66,8 +66,8 @@ exports.plugin = {
             Path.join(__dirname, "../../../client/service-worker.js")
           );
         }
-        catch(err) {
-          console.log(`\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `);
+        catch(e) {
+          console.error(`\n [ENDPONT]: ${request.path} \n [ERROR]: ${e} `);
         }
       }
     });

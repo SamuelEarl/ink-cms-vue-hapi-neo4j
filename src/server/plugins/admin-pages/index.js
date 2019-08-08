@@ -60,7 +60,7 @@ exports.plugin = {
           // "error" to a Boom error.
           if (pageWithMatchingSlug.records.length > 0) {
             flash = "A page with this slug already exists. Please choose a different slug.";
-            error = Boom.badRequest(flash);
+            throw new Error(flash);
           }
           // Otherwise create a new page in Neo4j and set "flash" to a success message.
           else {
@@ -81,23 +81,30 @@ exports.plugin = {
               }
             );
 
-            flash = "New page successfully created!";
+            flash = `The "${title}" page was successfully created!`;
             // NOTE: If there is an error while trying to create the new page in Neo4j, then the
             // execution will skip to the "catch" block where you can handle the error and return
-            // an alert message to the user as user feedback.
+            // an flash message to the user as user feedback.
           }
 
           session.close();
-
-          return { error, flash };
         }
-        catch(err) {
-          // Log the error...
-          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errMsg);
-          // ...and return the error to the user to provide user feedback.
-          flash = err;
-          error = Boom.badRequest(flash);
+        catch(e) {
+          // Be careful that you do not send error messages to the client that could give sensitive
+          // information about the internals of your system.
+
+          // Set the error message to a Boom error and log the error for internal use.
+          // Boom errors are safe to send back to the client.
+          error = new Boom(e);
+          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          console.error(errorLog);
+        }
+        finally {
+          // Return the error and flash message to the user to provide user feedback.
+          // NOTE: If there is an error, then in the "onPreResponse" hook the "error" variable will
+          // be set to the HTTP status message (e.g., "Bad Request", "Internal Server Error") and
+          // the "flash" variable will be set to the error message that is derived from
+          // `error.message` (e.g., "An internal server error occurred").
           return { error, flash };
         }
       }
@@ -144,18 +151,15 @@ exports.plugin = {
           // Otherwise set "flash" to an alert message and "error" to a Boom error.
           else {
             flash = "That page does not exist.";
-            error = Boom.badRequest(flash);
+            throw new Error(flash);
           }
-
-          return { error, flash, pageData };
         }
-        catch(err) {
-          // Log the error...
-          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errMsg);
-          // ...and return the error to the user to provide user feedback.
-          flash = err;
-          error = Boom.badRequest(flash);
+        catch(e) {
+          error = new Boom(e);
+          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          console.error(errorLog);
+        }
+        finally {
           return { error, flash, pageData };
         }
       }
@@ -210,7 +214,7 @@ exports.plugin = {
           // "error" to a Boom error.
           if (pageWithMatchingSlug.records.length > 0) {
             flash = "A page with this slug already exists. Please choose a different slug.";
-            error = Boom.badRequest(flash);
+            throw new Error(flash);
           }
           // Otherwise update the existing page in Neo4j and set "flash" to a success message.
           else {
@@ -237,16 +241,13 @@ exports.plugin = {
           }
 
           session.close();
-
-          return { error, flash };
         }
-        catch(err) {
-          // Log the error...
-          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errMsg);
-          // ...and return the error and flash message to the user to provide user feedback.
-          flash = err;
-          error = Boom.badRequest(flash);
+        catch(e) {
+          error = new Boom(e);
+          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          console.error(errorLog);
+        }
+        finally {
           return { error, flash };
         }
       }
@@ -281,27 +282,17 @@ exports.plugin = {
           flash = `The "${title}" page was successfully deleted!`;
         }
         catch(e) {
-          // Be careful that you do not send error messages to the client that could give sensitive
-          // information about the internals of your system.
-
-          // Set the error message to a Boom error and log the error for internal use.
-          // Boom errors are safe to send back to the client.
           error = new Boom(e);
-          console.log(` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `);
+          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          console.error(errorLog);
         }
         finally {
-          // Return the error and flash message to the user to provide user feedback.
-          // NOTE: If there is an error, then in the "onPreResponse" hook the "error" variable will
-          // be set to the HTTP status message (e.g., "Bad Request", "Internal Server Error") and
-          // the "flash" variable will be set to the error message that is derived from
-          // `error.message` (e.g., "An internal server error occurred").
           return { error, flash };
         }
       }
     });
 
 
-// I need to update this endpoint to match the ones above (with flash and error messages).
     /**
      * Reorder pages
      */
@@ -309,55 +300,60 @@ exports.plugin = {
       method: "PUT",
       path: "/admin-pages/reorder-pages",
       handler: async function(request, h) {
-        let boomError = null;
-        let reorderedPages = [];
-        const pagesList = request.payload.pagesList;
+        let error = null;
+        let flash = null;
 
         try {
+          const pagesList = request.payload.pagesList;
+
           // Loop through the "pagesList" array and update the "sortPosition" property of each page node in Neo4j.
           // This code takes advantage of parallel async operations, which is more efficient and faster than if the code was written serially. The database call is an async operation that returns a promise. map() will push each returned promise into an array. Once the promises are in the array, they can settle in parallel. Then a for loop will iterate over that array using the "await" keyword to resolve each promise. The data from the resolved promises is then pushed into a new array that is returned to the user.
-          const pagesListPromises = pagesList.map(async (page, index) => {
-            try {
-              const response = await session.run(
-                `MATCH (p:Page {
-                  pageId: { pageIdParam }
-                })
-                SET p.sortPosition={ sortPositionParam }
-                RETURN p`, {
-                  pageIdParam: page.pageId,
-                  sortPositionParam: index
-                }
-              );
+          const arrayOfPromises = pagesList.map(async (page, index) => {
 
-              return response;
-            }
-            catch(err) {
-              console.log(err);
-            }
+            // The map() function will iterate through the "pagesList" array and will push the
+            // response into the "arrayOfPromises" array.
+            const response = await session.run(
+              `MATCH (p:Page {
+                pageId: { pageIdParam }
+              })
+              SET p.sortPosition={ sortPositionParam }
+              RETURN p`, {
+                pageIdParam: page.pageId,
+                sortPositionParam: index
+              }
+            );
+
+            // Each response that is returned from Neo4j will be an unsettled Promise (i.e., a
+            // pending Promise) that will be pushed into the "arrayOfPromises" array.
+            return response;
           });
 
           session.close();
 
           // I need to show the JSON of a Neo4j record with an explanation of what each part means. Then I can clearly explain this next part.
 
-          // The "records[i]._fields[i].properties" property is an object that contains the properties of the node that is returned. For every node that is returned from the query, we are going to push that "properties" object into an array. The result will be an array of objects and we will return that array of objects to the browser. (Or should we simply return a success message?)
-          for (const pagePromise of pagesListPromises) {
+          let reorderedPagesArray = [];
+
+          // The "records[i]._fields[i].properties" property is an object that contains the properties of the node that is returned. For every node that is returned from the query, we are going to push that "properties" object into the "reorderedPagesArray". The result will be an array of objects. We don't need to return that array of objects to the browser because the pages were already reordered on the client. So we will return a success message letting the user know that their page reorganization has been saved. If an error occurred and the page reorganization was not saved in the database, then the execution would stop and skip to the catch block where an error would be create and sent back to the user.
+          for (const pagePromise of arrayOfPromises) {
             const resolvedPromise = await pagePromise;
             resolvedPromise.records.forEach(async function(record) {
-              reorderedPages.push(record._fields[0].properties);
+              reorderedPagesArray.push(record._fields[0].properties);
             });
           }
 
-          return { boomError, reorderedPages };
+          flash = "Your page reorganization has been saved!";
         }
-        catch(err) {
-          const errMsg = `\n [ENDPONT]: ${request.path} \n [ERROR]: ${err} `;
-          console.log(errMsg);
-          boomError = Boom.badRequest(err);
-          return { boomError, reorderedPages };
+        catch(e) {
+          error = new Boom("Your page reorganization was not saved!");
+          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          console.error(errorLog);
         }
-
+        finally {
+          return { error, flash };
+        }
       }
     });
+
   }
 };

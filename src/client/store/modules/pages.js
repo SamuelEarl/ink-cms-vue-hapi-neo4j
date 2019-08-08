@@ -53,7 +53,7 @@ const actions = {
    * before you send the request to reorganize the pages to make sure that the user has completed
    * at least most of their reorganizing.
    */
-  reorderPagesAction: debounce(async ({ commit, state }) => {
+  reorderPagesAction: debounce(async ({ commit, dispatch, state }) => {
     try {
       const reorderedPagesList = state.pagesList;
 
@@ -69,10 +69,23 @@ const actions = {
         data: payload
       });
 
-      // Display flash message for error (Error: Page reordering not saved) or successful reordering (Success: Page reordering successfully saved).
+      const res = response.data;
+      const msg = res.flash;
+
+      // Display a flash message with either an error or a success message for page reordering.
+      if (res.error) {
+        console.log("REORDER PAGES ERROR:", res.error);
+        // this.flashAction({ flashType: "error", flashMsg: msg });
+        dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
+        return;
+      }
+      else {
+        // this.flashAction({ flashType: "success", flashMsg: msg });
+        dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
+      }
     }
-    catch(err) {
-      console.log(err);
+    catch(e) {
+      console.error(e);
     }
 
   }, 2000),

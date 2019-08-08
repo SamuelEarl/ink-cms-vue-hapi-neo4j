@@ -31,9 +31,9 @@ exports.plugin = {
 
       await server.logger().info(driver);
     }
-    catch(err) {
-      console.log("DATABASE CONNECTION ERROR:", err);
-      await server.logger().error(err);
+    catch(e) {
+      console.error("DATABASE CONNECTION ERROR:", e);
+      await server.logger().error(e);
     }
   }
 };
