@@ -19,7 +19,7 @@ exports.plugin = {
      */
     server.route({
       method: "POST",
-      path: "/admin-pages/create-page",
+      path: "/pages-admin/create-page",
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -53,11 +53,10 @@ exports.plugin = {
            * a "records" array with length of 0, which means that there are no pages that exist with
            * the same slug. So if the "records" array has a length of 0, then create a new page in
            * Neo4j. If the "records" array has a length greater than 0, then there is a page that
-           * exists with the same slug, so set "flash" to an alert message and "error" to a Boom
-           * error.
+           * exists with the same slug, so set "flash" to an error message and throw an error.
            */
-          // If a page already exists with the same slug, then set "flash" to an alert message and
-          // "error" to a Boom error.
+          // If a page already exists with the same slug, then set "flash" to an error message and
+          // throw an error.
           if (pageWithMatchingSlug.records.length > 0) {
             flash = "A page with this slug already exists. Please choose a different slug.";
             throw new Error(flash);
@@ -96,7 +95,7 @@ exports.plugin = {
           // Set the error message to a Boom error and log the error for internal use.
           // Boom errors are safe to send back to the client.
           error = new Boom(e);
-          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
         finally {
@@ -116,7 +115,7 @@ exports.plugin = {
      */
     server.route({
       method: "GET",
-      path: "/admin-pages/edit-page/{pageId}",
+      path: "/pages-admin/edit-page/{pageId}",
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -144,11 +143,11 @@ exports.plugin = {
            * error. If the "records" array has a length greater than 0, then there is a page with a
            * matching pageId, so return the pageData.
            */
-          // If the page exists, then set pageData to equal the node's properties.
+          // If the page exists, then set pageData to equal the Neo4j node's properties.
           if (pageWithMatchingId.records.length > 0) {
             pageData = pageWithMatchingId.records[0]._fields[0].properties;
           }
-          // Otherwise set "flash" to an alert message and "error" to a Boom error.
+          // Otherwise set "flash" to an error message and throw an error.
           else {
             flash = "That page does not exist.";
             throw new Error(flash);
@@ -156,7 +155,7 @@ exports.plugin = {
         }
         catch(e) {
           error = new Boom(e);
-          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
         finally {
@@ -171,7 +170,7 @@ exports.plugin = {
      */
     server.route({
       method: "PUT",
-      path: "/admin-pages/edit-page/{pageId}",
+      path: "/pages-admin/edit-page/{pageId}",
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -207,11 +206,10 @@ exports.plugin = {
            * a "records" array with length of 0, which means that there are no pages that exist with
            * the same slug. So if the "records" array has a length of 0, then update the existing
            * page in Neo4j. If the "records" array has a length greater than 0, then there is a page
-           * that exists with the same slug, so set "flash" to an alert message and "error" to a
-           * Boom error.
+           * that exists with the same slug, so set "flash" to an error message and throw an error.
            */
-          // If a page already exists with the same slug, then set "flash" to an alert message and
-          // "error" to a Boom error.
+          // If a page already exists with the same slug, then set "flash" to an error message and
+          // throw an error.
           if (pageWithMatchingSlug.records.length > 0) {
             flash = "A page with this slug already exists. Please choose a different slug.";
             throw new Error(flash);
@@ -235,7 +233,7 @@ exports.plugin = {
             );
 
             flash = "Page successfully updated!";
-            // NOTE: If there is an error while trying to create the new page in Neo4j, then the
+            // NOTE: If there is an error while trying to edit the page in Neo4j, then the
             // execution will skip to the "catch" block where you can handle the error and return
             // a flash message to the user as user feedback.
           }
@@ -244,7 +242,7 @@ exports.plugin = {
         }
         catch(e) {
           error = new Boom(e);
-          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
         finally {
@@ -255,11 +253,11 @@ exports.plugin = {
 
 
     /**
-     * Delete the node for an existing page
+     * Delete a page
      */
     server.route({
       method: "DELETE",
-      path: "/admin-pages/delete-page",
+      path: "/pages-admin/delete-page",
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -282,8 +280,8 @@ exports.plugin = {
           flash = `The "${title}" page was successfully deleted!`;
         }
         catch(e) {
-          error = new Boom(e);
-          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          error = new Boom(`Error while deleting the "${title}" page`);
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
         finally {
@@ -298,7 +296,7 @@ exports.plugin = {
      */
     server.route({
       method: "PUT",
-      path: "/admin-pages/reorder-pages",
+      path: "/pages-admin/reorder-pages",
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -346,7 +344,7 @@ exports.plugin = {
         }
         catch(e) {
           error = new Boom("Your page reorganization was not saved!");
-          const errorLog = ` [ENDPOINT]: ${request.path} \n [ERROR]: ${error} `;
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
         finally {

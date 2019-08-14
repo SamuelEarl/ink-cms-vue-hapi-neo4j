@@ -109,11 +109,11 @@ export default {
 
         if (type === "create") {
           method = "POST";
-          url = "/admin-pages/create-page";
+          url = "/pages-admin/create-page";
         }
         if (type === "edit") {
           method = "PUT";
-          url = `/admin-pages/edit-page/${pageId}`;
+          url = `/pages-admin/edit-page/${pageId}`;
         }
 
         const payload = {
@@ -153,7 +153,7 @@ export default {
     async getPageData() {
       const pageId = this.$route.params.pageId;
       const method = "GET";
-      const url = `/admin-pages/edit-page/${pageId}`;
+      const url = `/pages-admin/edit-page/${pageId}`;
 
       const response = await Axios({
         method: method,

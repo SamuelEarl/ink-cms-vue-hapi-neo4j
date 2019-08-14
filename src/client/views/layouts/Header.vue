@@ -91,7 +91,11 @@
         >
           <font-awesome-icon icon="user-shield" />
         </router-link>
-        <button>Login</button>
+        <a
+          @click="login"
+        >
+          Login
+        </a>
       </div>
     </nav>
   </header>
@@ -144,6 +148,10 @@ export default {
         nav.style.display = "flex";
       }
     },
+
+    login() {
+      console.log("Login!");
+    },
   }
 }
 </script>
@@ -161,6 +169,7 @@ export default {
     a {
       text-decoration: none;
       color: white;
+      cursor: pointer;
     }
 
     #mobile-nav-bar {

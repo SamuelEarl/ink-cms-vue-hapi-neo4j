@@ -158,8 +158,9 @@ const init = async () => {
       // { plugin: require("hapi-auth-cookie") },
       // { plugin: require("./plugins/auth") },
       // { plugin: require("./plugins/users") },
-      { plugin: require("./plugins/public-pages") },
-      { plugin: require("./plugins/admin-pages") },
+      { plugin: require("./plugins/pages-admin") },
+      { plugin: require("./plugins/pages-public") },
+      { plugin: require("./plugins/pages-both") },
       { plugin: require("@hapi/inert") },
       // Route handlers to serve static files (HTML, CSS, JS, images)
       { plugin: require("./plugins/static-routes") },

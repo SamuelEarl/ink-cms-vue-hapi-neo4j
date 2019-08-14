@@ -1,12 +1,12 @@
 import Vue from "vue";
 import Router from "vue-router";
 // import Home from "./views/home/Home.vue";
-import PublicPage from "./views/public-pages/PublicPage.vue";
-import Admin from "./views/admin-pages/Admin.vue";
-import PagesList from "./views/admin-pages/PagesList.vue";
-import CreateEditPage from "./views/admin-pages/CreateEditPage.vue";
-import Categories from "./views/admin-pages/Categories.vue";
-import Products from "./views/admin-pages/Products.vue";
+import PublicPage from "./views/pages-public/PublicPage.vue";
+import Admin from "./views/pages-admin/Admin.vue";
+import PagesList from "./views/pages-admin/PagesList.vue";
+import CreateEditPage from "./views/pages-admin/CreateEditPage.vue";
+import Categories from "./views/pages-admin/Categories.vue";
+import Products from "./views/pages-admin/Products.vue";
 import ShoppingCart from "./views/shopping-cart/ShoppingCart.vue";
 
 Vue.use(Router)

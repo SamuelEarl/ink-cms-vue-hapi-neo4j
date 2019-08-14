@@ -17,7 +17,6 @@ const state = {
 
 const getters = {
   getPagesList: (state) => {
-    console.log("VUEX getPagesList:", state.pagesList);
     return state.pagesList;
   },
 };
@@ -25,26 +24,33 @@ const getters = {
 
 const mutations = {
   setPagesList: (state, pagesArray) => {
-    console.log("VUEX setPagesList:", pagesArray);
     state.pagesList = pagesArray;
   },
 
   removePageFromPagesList: (state, index) => {
-    console.log("removePageFromPagesList:", index);
     state.pagesList.splice(index, 1);
   },
 };
 
 
 const actions = {
-  setPagesListAction: async ({ commit }) => {
-    const response = await Axios.get("/public-pages/get-all-pages");
-    const pagesArray = response.data;
+  setPagesListAction: async ({ commit, dispatch }) => {
+    const response = await Axios.get("/pages-both/get-all-pages");
+
+    const res = response.data;
+    const msg = res.flash;
+
+    // If there is an error, then display a flash message with the error.
+    if (res.error) {
+      dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
+      return;
+    }
+
+    const pagesArray = res.pagesArray;
     commit("setPagesList", pagesArray);
   },
 
   removePageAction: ({ commit }, index) => {
-    console.log("removePageAction:", index);
     commit("removePageFromPagesList", index);
   },
 
@@ -58,7 +64,7 @@ const actions = {
       const reorderedPagesList = state.pagesList;
 
       const method = "PUT";
-      const url = "/admin-pages/reorder-pages";
+      const url = "/pages-admin/reorder-pages";
       const payload = {
         pagesList: reorderedPagesList
       };
@@ -74,13 +80,10 @@ const actions = {
 
       // Display a flash message with either an error or a success message for page reordering.
       if (res.error) {
-        console.log("REORDER PAGES ERROR:", res.error);
-        // this.flashAction({ flashType: "error", flashMsg: msg });
         dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
         return;
       }
       else {
-        // this.flashAction({ flashType: "success", flashMsg: msg });
         dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
       }
     }

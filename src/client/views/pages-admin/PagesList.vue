@@ -160,7 +160,7 @@ export default {
         const confirm = window.confirm(`Are you sure you want to delete the "${title}" page?`);
         if (confirm) {
           const method = "DELETE";
-          const url = `/admin-pages/delete-page`;
+          const url = `/pages-admin/delete-page`;
           const payload = {
             pageId: pageId,
             title: title
@@ -179,7 +179,6 @@ export default {
 
           // If there is an error, then display the error message.
           if (res.error) {
-            console.log("Remove Page Error:", msg);
             this.flashAction({ flashType: "error", flashMsg: msg });
             return;
           }
