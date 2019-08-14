@@ -43,6 +43,6 @@ exports.plugin = {
     // }
 
     // // Also, do I need to go back to any of the places where I used "throw new Error()" and replace those with a more descriptive "throw new Boom('msg', { statusCode: 400})"?
-    // // Right now everything throws a 500 error, but that might not be the most accurate error message to send back to the user.
+    // // Right now everything throws a 500 "Internal Server Error", but that might not be the most accurate error message to send back to the user.
   }
 };
