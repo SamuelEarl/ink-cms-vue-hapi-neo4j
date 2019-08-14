@@ -74,12 +74,13 @@ server.ext({
   }
 });
 
-// // Configure the user's session cookie:
-// server.state("sessionId", {
-//   isSameSite: NODE_ENV === "production" ? "Strict" : false, // false for all environments except for production
-//   isSecure: NODE_ENV === "production", // false for all environments except for production
-//   clearInvalid: true,
-// });
+// Configure the user's session cookie.
+// For more details see https://hapi.dev/api/?v=18.3.1#server.state()
+server.state("sessionId", {
+  // You might get errors if these options are not set to "false" during development:
+  isSameSite: NODE_ENV === "production" ? "Strict" : false, // false for all environments except for production
+  isSecure: NODE_ENV === "production", // false for all environments except for production
+});
 
 // Directory that contains the log files
 const logsDir = Path.resolve(__dirname + "../../../logs");
