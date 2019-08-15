@@ -16,21 +16,21 @@
 
         <section id="body">
           <div id="login" class="tab-content">
-            <form>
-              <input v-model="login.email" class="w3-input w3-border" type="email" placeholder="Email">
-              <input v-model="login.password" class="w3-input w3-border" type="password" placeholder="Password">
+            <form @submit.prevent="login">
+              <input v-model="loginFields.email" class="w3-input w3-border" type="email" placeholder="Email">
+              <input v-model="loginFields.password" class="w3-input w3-border" type="password" placeholder="Password">
 
               <button class="btn-primary">Login</button>
             </form>
           </div>
 
           <div id="register" class="tab-content">
-            <form>
-              <input v-model="reg.firstName" class="w3-input w3-border" type="text" placeholder="First Name">
-              <input v-model="reg.lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
-              <input v-model="reg.email" class="w3-input w3-border" type="email" placeholder="Email">
-              <input v-model="reg.password" class="w3-input w3-border" type="password" placeholder="Password">
-              <input v-model="reg.confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
+            <form @submit.prevent="register">
+              <input v-model="regFields.firstName" class="w3-input w3-border" type="text" placeholder="First Name">
+              <input v-model="regFields.lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
+              <input v-model="regFields.email" class="w3-input w3-border" type="email" placeholder="Email">
+              <input v-model="regFields.password" class="w3-input w3-border" type="password" placeholder="Password">
+              <input v-model="regFields.confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
               <button class="btn-primary">Register</button>
             </form>
           </div>
@@ -58,11 +58,11 @@ export default {
 
   data() {
     return {
-      login: {
+      loginFields: {
         email: "",
         password: ""
       },
-      reg: {
+      regFields: {
         firstName: "",
         lastName: "",
         email: "",
@@ -98,6 +98,14 @@ export default {
       document.getElementById(tabName).style.display = "block";
       // Add the "active-tab" class to the currently selected tab.
       event.currentTarget.className += " active-tab";
+    },
+
+    async login() {
+      console.log("Login clicked!");
+    },
+
+    async register() {
+      console.log("Register clicked!");
     },
 
     goBack() {

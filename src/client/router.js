@@ -70,12 +70,12 @@ export default new Router({
       ],
     },
     {
-      path: "/auth",
+      path: "/",
       component: AuthLayout,
       children: [
         {
-          path: "login-register",
-          name: "login-register",
+          path: "login",
+          name: "login",
           component: LoginRegister
         },
       ]

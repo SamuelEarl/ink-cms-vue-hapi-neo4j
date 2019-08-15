@@ -92,7 +92,7 @@
           <font-awesome-icon icon="user-shield" />
         </router-link>
         <router-link
-          :to="{ name: 'login-register' }"
+          :to="{ name: 'login' }"
           exact
         >
           Login
