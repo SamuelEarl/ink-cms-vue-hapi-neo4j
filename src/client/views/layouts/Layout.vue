@@ -1,20 +1,25 @@
 <template>
   <div id="layout">
-    <Header />
+    <div id="wrapper">
 
-    <FlashMessages />
+      <div id="top-content">
+        <Header />
 
-    <div class="container">
-      <br>
-      <router-view />
+        <FlashMessages />
+
+        <div class="container">
+          <br>
+          <router-view />
+        </div>
+      </div>
+
+      <Footer />
+
     </div>
-
-    <Footer />
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
 import Header from "./Header";
 import Footer from "./Footer";
 import FlashMessages from "../../components/FlashMessages.vue";
@@ -31,7 +36,21 @@ export default {
 
 <style scoped lang="stylus">
 @media $s-up {
+  // Create sticky footer
+  // https://css-tricks.com/couple-takes-sticky-footer/#article-header-id-3
+  #layout {
+    height: 100vh;
 
+    #wrapper {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      #top-content {
+        flex: 1 0 auto;
+      }
+    }
+  }
 }
 
 @media $m-up {

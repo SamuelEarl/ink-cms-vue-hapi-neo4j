@@ -14,35 +14,91 @@ exports.plugin = {
     // Set session to the Neo4j "session" database object
     const session = server.app.session;
 
-    // // Create a "helpers" plugin that has a server method called "catch", like this:
-    // function(e, message, path) {
-    //   let err;
+    /**
+     * Create a new user
+     */
+    server.route({
+      method: "POST",
+      path: "/auth/create-new-user",
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+        let user = null;
 
-    //   if (message) {
-    //     err = new Boom(message);
-    //   }
-    //   else {
-    //     err = new Boom(e);
-    //   }
+        try {
+          const uuid = uuidv4();
+          const currentTime = new Date().getTime();
+          const userId = `${uuid}-${currentTime}`;
+          const userProfle = request.payload;
+          const email = userProfle.email;
+          const firstName = userProfle.firstName;
+          const lastName = userProfle.lastName;
 
-    //   // `path` is from `request.path`
-    //   const errorLog = `[ENDPOINT]: ${path}\n[ERROR]: ${err}`;
+          // See if a user already exists with the same email.
+          const userNode = await session.run(
+            `MATCH (u:User {
+              email: { emailParam }
+            })
+            RETURN u`, {
+              emailParam: email
+            }
+          );
 
-    //   // Log the error:
-    //   console.error(errorLog);
-    //   // The nice thing about using a helper method is that you could add logging here and it would be added for every catch block in every route.
+          /**
+           * If there are no matching nodes in the Neo4j query, then the return statement will have
+           * a "records" array with length of 0, which means that there are no pages that exist with
+           * the same slug. So if the "records" array has a length of 0, then create a new page in
+           * Neo4j. If the "records" array has a length greater than 0, then there is a page that
+           * exists with the same slug, so set "flash" to an error message and throw an error.
+           */
+          // If a page already exists with the same slug, then set "flash" to an error message and
+          // throw an error.
+          if (userNode.records.length > 0) {
+            flash = "A user with this email already exists. Please enter a different email address.";
+            throw new Error(flash);
+          }
+          // Otherwise create a new user in Neo4j and set "flash" to a success message.
+          else {
+            await session.run(
+              `CREATE (u:User {
+                userId: { userIdParam },
+                email: { emailParam },
+                firstName: { firstNameParam },
+                lastName: { lastNameParam }
+              })
+              RETURN u`, {
+                userIdParam: userId,
+                emailParam: email,
+                firstNameParam: firstName,
+                lastNameParam: lastName
+              }
+            );
 
-    //   return err;
-    // }
+            user = userNode.records[0]._fields[0].properties;
+            console.log("USER OBJECT:", user);
 
-    // // Call the "catch" method:
-    // catch(e) {
-    //   const msg = "Some error message";
-    //   const errorRes = server.methods.catch(e, msg, request.path);
-    //   error = errorRes;
-    // }
+            flash = `Profile for "${firstName} ${lastName}" was successfully created!`;
+            // NOTE: If there is an error while trying to create the new user in Neo4j, then the
+            // execution will skip to the "catch" block where you can handle the error and return
+            // an flash message to the user as user feedback.
+          }
 
-    // // Also, do I need to go back to any of the places where I used "throw new Error()" and replace those with a more descriptive "throw new Boom('msg', { statusCode: 400})"?
-    // // Right now everything throws a 500 "Internal Server Error", but that might not be the most accurate error message to send back to the user.
+          session.close();
+        }
+        catch(e) {
+          const msg = "Error while attempting to create a new user!";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          // Return the error and flash message to the user to provide user feedback.
+          // NOTE: If there is an error, then in the "onPreResponse" hook the "error" variable will
+          // be set to the HTTP status message (e.g., "Bad Request", "Internal Server Error") and
+          // the "flash" variable will be set to the error message that is derived from
+          // `error.message` (e.g., "An internal server error occurred").
+          return { error, flash, user };
+        }
+      }
+    });
   }
 };

@@ -92,7 +92,7 @@ exports.plugin = {
           // Be careful that you do not send error messages to the client that could give sensitive
           // information about the internals of your system.
 
-          // Set the error message to a Boom error and log the error for internal use.
+          // Set the error object to a Boom error object and log the error for internal use.
           // Boom errors are safe to send back to the client.
           error = new Boom(e);
           const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
@@ -190,14 +190,16 @@ exports.plugin = {
           // another node that has the same slug but has a different ID than the current node, then
           // you know that the slug you are trying to use is not unique and you need to use a
           // different slug.
+          // So you need to see if there is another Neo4j node that has the same slug but whose
+          // pageId is NOT equal to this node's pageId.
           const pageWithMatchingSlug = await session.run(
             `MATCH (p:Page {
-              slug: { slugParam },
-              pageId: { pageIdParam }
+              slug: { slugParam }
             })
+            WHERE NOT p.pageId={ pageIdParam }
             RETURN p`, {
               slugParam: slug,
-              pageIdParam: { pageId }
+              pageIdParam: pageId
             }
           );
 

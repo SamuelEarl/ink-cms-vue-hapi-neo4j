@@ -162,6 +162,7 @@ const init = async () => {
       { plugin: require("./plugins/pages-admin") },
       { plugin: require("./plugins/pages-public") },
       { plugin: require("./plugins/pages-both") },
+      { plugin: require("./plugins/helpers") },
       { plugin: require("@hapi/inert") },
       // Route handlers to serve static files (HTML, CSS, JS, images)
       { plugin: require("./plugins/static-routes") },

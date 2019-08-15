@@ -91,11 +91,12 @@
         >
           <font-awesome-icon icon="user-shield" />
         </router-link>
-        <a
-          @click="login"
+        <router-link
+          :to="{ name: 'login-register' }"
+          exact
         >
           Login
-        </a>
+        </router-link>
       </div>
     </nav>
   </header>
@@ -110,7 +111,7 @@ export default {
 
   data() {
     return {
-      groups: [ "admin" ],
+      // groups: [ "admin" ],
     }
   },
 
