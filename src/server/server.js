@@ -74,13 +74,16 @@ server.ext({
   }
 });
 
-// Configure the user's session cookie.
-// For more details see https://hapi.dev/api/?v=18.3.1#server.state()
-server.state("sessionId", {
-  // You might get errors if these options are not set to "false" during development:
-  isSameSite: NODE_ENV === "production" ? "Strict" : false, // false for all environments except for production
-  isSecure: NODE_ENV === "production", // false for all environments except for production
-});
+// // Configure the user's session cookie.
+// // For more details see https://hapi.dev/api/?v=18.3.1#server.state()
+// server.state("sessionId", {
+//   // You might get errors if these options are not set to "false" during development:
+//   isSameSite: NODE_ENV === "production" ? "Strict" : false, // false for all environments except for production
+//   isSecure: NODE_ENV === "production", // false for all environments except for production
+// });
+
+
+
 
 // Directory that contains the log files
 const logsDir = Path.resolve(__dirname + "../../../logs");
@@ -155,9 +158,12 @@ const init = async () => {
         plugin: require("./plugins/database"),
         options: dbOptions
       },
-      // { plugin: require("bell") },
-      // { plugin: require("hapi-auth-cookie") },
-      // { plugin: require("./plugins/auth") },
+      // "plugins/auth" is where the "@hapi/cookie" strategy is configured, so "@hapi/cookie" needs
+      // to be registered before "plugins/auth".
+      { plugin: require("@hapi/cookie") },
+      // If you configure a default auth strategy, then it needs to be registered before any routes
+      // are registered: https://hapi.dev/tutorials/auth/?lang=en_US#default
+      { plugin: require("./plugins/auth") },
       // { plugin: require("./plugins/users") },
       { plugin: require("./plugins/pages-admin") },
       { plugin: require("./plugins/pages-public") },
