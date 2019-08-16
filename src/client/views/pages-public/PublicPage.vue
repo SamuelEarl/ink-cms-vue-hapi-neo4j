@@ -63,7 +63,6 @@ export default {
 
       const res = response.data;
       const pageData = res.pageData;
-      console.log("SANITIZED?", pageData);
       const msg = res.flash;
 
       // If there is an error, then display the error message.

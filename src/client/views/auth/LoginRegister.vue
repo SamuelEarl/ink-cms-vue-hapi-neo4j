@@ -52,6 +52,9 @@
 </template>
 
 <script>
+import * as Axios from "axios";
+import { mapActions } from "vuex";
+
 export default {
   name: "LoginRegister",
   components: {},
@@ -80,6 +83,10 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      flashAction: "userFeedback/flashAction",
+    }),
+
     openTab(tabName, event) {
       let i, x, tablinks;
       // Create an array of all the "tab" elements and save it to a variable "x".
@@ -101,11 +108,66 @@ export default {
     },
 
     async login() {
-      console.log("Login clicked!");
+      const method = "POST";
+      const url = "/login"
+      const payload = {
+        email: this.loginFields.email,
+        password: this.loginFields.password
+      };
+
+      const response = await Axios({
+        method: method,
+        url: url,
+        data: payload
+      });
+
+      console.log("login RESPONSE:", response.data);
+
+      const res = response.data;
+      const msg = res.flash;
+
+      // If there is an error, then display the error message.
+      if (res.error) {
+        this.flashAction({ flashType: "error", flashMsg: msg });
+        return;
+      }
+
+      // Otherwise redirect the user back to the previous page they were on and display a success message.
+      this.$router.back();
+      this.flashAction({ flashType: "success", flashMsg: msg });
     },
 
     async register() {
-      console.log("Register clicked!");
+      const method = "POST";
+      const url = "/register"
+      const payload = {
+        firstName: this.regFields.firstName,
+        lastName: this.regFields.lastName,
+        email: this.regFields.email,
+        password: this.regFields.password,
+        confirmPassword: this.regFields.confirmPassword
+      };
+
+      const response = await Axios({
+        method: method,
+        url: url,
+        data: payload
+      });
+
+      console.log("register RESPONSE:", response.data);
+
+      const res = response.data;
+      const msg = res.flash;
+
+      // If there is an error, then display the error message.
+      if (res.error) {
+        this.flashAction({ flashType: "error", flashMsg: msg });
+        return;
+      }
+
+      // Otherwise redirect the user back to the previous page they were on and display a success message.
+      this.$router.back();
+      this.flashAction({ flashType: "success", flashMsg: msg });
     },
 
     goBack() {

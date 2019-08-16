@@ -24,20 +24,38 @@ const server = new Hapi.Server({
 server.ext({
   type: "onPreResponse",
   method: function(request, h) {
+    let error;
+    let message;
+    let flash;
+
     try {
+
+// I need to review this code and refactor it, if necessary.
+
+      // console.log("REQUEST.RESPONSE:", request.response);
       // console.log("REQUEST.RESPONSE.SOURCE:", request.response.source);
+
+      // If a user is unauthenticated and they gain access to a route that requires authentication,
+      // then there will be no "request.response.source" property. However, there will be a
+      // "request.response.isBoom" property. This conditional check will check for
+      // "request.response.isBoom" and set the necessary the error and flash values accordingly.
+      if (request.response.isBoom) {
+        error = request.response.output.payload.error;
+        message = request.response.output.payload.message;
+        flash = `${error}: ${message}`;
+        return { error, flash };
+      }
 
       // All errors should be set to a Boom error object before a response is returned to the client.
       // If there is an error, then the "error" property will be set to the HTTP status message
       // (e.g., "Bad Request", "Internal Server Error") and the "flash" property will be set according
       // to the explanations below.
-      if (request.response.source.error && request.response.source.error.isBoom) {
+      if (request.response.source && request.response.source.error && request.response.source.error.isBoom) {
         // HTTP status message
-        const error = request.response.source.error.output.payload.error;
+        error = request.response.source.error.output.payload.error;
         // If the user defined a custom error message, then "message" will be that custom error
         // message. Otherwise, "message" will be the same as the HTTP status message.
-        const message = request.response.source.error.message;
-        let flash;
+        message = request.response.source.error.message;
 
         // If the flash message is null, then set it to an appropriate message.
         if (!request.response.source.flash) {
@@ -99,7 +117,7 @@ const logsDestination = function() {
   else {
     return Fs.createWriteStream(logsDir + "/server.log");
   }
-}
+};
 const logLevel = function() {
   if (NODE_ENV !== "production") {
     return "debug";

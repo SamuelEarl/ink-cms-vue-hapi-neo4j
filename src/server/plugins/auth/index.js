@@ -29,10 +29,10 @@ exports.plugin = {
         isSameSite: NODE_ENV === "production" ? "Strict" : false, // false for all environments except for production
         isSecure: NODE_ENV === "production", // false for all environments except for production
       },
-      redirectTo: "/login",
+      // redirectTo: "/login",
       validateFunc: async (request, userSession) => {
         // See if a user exists with a matching "sessionId".
-        const userNode = await session.run(
+        const existingUser = await session.run(
           `MATCH (u:User {
             sessionId: { sessionIdParam }
           })
@@ -44,14 +44,14 @@ exports.plugin = {
         session.close();
 
         // If no user exists with a matching session ID, then set "valid" to false.
-        if (userNode.records.length === 0) {
+        if (existingUser.records.length === 0) {
           return { valid: false };
         }
 
-        //work
-        // const userProfile = userNode.records[0]._fields[0].properties;
+//work
+        // const userProfile = existingUser.records[0]._fields[0].properties;
         // What should go in the credentials property?
-        const { firstName, lastName, email } = userNode.records[0]._fields[0].properties;
+        const { firstName, lastName, email } = existingUser.records[0]._fields[0].properties;
         const userCredentials = { firstName, lastName, email };
 
         return { valid: true, credentials: userCredentials };
@@ -67,8 +67,10 @@ exports.plugin = {
      */
     server.route({
       method: "POST",
-      path: "/create-new-user",
+      path: "/register",
       options: {
+        // If you validate even one field from your payload with Joi, then you have to validate all
+        // fields from your payload. Otherwise you will get very confusing errors.
         validate: {
           payload: {
             firstName: Joi.string().required(),
@@ -82,17 +84,18 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let user = null;
+        let user = {};
 
         try {
-          const uuid = uuidv4();
+          const userUuid = uuidv4();
+          const sessionUuid = uuidv4();
           const currentTime = new Date().getTime();
-          const userId = `${uuid}-${currentTime}`;
-          const sessionId = `${uuid}-${currentTime}`;
-          const { firstName, lastName, email, password, confirmPassword } = request.payload;
+          const userId = `${userUuid}-${currentTime}`;
+          const sessionId = `${sessionUuid}-${currentTime}`;
+          const { firstName, lastName, email, password } = request.payload;
 
           // See if a user already exists with the same email.
-          const userNode = await session.run(
+          const existingUser = await session.run(
             `MATCH (u:User {
               email: { emailParam }
             })
@@ -103,43 +106,49 @@ exports.plugin = {
 
           // If a user already exists with this email, then set "flash" to an error message and
           // throw an error.
-          if (userNode.records.length > 0) {
+          if (existingUser.records.length > 0) {
             flash = "A user with this email already exists. Please use a different email address.";
             throw new Error(flash);
           }
+
+          // Hash the password before it is stored in the database.
+          // See https://www.npmjs.com/package/bcrypt.
+          const saltRounds = 10;
+          const hash = await Bcrypt.hash(password, saltRounds);
+
           // Otherwise create a new user in Neo4j and set "flash" to a success message.
-          else {
-            await session.run(
-              `CREATE (u:User {
-                userId: { userIdParam },
-                sessionId: { sessionIdParam },
-                email: { emailParam },
-                firstName: { firstNameParam },
-                lastName: { lastNameParam },
-                password: { passwordParam }
-              })
-              RETURN u`, {
-                userIdParam: userId,
-                sessionIdParam: sessionId,
-                emailParam: email,
-                firstNameParam: firstName,
-                lastNameParam: lastName,
-                passwordParam: password
-              }
-            );
-
-            const { firstName, lastName, email } = userNode.records[0]._fields[0].properties;
-            user = { firstName, lastName, email };
-            console.log("USER OBJECT:", user);
-
-            // "id" is the "userSession.id" that is used in the "cookie" strategy.
-            // I am setting "id" to a new "sessionId" that is created each time a user logs in.
-            request.cookieAuth.set({ id: sessionId });
-
-            flash = `"${firstName} ${lastName}" has successfully registered!`;
-          }
+          const newUser = await session.run(
+            `CREATE (u:User {
+              userId: { userIdParam },
+              sessionId: { sessionIdParam },
+              email: { emailParam },
+              firstName: { firstNameParam },
+              lastName: { lastNameParam },
+              password: { passwordParam }
+            })
+            RETURN u`, {
+              userIdParam: userId,
+              sessionIdParam: sessionId,
+              emailParam: email,
+              firstNameParam: firstName,
+              lastNameParam: lastName,
+              passwordParam: hash
+            }
+          );
 
           session.close();
+
+          const newSessionId = newUser.records[0]._fields[0].properties.sessionId;
+          const newFirstName = newUser.records[0]._fields[0].properties.firstName;
+          const newLastName = newUser.records[0]._fields[0].properties.lastName;
+          const newEmail = newUser.records[0]._fields[0].properties.email;
+          user = { newFirstName, newLastName, newEmail };
+
+          // "id" is the "userSession.id" that is used in the "cookie" strategy.
+          // I am setting "id" to a new "sessionId" that is created each time a user logs in.
+          request.cookieAuth.set({ id: newSessionId });
+
+          flash = `"${newFirstName} ${newLastName}" has successfully registered!`;
         }
         catch(e) {
           const msg = "Error while attempting to create a new user.";
@@ -168,7 +177,10 @@ exports.plugin = {
         },
         auth: {
           strategy: "userSession",
-          mode: "required"
+          // A user is not required to be logged in before they can login. Obviously.
+          // The example in the @hapi/cookie GitHub page uses the "try" mode, so I am using it here
+          // too. See https://github.com/hapijs/cookie.
+          mode: "try"
         }
       },
       handler: async function(request, h) {
@@ -182,7 +194,7 @@ exports.plugin = {
           const { email, password } = request.payload;
 
           // See if a user exists with this email.
-          const userAccount = await session.run(
+          const existingUser = await session.run(
             `MATCH (u:User {
               email: { emailParam }
             })
@@ -193,38 +205,45 @@ exports.plugin = {
 
           // If no user exists with the above email or the password does not match the one stored in
           // the database, then set "flash" to an error message and throw an error.
-          if (userAccount.records.length === 0 || !(await Bcrypt.compare(password, userAccount.records[0]._fields[0].properties.password))) {
+          if (existingUser.records.length === 0 || !(await Bcrypt.compare(password, existingUser.records[0]._fields[0].properties.password))) {
             flash = "The email or password that you provided does not match our records. Do you need to register for an account?";
             throw new Error(flash);
           }
-          // Otherwise set the new sessionId in the database, set the user session object
-          // (with request.cookieAuth.set()) and set "flash" to a success message.
-          else { //work
-            const newSessionId = `${uuid}-${currentTime}`;
 
-            // Set a new sessionId for this user.
-            const userAccount = await session.run(
-              `MATCH (u:User {
-                email: { emailParam }
-              })
-              SET u.sessionId={ sessionIdParam }
-              RETURN u`, {
-                emailParam: email,
-                sessionIdParam: newSessionId
-              }
-            );
+          // Otherwise set the new sessionId in the database.
+          const newSessionId = `${uuid}-${currentTime}`;
 
-            const { sessionId, firstName, lastName, email } = userAccount.records[0]._fields[0].properties;
-            user = { firstName, lastName, email };
-
-            // "id" is the "userSession.id" that is used in the "cookie" strategy.
-            // I am setting "id" to a new "sessionId" that is created each time a user logs in.
-            request.cookieAuth.set({ id: sessionId });
-
-            flash = `"${firstName} ${lastName}" has successfully logged in!`;
-          }
+          // Set a new sessionId for this user.
+          const userAccount = await session.run(
+            `MATCH (u:User {
+              email: { emailParam }
+            })
+            SET u.sessionId={ sessionIdParam }
+            RETURN u`, {
+              emailParam: email,
+              sessionIdParam: newSessionId
+            }
+          );
 
           session.close();
+
+          // Set the user objcet that will be returned to the browser.
+          // There is probably no need to run an "if" conditional check here to see if this user
+          // account exists (e.g., userAccount.records.length === 1) because we already tested
+          // that above.
+          const sessionIdFromDb = userAccount.records[0]._fields[0].properties.sessionId;
+          const userFirstName = userAccount.records[0]._fields[0].properties.firstName;
+          const userLastName = userAccount.records[0]._fields[0].properties.lastName;
+          const userEmail = userAccount.records[0]._fields[0].properties.email;
+          user = { userFirstName, userLastName, userEmail };
+
+          // Set the user session object that will create the cookie (with request.cookieAuth.set()).
+          // "id" is the "userSession.id" that is used in the "cookie" strategy.
+          // I am setting "id" to a new "sessionId" that is created each time a user logs in.
+          request.cookieAuth.set({ id: sessionIdFromDb });
+
+          // Set "flash" to a success message.
+          flash = `"${userFirstName} ${userLastName}" has successfully logged in!`;
         }
         catch(e) {
           const msg = "Login error. Please try again.";
@@ -233,6 +252,40 @@ exports.plugin = {
         }
         finally {
           return { error, flash, user };
+        }
+      }
+    });
+
+
+    /**
+     * Logout
+     */
+    server.route({
+      method: "GET",
+      path: "/logout",
+      options: {
+        // I am guessing that the auth option needs to be configured because you would have to be logged in first before you can logout, right?
+        auth: {
+          strategy: "userSession",
+          mode: "required"
+        }
+      },
+      handler: function(request, h) {
+        let error = null;
+        let flash = null;
+
+        try {
+          // Clear the cookie. If a user does not have a valid cookie, then they are not logged in.
+          request.cookieAuth.clear();
+          flash = "You have successfully logged out.";
+        }
+        catch(e) {
+          const msg = "Logout error. Please try again.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash };
         }
       }
     });

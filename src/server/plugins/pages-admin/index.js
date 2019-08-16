@@ -20,6 +20,12 @@ exports.plugin = {
     server.route({
       method: "POST",
       path: "/pages-admin/create-page",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required"
+        }
+      },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -116,6 +122,12 @@ exports.plugin = {
     server.route({
       method: "GET",
       path: "/pages-admin/edit-page/{pageId}",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required"
+        }
+      },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -171,6 +183,12 @@ exports.plugin = {
     server.route({
       method: "PUT",
       path: "/pages-admin/edit-page/{pageId}",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required"
+        }
+      },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -260,6 +278,12 @@ exports.plugin = {
     server.route({
       method: "DELETE",
       path: "/pages-admin/delete-page",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required"
+        }
+      },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
@@ -299,6 +323,12 @@ exports.plugin = {
     server.route({
       method: "PUT",
       path: "/pages-admin/reorder-pages",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required"
+        }
+      },
       handler: async function(request, h) {
         let error = null;
         let flash = null;

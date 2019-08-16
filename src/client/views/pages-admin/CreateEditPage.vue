@@ -139,14 +139,14 @@ export default {
           this.flashAction({ flashType: "error", flashMsg: msg });
           return;
         }
+
         // Otherwise redirect the user back to the "pages-list" page and display a success message.
-        else {
-          this.$router.push({ name: "pages-list" });
-          this.flashAction({ flashType: "success", flashMsg: msg });
-        }
+        this.$router.push({ name: "pages-list" });
+        this.flashAction({ flashType: "success", flashMsg: msg });
       }
       catch(e) {
         console.error("submitPageData Error:", e);
+        this.flashAction({ flashType: "error", flashMsg: e });
       }
     },
 
