@@ -16,7 +16,7 @@ exports.plugin = {
     // Set session to the Neo4j "session" database object
     const session = server.app.session;
 
-    server.auth.strategy("session", "cookie", {
+    server.auth.strategy("userSession", "cookie", {
       // Configure the user's session cookie
       cookie: {
         name: "sid", // This is also the default cookie name
@@ -30,26 +30,18 @@ exports.plugin = {
         isSecure: NODE_ENV === "production", // false for all environments except for production
       },
       redirectTo: "/login",
-      validateFunc: async (request, session) => {
+      validateFunc: async (request, userSession) => {
         // See if a user exists with a matching "sessionId".
         const userNode = await session.run(
           `MATCH (u:User {
             sessionId: { sessionIdParam }
           })
           RETURN u`, {
-            sessionIdParam: session.id
+            sessionIdParam: userSession.id
           }
         );
 
         session.close();
-
-        // const userNode = await users.find(
-        //   (user) => (user.id === session.id)
-        // );
-
-        // if (!account) {
-        //   return { valid: false };
-        // }
 
         // If no user exists with a matching session ID, then set "valid" to false.
         if (userNode.records.length === 0) {
@@ -67,8 +59,8 @@ exports.plugin = {
     });
 
     // You can set the default strategy here, but since there are only a few routes that require
-    // authentication I prefer configure the routes individually.
-    // server.auth.default("session");
+    // authentication I prefer to configure the routes individually.
+    // server.auth.default("userSession");
 
     /**
      * Create a new user
@@ -140,7 +132,7 @@ exports.plugin = {
             user = { firstName, lastName, email };
             console.log("USER OBJECT:", user);
 
-            // "id" is the "session.id" that is used in the "cookie" strategy.
+            // "id" is the "userSession.id" that is used in the "cookie" strategy.
             // I am setting "id" to a new "sessionId" that is created each time a user logs in.
             request.cookieAuth.set({ id: sessionId });
 
@@ -175,7 +167,7 @@ exports.plugin = {
           }
         },
         auth: {
-          strategy: "session",
+          strategy: "userSession",
           mode: "required"
         }
       },
@@ -205,7 +197,7 @@ exports.plugin = {
             flash = "The email or password that you provided does not match our records. Do you need to register for an account?";
             throw new Error(flash);
           }
-          // Otherwise set the new sessionId in the database, set the session object
+          // Otherwise set the new sessionId in the database, set the user session object
           // (with request.cookieAuth.set()) and set "flash" to a success message.
           else { //work
             const newSessionId = `${uuid}-${currentTime}`;
@@ -225,7 +217,7 @@ exports.plugin = {
             const { sessionId, firstName, lastName, email } = userAccount.records[0]._fields[0].properties;
             user = { firstName, lastName, email };
 
-            // "id" is the "session.id" that is used in the "cookie" strategy.
+            // "id" is the "userSession.id" that is used in the "cookie" strategy.
             // I am setting "id" to a new "sessionId" that is created each time a user logs in.
             request.cookieAuth.set({ id: sessionId });
 
