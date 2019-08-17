@@ -1,15 +1,14 @@
 import Vue from "vue";
 import Router from "vue-router";
+import store from "./store";
 import Layout from "./views/layouts/Layout.vue";
 import AuthLayout from "./views/layouts/AuthLayout.vue";
+import LoginRegister from "./views/auth/LoginRegister.vue";
 import PublicPage from "./views/pages-public/PublicPage.vue";
 import Admin from "./views/pages-admin/Admin.vue";
+import Users from "./views/pages-admin/Users.vue";
 import PagesList from "./views/pages-admin/PagesList.vue";
 import CreateEditPage from "./views/pages-admin/CreateEditPage.vue";
-import Categories from "./views/pages-admin/Categories.vue";
-import Products from "./views/pages-admin/Products.vue";
-import LoginRegister from "./views/auth/LoginRegister.vue";
-import ShoppingCart from "./views/shopping-cart/ShoppingCart.vue";
 
 Vue.use(Router);
 
@@ -34,6 +33,9 @@ const router = new Router({
         {
           path: "admin",
           component: Admin,
+          meta: {
+            requiresAuth: true
+          },
           children: [
             {
               path: "pages-list",
@@ -51,21 +53,11 @@ const router = new Router({
               component: CreateEditPage
             },
             {
-              path: "categories",
-              name: "admin-categories",
-              component: Categories
-            },
-            {
-              path: "products",
-              name: "admin-products",
-              component: Products
-            },
+              path: "users",
+              name: "users",
+              component: Users
+            }
           ]
-        },
-        {
-          path: "shopping-cart",
-          name: "shopping-cart",
-          component: ShoppingCart
         },
       ],
     },
@@ -83,24 +75,39 @@ const router = new Router({
   ]
 });
 
-// Combine these two route guards into one:
-// (1) Check if a route requires auth (and permissions).
-// (2) If it does, then retrieve the user's authentication status and user permissions from the server.
-// * Remember that each user's authentication status and permissions need to be verified during each request to the server.
-// * Remember that hapi receives the browser cookie automatically on all requests to the server. Not every page navigation in Vue will send a request to the server, but I need to be aware of those that do, so I can use those requests in this route guard instead of sending an additional, separate request to the server.
-// * Is there some way I can intercept the response back from the server in a route guard? I might have to call a "getAuthAction" for every route that requires authentication (and permissions).
+// IMPORTANT NOTE:
+// There is no need to manually check the user's auth status with every request or refresh their
+// "isAuthenticated" or "scope" variables (which are stored in the browser) with every request. Each
+// request that goes to the server will package up the cookie that was set when the user logged in.
+// We already configured our routes on the server to check for authentication and scope, so our app
+// is secure. It doesn't matter if a malicious user tampers with their cookie or their
+// "isAuthenticated" or "scope" variables that are stored in the browser (in an attempt to gain
+// access to things they are not allowed to) because everything is locked down on the server. For
+// example, a malicious user could gain access to the admin pages if they set their
+// "isAuthenticated" variable to true, but those pages would be blank. They wouldn't have access to
+// see or alter the data, which is the most important thing.
 
-// This route guard will check the matched routes "metadata" property for the key "requiresAuth" and will redirect the user to the Okta authentication flow if the user is not authenticated.
-// router.beforeEach(Vue.prototype.$auth.authRedirectGuard());
-
-// router.beforeEach( async (to, from , next) => {
-//   // On each route request, retrieve authentication status and user permissions from the server.
-//   // This will set the auth status and user permissions in Vuex.
-//   // Getters are then used throughout the app to check if a user is signed in and if they have
-//   // the proper permissions to access resources.
-//   await store.dispatch("auth/getAuthGroupsAction");
-//   // You have to call the next() method to continue navigating to the next route.
-//   next();
-// });
+// You can set a "requiresAuth: true" meta data property on each route that should be protected.
+// For each protected route, check if the user is logged in before they are allowed access.
+// If the user is not logged in, then redirect them to the login page.
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // If the user is not logged in, then redirect the user to the login page.
+    const isAuthenticated = store.getters["auth/getIsAuthenticated"];
+    if (!isAuthenticated) {
+      next({
+        path: "/login",
+        query: { redirect: to.fullPath }
+      });
+    }
+    // Otherwise continue with the request.
+    else {
+      next();
+    }
+  }
+  else {
+    next(); // Make sure to always call `next()`!
+  }
+});
 
 export default router;

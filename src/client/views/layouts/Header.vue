@@ -31,6 +31,7 @@
           <router-link :to="{ name: 'pages-list' }" exact>Pages</router-link>
           <!-- <router-link :to="{ name: 'admin-categories' }" exact>Categories</router-link>
           <router-link :to="{ name: 'admin-products' }" exact>Products</router-link> -->
+          <router-link :to="{ name: 'users' }" exact>Users</router-link>
 
         </div>
       </div>
@@ -75,16 +76,16 @@
       </div>
 
       <div id="right-nav">
-        <router-link
+        <!-- <router-link
           v-if="!$route.path.startsWith('/admin')"
           :to="{ name: 'shopping-cart' }"
           title="Shopping Cart"
           exact
         >
           <font-awesome-icon icon="shopping-cart" /> ( 0 )
-        </router-link>
+        </router-link> -->
         <router-link
-          v-if="!$route.path.startsWith('/admin')"
+          v-if="isAuthenticated && !$route.path.startsWith('/admin')"
           :to="{ name: 'pages-list' }"
           title="Admin"
           exact

@@ -42,17 +42,9 @@ const mutations = {
     state.isAuthenticated = isAuthenticated;
   },
 
-  /**
-   * The user's auth (authentication and authorization) will be checked on each route request that
-   * requires auth. So "userJustLoggedIn" will be set to true only when the user first registers or
-   * logs in. "userJustLoggedIn" will be set to false on every auth check.
-   */
-  setUserProfile: (state, { userJustLoggedIn, userProfile }) => {
+  setUserProfile: (state, userProfile) => {
     state.userProfile = userProfile;
-
-    if (userJustLoggedIn) {
-      router.back();
-    }
+    router.back();
   },
 
   clearUserProfile: (state) => {
@@ -105,7 +97,7 @@ const actions = {
 
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
         // Otherwise call "setUserProfile" with the newly registered user's profile object and display a success message.
-        commit("setUserProfile", { userJustLoggedIn: true, userProfile: user });
+        commit("setUserProfile", user);
         commit("setIsAuthenticated", true);
 
         dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
@@ -155,9 +147,10 @@ const actions = {
       user.email = res.user.userEmail;
       user.scope = res.user.userScope;
 
+      // If the user is logged in, then call "setUserProfile" with the logged in user's profile
+      // object and display a success message.
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
-        // Otherwise call "setUserProfile" with the logged in user's profile object and display a success message.
-        commit("setUserProfile", { userJustLoggedIn: true, userProfile: user });
+        commit("setUserProfile", user);
         commit("setIsAuthenticated", true);
 
         dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
