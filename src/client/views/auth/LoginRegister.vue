@@ -178,7 +178,7 @@ export default {
 
             &:hover {
               background-color: transparent !important;
-              border-bottom: 3px solid #ccc;
+              border-bottom: 3px solid $medium-gray;
             }
             &.active-tab {
               background-color: transparent !important;
@@ -221,7 +221,7 @@ export default {
       footer {
         display: flex;
         justify-content: space-between;
-        border-top: 1px solid #ccc;
+        border-top: 1px solid $medium-gray;
         padding: 20px;
         background-color: #eee;
       }

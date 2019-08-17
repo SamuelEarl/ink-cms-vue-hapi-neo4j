@@ -23,7 +23,10 @@ exports.plugin = {
       options: {
         auth: {
           strategy: "userSession",
-          mode: "required"
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
         }
       },
       handler: async function(request, h) {
@@ -125,7 +128,10 @@ exports.plugin = {
       options: {
         auth: {
           strategy: "userSession",
-          mode: "required"
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
         }
       },
       handler: async function(request, h) {
@@ -186,7 +192,10 @@ exports.plugin = {
       options: {
         auth: {
           strategy: "userSession",
-          mode: "required"
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
         }
       },
       handler: async function(request, h) {
@@ -281,7 +290,10 @@ exports.plugin = {
       options: {
         auth: {
           strategy: "userSession",
-          mode: "required"
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
         }
       },
       handler: async function(request, h) {
@@ -326,7 +338,10 @@ exports.plugin = {
       options: {
         auth: {
           strategy: "userSession",
-          mode: "required"
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
         }
       },
       handler: async function(request, h) {

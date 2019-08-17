@@ -85,7 +85,7 @@
           <font-awesome-icon icon="shopping-cart" /> ( 0 )
         </router-link> -->
         <router-link
-          v-if="isAuthenticated && !$route.path.startsWith('/admin')"
+          v-if="isAuthenticated && scope.includes('admin') && !$route.path.startsWith('/admin')"
           :to="{ name: 'pages-list' }"
           title="Admin"
           exact
@@ -126,6 +126,7 @@ export default {
   computed: {
     ...mapGetters({
       isAuthenticated: "auth/getIsAuthenticated",
+      scope: "auth/getScope",
       getPagesList: "pages/getPagesList",
     }),
   },

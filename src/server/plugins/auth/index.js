@@ -29,7 +29,6 @@ exports.plugin = {
         isSameSite: NODE_ENV === "production" ? "Strict" : false, // false for all environments except for production
         isSecure: NODE_ENV === "production", // false for all environments except for production
       },
-      // redirectTo: "/login",
       validateFunc: async (request, userSession) => {
         // See if a user exists with a matching "sessionId".
         const existingUser = await session.run(
@@ -48,18 +47,14 @@ exports.plugin = {
           return { valid: false };
         }
 
-//work
-        // const userProfile = existingUser.records[0]._fields[0].properties;
-        // What should go in the credentials property?
-        const { firstName, lastName, email } = existingUser.records[0]._fields[0].properties;
-        const userCredentials = { firstName, lastName, email };
+        const { firstName, lastName, email, scope } = existingUser.records[0]._fields[0].properties;
+        const userCredentials = { firstName, lastName, email, scope };
 
         return { valid: true, credentials: userCredentials };
       }
     });
 
-    // You can set the default strategy here, but since there are only a few routes that require
-    // authentication I prefer to configure the routes individually.
+    // You can set the default strategy here, but we are going to configure the routes individually.
     // server.auth.default("userSession");
 
     /**
@@ -322,19 +317,17 @@ exports.plugin = {
         let usersList = [];
 
         try {
-          const result = await session.run("MATCH (u:User) RETURN u");
+          const users = await session.run("MATCH (u:User) RETURN u");
 
-          result.records.forEach(function(record) {
+          users.records.forEach(function(record) {
             // "record._fields[0]" returns each node in the array
-            // console.log(record._fields[0]);
             usersList.push(record._fields[0].properties);
           });
 
           session.close();
         }
         catch(e) {
-          const msg = "Login error. Please try again.";
-          const errorRes = server.methods.catch(e, msg, request.path);
+          const errorRes = server.methods.catch(e, null, request.path);
           error = errorRes;
         }
         finally {
@@ -352,7 +345,6 @@ exports.plugin = {
           strategy: "userSession",
           mode: "required",
           access: {
-            // If the user does not have the proper permissions, then hapi will return a 403 Forbidden error.
             scope: ["admin"]
           }
         }
@@ -360,57 +352,38 @@ exports.plugin = {
       handler: async function(request) {
         let error = null;
         let flash = null;
-
-        const sessionId = request.payload.sessionId;
-        const userId = request.payload.userId;
-        const updatedPermissionsArray = request.payload.updatedPermissionsArray;
-        let userNode = null;
-        let hasPermissions = false;
+        let userScope = [];
 
         try {
-          // Check if the user is authenticated and if they have the proper permissions
-          const user = await server.methods.checkUserAuthPermissions(sessionId, request.path);
-          const isAuthenticated = user.isAuthenticated;
-          const userPermissions = user.permissions;
-          const authPermissionsErrMsg = user.errorMessage;
+          const userId = request.payload.userId;
+          const updatedScopeArray = request.payload.updatedScopeArray;
 
-          if (userPermissions.includes("admin")) {
-            hasPermissions = true;
-          }
-
-          if (isAuthenticated && hasPermissions) {
-
-            const userNodeWithUpdatedPermissions = await session.run(
-              `MATCH (u:User {
-                userId: { userIdParam }
-              })
-              SET u.permissions={ permissionsParam }
-              RETURN u`, {
-                userIdParam: userId,
-                permissionsParam: updatedPermissionsArray
-              }
-            );
-
-            session.close();
-
-            // If the "userNodeWithUpdatedPermissions" was updated successfully (i.e., if the database operation was executed without an error), then set "userNode" to equal "userNodeWithUpdatedPermissions".
-            const records = userNodeWithUpdatedPermissions.records[0];
-            const fields = records._fields[0];
-            const properties = fields.properties;
-            if (records && fields && properties && properties.permissions) {
-              userNode = userNodeWithUpdatedPermissions;
+          const userNodeWithUpdatedScope = await session.run(
+            `MATCH (u:User {
+              userId: { userIdParam }
+            })
+            SET u.scope={ scopeParam }
+            RETURN u`, {
+              userIdParam: userId,
+              scopeParam: updatedScopeArray
             }
-          }
+          );
 
-          return { userNode, isAuthenticated, hasPermissions, authPermissionsErrMsg };
+          session.close();
+
+          // Set "userNode" and a success flash message
+          userScope = userNodeWithUpdatedScope.records[0]._fields[0].properties.scope;
+          flash = "User scope updated successfully!";
         }
         catch(e) {
-          const msg = "Login error. Please try again.";
-          const errorRes = server.methods.catch(e, msg, request.path);
-          error = errorRes;
+          error = new Boom(e);
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
+          console.error(errorLog);
+          // const errorRes = server.methods.catch(e, null, request.path);
+          // error = errorRes;
         }
         finally {
-          return { error, flash, userNode };
+          return { error, flash, userScope };
         }
       }
     });
