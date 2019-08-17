@@ -3,7 +3,7 @@
 
 // computed: {
 //   ...mapGetters({
-//     isAuthenticated: "auth/getAuthentication"
+//     isAuthenticated: "auth/getIsAuthentication"
 //   })
 // }
 
@@ -38,7 +38,7 @@ const getters = {
 
 
 const mutations = {
-  setAuthenticated: (state, isAuthenticated) => {
+  setIsAuthenticated: (state, isAuthenticated) => {
     state.isAuthenticated = isAuthenticated;
   },
 
@@ -56,7 +56,10 @@ const mutations = {
   },
 
   clearUserProfile: (state) => {
-    state.userProfile = null;
+    state.userProfile.firstName = "";
+    state.userProfile.lastName = "";
+    state.userProfile.email = "";
+    state.userProfile.scope = [];
 
     // Redirect user to the home route
     router.push("/");
@@ -67,6 +70,13 @@ const mutations = {
 const actions = {
   registerAction: async ({ commit, dispatch }, newUser) => {
     try {
+      let user = {
+        firstName: "",
+        lastName: "",
+        email: "",
+        scope: [],
+      };
+
       const method = "POST";
       const url = "/register";
       const payload = newUser;
@@ -88,10 +98,21 @@ const actions = {
         return;
       }
 
-      // Otherwise call "setUserProfile" with the newly registered user's profile object and display a success message.
-      commit("setUserProfile", { userJustLoggedIn: true, userProfile: res.user });
+      user.firstName = res.user.newUserFirstName;
+      user.lastName = res.user.newUserLastName;
+      user.email = res.user.newUserEmail;
+      user.scope = res.user.newUserScope;
 
-      dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
+      if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
+        // Otherwise call "setUserProfile" with the newly registered user's profile object and display a success message.
+        commit("setUserProfile", { userJustLoggedIn: true, userProfile: user });
+        commit("setIsAuthenticated", true);
+
+        dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
+      }
+      else {
+        throw new Error("Unable to register user.");
+      }
     }
     catch(e) {
       console.error("registerAction Error:", e);
@@ -101,6 +122,13 @@ const actions = {
 
   loginAction: async ({ commit, dispatch }, credentials) => {
     try {
+      let user = {
+        firstName: "",
+        lastName: "",
+        email: "",
+        scope: [],
+      };
+
       const method = "POST";
       const url = "/login";
       const payload = credentials;
@@ -122,10 +150,18 @@ const actions = {
         return;
       }
 
-      // Otherwise call "setUserProfile" with the logged in user's profile object and display a success message.
-      commit("setUserProfile", { userJustLoggedIn: true, userProfile: res.user });
+      user.firstName = res.user.userFirstName;
+      user.lastName = res.user.userLastName;
+      user.email = res.user.userEmail;
+      user.scope = res.user.userScope;
 
-      dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
+      if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
+        // Otherwise call "setUserProfile" with the logged in user's profile object and display a success message.
+        commit("setUserProfile", { userJustLoggedIn: true, userProfile: user });
+        commit("setIsAuthenticated", true);
+
+        dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
+      }
     }
     catch(e) {
       console.error("loginAction Error:", e);
@@ -156,6 +192,7 @@ const actions = {
 
       // Otherwise clear the userProfile and display a success message.
       commit("clearUserProfile");
+      commit("setIsAuthenticated", false);
       dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
     }
     catch(e) {

@@ -2,6 +2,11 @@
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 
+const Dotenv = require("dotenv").config();
+if (Dotenv.error) {
+  throw Dotenv.error;
+}
+
 if (NODE_ENV === "production") {
   require("@babel/polyfill");
 }
@@ -11,7 +16,6 @@ const Path = require("path");
 // const Shell = require("shelljs");
 const Hapi = require("@hapi/hapi");
 const Boom = require("@hapi/boom");
-const Credentials = require("./credentials");
 
 // Server configs
 const server = new Hapi.Server({
@@ -21,6 +25,7 @@ const server = new Hapi.Server({
   port: process.env.PORT || 4000
 });
 
+// I need to review the code in this "onPreResponse" hook and refactor it, if necessary.
 server.ext({
   type: "onPreResponse",
   method: function(request, h) {
@@ -29,9 +34,6 @@ server.ext({
     let flash;
 
     try {
-
-// I need to review this code and refactor it, if necessary.
-
       // console.log("REQUEST.RESPONSE:", request.response);
       // console.log("REQUEST.RESPONSE.SOURCE:", request.response.source);
 
@@ -137,19 +139,20 @@ const logLevel = function() {
 // Database Config Options
 let dbOptions;
 if (NODE_ENV === "production") {
-  const dbOptsProd = Credentials.dbOptsProd;
   dbOptions = {
-    uri: dbOptsProd.uri,
-    user: dbOptsProd.user,
-    password: dbOptsProd.password
+    uri: process.env.GRAPHENE_PROD_URI,
+    user: process.env.GRAPHENE_PROD_USER,
+    password: process.env.GRAPHENE_PROD_PASSWORD
   };
 }
 else {
-  const dbOptsDev = Credentials.dbOptsDev;
   dbOptions = {
-    uri: dbOptsDev.uri,
-    user: dbOptsDev.user,
-    password: dbOptsDev.password
+    uri: process.env.DOCKER_NEO4J_URI,
+    user: process.env.DOCKER_NEO4J_USER,
+    password: process.env.DOCKER_NEO4J_PASSWORD
+    // uri: process.env.GRAPHENE_DEV_URI,
+    // user: process.env.GRAPHENE_DEV_USER,
+    // password: process.env.GRAPHENE_DEV_PASSWORD
   };
 }
 

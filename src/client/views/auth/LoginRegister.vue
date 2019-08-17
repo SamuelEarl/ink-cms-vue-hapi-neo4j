@@ -17,8 +17,8 @@
         <section id="body">
           <div id="login" class="tab-content">
             <form @submit.prevent="login">
-              <input v-model="loginFields.email" class="w3-input w3-border" type="email" placeholder="Email">
-              <input v-model="loginFields.password" class="w3-input w3-border" type="password" placeholder="Password">
+              <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+              <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
 
               <button class="btn-primary">Login</button>
             </form>
@@ -26,11 +26,11 @@
 
           <div id="register" class="tab-content">
             <form @submit.prevent="register">
-              <input v-model="regFields.firstName" class="w3-input w3-border" type="text" placeholder="First Name">
-              <input v-model="regFields.lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
-              <input v-model="regFields.email" class="w3-input w3-border" type="email" placeholder="Email">
-              <input v-model="regFields.password" class="w3-input w3-border" type="password" placeholder="Password">
-              <input v-model="regFields.confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
+              <input v-model="firstName" class="w3-input w3-border" type="text" placeholder="First Name">
+              <input v-model="lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
+              <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+              <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+              <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
               <button class="btn-primary">Register</button>
             </form>
           </div>
@@ -61,17 +61,11 @@ export default {
 
   data() {
     return {
-      loginFields: {
-        email: "",
-        password: ""
-      },
-      regFields: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-      },
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
     }
   },
 
@@ -112,11 +106,11 @@ export default {
     async register() {
       try {
         const newUser = {
-          firstName: this.regFields.firstName,
-          lastName: this.regFields.lastName,
-          email: this.regFields.email,
-          password: this.regFields.password,
-          confirmPassword: this.regFields.confirmPassword
+          firstName: this.firstName,
+          lastName: this.lastName,
+          email: this.email,
+          password: this.password,
+          confirmPassword: this.confirmPassword
         };
 
         this.registerAction(newUser);
@@ -129,8 +123,8 @@ export default {
     async login() {
       try {
         const credentials = {
-          email: this.loginFields.email,
-          password: this.loginFields.password
+          email: this.email,
+          password: this.password
         };
 
         this.loginAction(credentials);

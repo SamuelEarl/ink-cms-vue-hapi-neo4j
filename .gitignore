@@ -6,9 +6,6 @@ node_modules
 # Build Directories
 /dist
 
-# Sensitive Credentials
-credentials*
-
 # Uploaded Test Images
 src/client/assets/uploads/*
 
@@ -17,7 +14,7 @@ src/client/assets/uploads/*
 /tests/e2e/reports/
 selenium-debug.log
 
-# local env files
+# local env files and sensitive credentials
 .env
 .env.local
 .env.*.local

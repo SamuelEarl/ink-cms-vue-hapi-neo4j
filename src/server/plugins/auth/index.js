@@ -116,9 +116,9 @@ exports.plugin = {
           const saltRounds = 10;
           const hash = await Bcrypt.hash(password, saltRounds);
 
-          let newUserScope = ["user"];
-          if (email === "samueltremain@gmail.com") {
-            newUserScope = [ ...newUserScope, "admin" ];
+          let scope = ["user"];
+          if (email === process.env.ADMIN_EMAIL) {
+            scope = [ ...scope, "admin" ];
           }
 
           // Otherwise create a new user in Neo4j and set "flash" to a success message.
@@ -139,23 +139,24 @@ exports.plugin = {
               firstNameParam: firstName,
               lastNameParam: lastName,
               passwordParam: hash,
-              scopeParam: newUserScope
+              scopeParam: scope
             }
           );
 
           session.close();
 
-          const newSessionId = newUser.records[0]._fields[0].properties.sessionId;
-          const newFirstName = newUser.records[0]._fields[0].properties.firstName;
-          const newLastName = newUser.records[0]._fields[0].properties.lastName;
-          const newEmail = newUser.records[0]._fields[0].properties.email;
-          user = { newFirstName, newLastName, newEmail };
+          const newUserSessionId = newUser.records[0]._fields[0].properties.sessionId;
+          const newUserFirstName = newUser.records[0]._fields[0].properties.firstName;
+          const newUserLastName = newUser.records[0]._fields[0].properties.lastName;
+          const newUserEmail = newUser.records[0]._fields[0].properties.email;
+          const newUserScope = newUser.records[0]._fields[0].properties.scope;
+          user = { newUserFirstName, newUserLastName, newUserEmail, newUserScope };
 
           // "id" is the "userSession.id" that is used in the "cookie" strategy.
           // I am setting "id" to a new "sessionId" that is created each time a user logs in.
-          request.cookieAuth.set({ id: newSessionId });
+          request.cookieAuth.set({ id: newUserSessionId });
 
-          flash = `"${newFirstName} ${newLastName}" has successfully registered!`;
+          flash = `"${newUserFirstName} ${newUserLastName}" has successfully registered!`;
         }
         catch(e) {
           const msg = "Error while attempting to create a new user.";
@@ -242,7 +243,8 @@ exports.plugin = {
           const userFirstName = userAccount.records[0]._fields[0].properties.firstName;
           const userLastName = userAccount.records[0]._fields[0].properties.lastName;
           const userEmail = userAccount.records[0]._fields[0].properties.email;
-          user = { userFirstName, userLastName, userEmail };
+          const userScope = userAccount.records[0]._fields[0].properties.scope;
+          user = { userFirstName, userLastName, userEmail, userScope };
 
           // Set the user session object that will create the cookie (with request.cookieAuth.set()).
           // "id" is the "userSession.id" that is used in the "cookie" strategy.
@@ -271,10 +273,13 @@ exports.plugin = {
       method: "GET",
       path: "/logout",
       options: {
-        // I am guessing that the auth option needs to be configured because you would have to be logged in first before you can logout, right?
+        // The auth option can be configured because you would have to be logged in first before
+        // you could logout, right? But I am going to set "mode" to "try" just to make sure that
+        // users can logout under any circumstances (e.g., maybe the user deleted their cookies or
+        // their account was accidentally deleted while they were logged in).
         auth: {
           strategy: "userSession",
-          mode: "required"
+          mode: "try"
         }
       },
       handler: function(request, h) {

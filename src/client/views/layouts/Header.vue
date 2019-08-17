@@ -102,7 +102,7 @@
           :to="{ name: 'login' }"
           exact
         >
-          Login
+          Login / Register
         </router-link>
       </div>
     </nav>
