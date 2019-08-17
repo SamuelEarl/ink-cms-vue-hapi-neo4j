@@ -13,7 +13,7 @@ import ShoppingCart from "./views/shopping-cart/ShoppingCart.vue";
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   mode: "history",
   base: process.env.BASE_URL,
   routes: [
@@ -82,3 +82,25 @@ export default new Router({
     }
   ]
 });
+
+// Combine these two route guards into one:
+// (1) Check if a route requires auth (and permissions).
+// (2) If it does, then retrieve the user's authentication status and user permissions from the server.
+// * Remember that each user's authentication status and permissions need to be verified during each request to the server.
+// * Remember that hapi receives the browser cookie automatically on all requests to the server. Not every page navigation in Vue will send a request to the server, but I need to be aware of those that do, so I can use those requests in this route guard instead of sending an additional, separate request to the server.
+// * Is there some way I can intercept the response back from the server in a route guard? I might have to call a "getAuthAction" for every route that requires authentication (and permissions).
+
+// This route guard will check the matched routes "metadata" property for the key "requiresAuth" and will redirect the user to the Okta authentication flow if the user is not authenticated.
+// router.beforeEach(Vue.prototype.$auth.authRedirectGuard());
+
+// router.beforeEach( async (to, from , next) => {
+//   // On each route request, retrieve authentication status and user permissions from the server.
+//   // This will set the auth status and user permissions in Vuex.
+//   // Getters are then used throughout the app to check if a user is signed in and if they have
+//   // the proper permissions to access resources.
+//   await store.dispatch("auth/getAuthGroupsAction");
+//   // You have to call the next() method to continue navigating to the next route.
+//   next();
+// });
+
+export default router;

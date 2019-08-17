@@ -91,7 +91,14 @@
         >
           <font-awesome-icon icon="user-shield" />
         </router-link>
+        <a
+          v-if="isAuthenticated"
+          @click="logout"
+        >
+          Logout
+        </a>
         <router-link
+          v-else
           :to="{ name: 'login' }"
           exact
         >
@@ -117,6 +124,7 @@ export default {
 
   computed: {
     ...mapGetters({
+      isAuthenticated: "auth/getIsAuthenticated",
       getPagesList: "pages/getPagesList",
     }),
   },
@@ -138,6 +146,7 @@ export default {
   methods: {
     ...mapActions({
       setPagesListAction: "pages/setPagesListAction",
+      logoutAction: "auth/logoutAction"
     }),
 
     toggleNav() {
@@ -150,8 +159,14 @@ export default {
       }
     },
 
-    login() {
-      console.log("Login!");
+    async logout() {
+      try {
+        console.log("You clicked Logout!");
+        this.logoutAction();
+      }
+      catch(e) {
+        console.log("Logout error");
+      }
     },
   }
 }

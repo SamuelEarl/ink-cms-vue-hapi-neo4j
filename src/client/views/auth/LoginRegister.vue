@@ -1,6 +1,6 @@
 <template>
   <div id="page-container">
-    <div class="form-container">
+    <div id="form-container">
 
       <div id="top-container">
         <header>
@@ -85,6 +85,8 @@ export default {
   methods: {
     ...mapActions({
       flashAction: "userFeedback/flashAction",
+      registerAction: "auth/registerAction",
+      loginAction: "auth/loginAction",
     }),
 
     openTab(tabName, event) {
@@ -107,67 +109,35 @@ export default {
       event.currentTarget.className += " active-tab";
     },
 
-    async login() {
-      const method = "POST";
-      const url = "/login"
-      const payload = {
-        email: this.loginFields.email,
-        password: this.loginFields.password
-      };
+    async register() {
+      try {
+        const newUser = {
+          firstName: this.regFields.firstName,
+          lastName: this.regFields.lastName,
+          email: this.regFields.email,
+          password: this.regFields.password,
+          confirmPassword: this.regFields.confirmPassword
+        };
 
-      const response = await Axios({
-        method: method,
-        url: url,
-        data: payload
-      });
-
-      console.log("login RESPONSE:", response.data);
-
-      const res = response.data;
-      const msg = res.flash;
-
-      // If there is an error, then display the error message.
-      if (res.error) {
-        this.flashAction({ flashType: "error", flashMsg: msg });
-        return;
+        this.registerAction(newUser);
       }
-
-      // Otherwise redirect the user back to the previous page they were on and display a success message.
-      this.$router.back();
-      this.flashAction({ flashType: "success", flashMsg: msg });
+      catch(e) {
+        console.error("Register Error:", e);
+      }
     },
 
-    async register() {
-      const method = "POST";
-      const url = "/register"
-      const payload = {
-        firstName: this.regFields.firstName,
-        lastName: this.regFields.lastName,
-        email: this.regFields.email,
-        password: this.regFields.password,
-        confirmPassword: this.regFields.confirmPassword
-      };
+    async login() {
+      try {
+        const credentials = {
+          email: this.loginFields.email,
+          password: this.loginFields.password
+        };
 
-      const response = await Axios({
-        method: method,
-        url: url,
-        data: payload
-      });
-
-      console.log("register RESPONSE:", response.data);
-
-      const res = response.data;
-      const msg = res.flash;
-
-      // If there is an error, then display the error message.
-      if (res.error) {
-        this.flashAction({ flashType: "error", flashMsg: msg });
-        return;
+        this.loginAction(credentials);
       }
-
-      // Otherwise redirect the user back to the previous page they were on and display a success message.
-      this.$router.back();
-      this.flashAction({ flashType: "success", flashMsg: msg });
+      catch(e) {
+        console.error("Login Error:", e);
+      }
     },
 
     goBack() {
@@ -192,9 +162,8 @@ export default {
       lighten($ink-blue, 15%),
       $ink-blue
     );
-    color: white;
 
-    .form-container {
+    #form-container {
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -268,12 +237,11 @@ export default {
 
 
 @media $m-up {
-  .form-container {
-    position: relative;
-    top: 40px;
+  #form-container {
+    margin-top: 40px;
     margin-right: auto;
     margin-left: auto;
-    width: 50%;
+    width: 425px;
     height: auto !important;
 
     header div {
@@ -288,8 +256,6 @@ export default {
 
 
 @media $l-up {
-  .form-container {
-    width: 30%;
-  }
+
 }
 </style>

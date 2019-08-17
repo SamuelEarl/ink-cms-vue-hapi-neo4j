@@ -160,7 +160,7 @@ export default {
         const confirm = window.confirm(`Are you sure you want to delete the "${title}" page?`);
         if (confirm) {
           const method = "DELETE";
-          const url = `/pages-admin/delete-page`;
+          const url = "/pages-admin/delete-page";
           const payload = {
             pageId: pageId,
             title: title

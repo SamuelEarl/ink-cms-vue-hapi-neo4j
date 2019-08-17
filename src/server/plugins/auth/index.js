@@ -116,6 +116,11 @@ exports.plugin = {
           const saltRounds = 10;
           const hash = await Bcrypt.hash(password, saltRounds);
 
+          let newUserScope = ["user"];
+          if (email === "samueltremain@gmail.com") {
+            newUserScope = [ ...newUserScope, "admin" ];
+          }
+
           // Otherwise create a new user in Neo4j and set "flash" to a success message.
           const newUser = await session.run(
             `CREATE (u:User {
@@ -124,7 +129,8 @@ exports.plugin = {
               email: { emailParam },
               firstName: { firstNameParam },
               lastName: { lastNameParam },
-              password: { passwordParam }
+              password: { passwordParam },
+              scope: { scopeParam }
             })
             RETURN u`, {
               userIdParam: userId,
@@ -132,7 +138,8 @@ exports.plugin = {
               emailParam: email,
               firstNameParam: firstName,
               lastNameParam: lastName,
-              passwordParam: hash
+              passwordParam: hash,
+              scopeParam: newUserScope
             }
           );
 
@@ -286,6 +293,119 @@ exports.plugin = {
         }
         finally {
           return { error, flash };
+        }
+      }
+    });
+
+
+    server.route({
+      method: "GET",
+      path: "/users/get-all-users",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required",
+          access: {
+            // If the user does not have the proper permissions, then hapi will return a 403 Forbidden error.
+            scope: ["admin"]
+          }
+        }
+      },
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+        let usersList = [];
+
+        try {
+          const result = await session.run("MATCH (u:User) RETURN u");
+
+          result.records.forEach(function(record) {
+            // "record._fields[0]" returns each node in the array
+            // console.log(record._fields[0]);
+            usersList.push(record._fields[0].properties);
+          });
+
+          session.close();
+        }
+        catch(e) {
+          const msg = "Login error. Please try again.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash, usersList };
+        }
+      }
+    });
+
+
+    server.route({
+      method: "PUT",
+      path: "/users/update-user-scope",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required",
+          access: {
+            // If the user does not have the proper permissions, then hapi will return a 403 Forbidden error.
+            scope: ["admin"]
+          }
+        }
+      },
+      handler: async function(request) {
+        let error = null;
+        let flash = null;
+
+        const sessionId = request.payload.sessionId;
+        const userId = request.payload.userId;
+        const updatedPermissionsArray = request.payload.updatedPermissionsArray;
+        let userNode = null;
+        let hasPermissions = false;
+
+        try {
+          // Check if the user is authenticated and if they have the proper permissions
+          const user = await server.methods.checkUserAuthPermissions(sessionId, request.path);
+          const isAuthenticated = user.isAuthenticated;
+          const userPermissions = user.permissions;
+          const authPermissionsErrMsg = user.errorMessage;
+
+          if (userPermissions.includes("admin")) {
+            hasPermissions = true;
+          }
+
+          if (isAuthenticated && hasPermissions) {
+
+            const userNodeWithUpdatedPermissions = await session.run(
+              `MATCH (u:User {
+                userId: { userIdParam }
+              })
+              SET u.permissions={ permissionsParam }
+              RETURN u`, {
+                userIdParam: userId,
+                permissionsParam: updatedPermissionsArray
+              }
+            );
+
+            session.close();
+
+            // If the "userNodeWithUpdatedPermissions" was updated successfully (i.e., if the database operation was executed without an error), then set "userNode" to equal "userNodeWithUpdatedPermissions".
+            const records = userNodeWithUpdatedPermissions.records[0];
+            const fields = records._fields[0];
+            const properties = fields.properties;
+            if (records && fields && properties && properties.permissions) {
+              userNode = userNodeWithUpdatedPermissions;
+            }
+          }
+
+          return { userNode, isAuthenticated, hasPermissions, authPermissionsErrMsg };
+        }
+        catch(e) {
+          const msg = "Login error. Please try again.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash, userNode };
         }
       }
     });
