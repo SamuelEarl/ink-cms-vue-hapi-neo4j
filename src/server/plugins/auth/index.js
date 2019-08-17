@@ -376,11 +376,8 @@ exports.plugin = {
           flash = "User scope updated successfully!";
         }
         catch(e) {
-          error = new Boom(e);
-          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
-          console.error(errorLog);
-          // const errorRes = server.methods.catch(e, null, request.path);
-          // error = errorRes;
+          const errorRes = server.methods.catch(e, null, request.path);
+          error = errorRes;
         }
         finally {
           return { error, flash, userScope };

@@ -9,3 +9,4 @@
 * Create a blog feature.
   * Create comments feature for blog posts.
 * Create a shopping cart.
+* Implement Redis for faster retrieval of auth data and other things.

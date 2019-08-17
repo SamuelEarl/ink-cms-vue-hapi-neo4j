@@ -88,6 +88,9 @@ export default {
     return {
       usersList: [],
       showUserModal: false,
+      // Since we are using a unique session ID for authentication, instead of the user's userId, we
+      // can pass the userId here without any security issues. In this case the userId is no more
+      // risky to pass around and store in the browser than the email address is.
       selectedUser: {
         userId: "",
         firstName: "",
@@ -179,7 +182,7 @@ export default {
         });
 
         const res = response.data;
-        const msg = response.flash;
+        const msg = res.flash;
 
         // If there is an error, then display the error message.
         if (res.error) {
@@ -192,9 +195,10 @@ export default {
         // window.location.reload();
 
         // Update the user's scope that is displayed in the "Users" table.
+        // The array.find() method returns the matching element/object.
         let userObj = this.usersList.find((user) => {
           // Return the user object whose userId equals this.selectedUser.userId (which is the
-          // "userId" variable at the beginning of this method).
+          // "userId" variable that is defined at the beginning of this method).
           return user.userId === userId;
         })
         // If userObj exists, then update that user's scope.
@@ -203,6 +207,8 @@ export default {
         }
 
         this.closeUserModal();
+
+        this.flashAction({ flashType: "success", flashMsg: msg });
       }
     },
   }

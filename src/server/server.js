@@ -85,7 +85,10 @@ server.ext({
         // console.log(`BOOM FORMATTED ERROR (onPreResponse): \n [ERROR]: ${error} \n [FLASH]: ${flash}`);
         return { error, flash };
       }
-
+      // If there are no errors, then use the success flash message that was set in the endpoint.
+      else {
+        flash = request.response.source.flash;
+      }
       return h.continue;
     }
     catch(e) {
