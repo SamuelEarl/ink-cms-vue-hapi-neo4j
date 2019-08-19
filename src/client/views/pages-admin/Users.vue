@@ -53,16 +53,14 @@
             </tbody>
           </table>
           <br>
-          <div>
-            <div class="w3-left">
-              <label for="user">
-                <input class="w3-check" type="checkbox" id="user" value="user" v-model="modeledUserScope"> User
-              </label>
-              <br>
-              <label for="admin">
-                <input class="w3-check" type="checkbox" id="admin" value="admin" v-model="modeledUserScope"> Admin
-              </label>
-            </div>
+          <div id="checkbox-container">
+            <label for="user">
+              <input class="w3-check" type="checkbox" id="user" value="user" v-model="modeledUserScope"> User
+            </label>
+            <br>
+            <label for="admin">
+              <input class="w3-check" type="checkbox" id="admin" value="admin" v-model="modeledUserScope"> Admin
+            </label>
           </div>
         </div>
         <footer class="user-modal-footer">
@@ -244,6 +242,10 @@ export default {
 
     .user-modal-body {
       padding: 0 40px 40px 40px;
+
+      label, input[type="checkbox"] {
+        cursor: pointer;
+      }
     }
 
     .user-modal-footer {

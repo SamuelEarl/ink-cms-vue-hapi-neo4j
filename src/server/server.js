@@ -26,6 +26,7 @@ const server = new Hapi.Server({
 });
 
 // I need to review the code in this "onPreResponse" hook and refactor it, if necessary.
+// I need to find out what I'm doing when I return { error, flash } and then document that here. Am I updating a property on the request.resonse object? What does the response look like that is being sent to the browser? Is the last else clause in the try block necessary (it is currently commented out)?
 server.ext({
   type: "onPreResponse",
   method: function(request, h) {
@@ -34,13 +35,13 @@ server.ext({
     let flash;
 
     try {
-      // console.log("REQUEST.RESPONSE:", request.response);
+      console.log("REQUEST.RESPONSE:", request.response);
       // console.log("REQUEST.RESPONSE.SOURCE:", request.response.source);
 
       // If a user is unauthenticated and they gain access to a route that requires authentication,
       // then there will be no "request.response.source" property. However, there will be a
-      // "request.response.isBoom" property. This conditional check will check for
-      // "request.response.isBoom" and set the necessary the error and flash values accordingly.
+      // "request.response.isBoom" property. The following conditional check will check for
+      // "request.response.isBoom" and set the necessary error and flash values accordingly.
       if (request.response.isBoom) {
         error = request.response.output.payload.error;
         message = request.response.output.payload.message;
@@ -85,10 +86,11 @@ server.ext({
         // console.log(`BOOM FORMATTED ERROR (onPreResponse): \n [ERROR]: ${error} \n [FLASH]: ${flash}`);
         return { error, flash };
       }
-      // If there are no errors, then use the success flash message that was set in the endpoint.
-      else {
-        flash = request.response.source.flash;
-      }
+      // // If there are no errors, then use the success flash message that was set in the endpoint.
+      // else {
+      //   flash = request.response.source.flash;
+      // }
+      console.log("FLASH:", flash);
       return h.continue;
     }
     catch(e) {
