@@ -25,72 +25,85 @@ const server = new Hapi.Server({
   port: process.env.PORT || 4000
 });
 
-// I need to review the code in this "onPreResponse" hook and refactor it, if necessary.
-// I need to find out what I'm doing when I return { error, flash } and then document that here. Am I updating a property on the request.resonse object? What does the response look like that is being sent to the browser? Is the last else clause in the try block necessary (it is currently commented out)?
+
+// The return values from your endpoint will be passed to the "onPreResponse" hook. This gives you a chance to format the error object or flash message before they are returned to the browser. If your endpoint is returning other data in addition to the error and flash values, you probably won't want to customize those data, so you can leave them alone.
+// Make sure to return the error and a flash values, which will be used to populate the FlashMessages component in the browser. If you do not return these values, then no flash message will be shown to the user. When necessary, you should always provide user feedback to improve the user experience.
 server.ext({
   type: "onPreResponse",
   method: function(request, h) {
-    let error;
+
+// I need to review the code in this "onPreResponse" hook and refactor it, if necessary.
+// I need to find out what I'm doing when I return { error, flash } and then document that here. Am I updating a property on the request.resonse object? What does the response look like that is being sent to the browser? Is the last else clause in the try block necessary (it is currently commented out)?
+
+    const res = request.response;
+    let error = res.source.error;
     let message;
-    let flash;
+    let flash = res.source.flash;
 
     try {
-      console.log("REQUEST.RESPONSE:", request.response);
-      // console.log("REQUEST.RESPONSE.SOURCE:", request.response.source);
+      // console.log("res.isBoom:", res.isBoom);
+      // console.log("REQUEST.RESPONSE:", res);
+      console.log("REQUEST.RESPONSE.SOURCE:", res.source);
 
       // If a user is unauthenticated and they gain access to a route that requires authentication,
-      // then there will be no "request.response.source" property. However, there will be a
-      // "request.response.isBoom" property. The following conditional check will check for
-      // "request.response.isBoom" and set the necessary error and flash values accordingly.
-      if (request.response.isBoom) {
-        error = request.response.output.payload.error;
-        message = request.response.output.payload.message;
+      // then there will be no "res.source" property. However, there will be a
+      // "res.isBoom" property. The following conditional check will check for
+      // "res.isBoom" and set the necessary error and flash values accordingly.
+      if (res.isBoom) {
+        error = res.output.payload.error;
+        message = res.output.payload.message;
         flash = `${error}: ${message}`;
+        // Make sure to return the error and a flash message.
         return { error, flash };
       }
 
-      // All errors should be set to a Boom error object before a response is returned to the client.
-      // If there is an error, then the "error" property will be set to the HTTP status message
-      // (e.g., "Bad Request", "Internal Server Error") and the "flash" property will be set according
-      // to the explanations below.
-      if (request.response.source && request.response.source.error && request.response.source.error.isBoom) {
-        // HTTP status message
-        error = request.response.source.error.output.payload.error;
-        // If the user defined a custom error message, then "message" will be that custom error
-        // message. Otherwise, "message" will be the same as the HTTP status message.
-        message = request.response.source.error.message;
+      // If there is an error in an endpoint, then it should be set to a Boom error object before
+      // the response is returned to the client. If there is an error, then the "error" property
+      // will be set to the HTTP status message and the "flash" property will be set according to
+      // the explanations below.
+      if (res.source && res.source.error && res.source.error.isBoom) {
+        // error = HTTP status message (e.g., "Bad Request", "Internal Server Error")
+        error = res.source.error.output.payload.error;
+        // If a custom error message was defined in the endpoint, then "message" will be that custom
+        // error message. Otherwise, "message" will be the same as the HTTP status message above.
+        message = res.source.error.message;
 
-        // If the flash message is null, then set it to an appropriate message.
-        if (!request.response.source.flash) {
-          // In the catch block, if the Boom error was set like this "error = new Boom(e)", then
-          // the HTTP status message and the error message that is derived from `error.message`
-          // (e.g., "An internal server error occurred") will be the same. So set the flash message
-          // to be `error.message`.
+        // In the catch block of your endpoints, if the Boom error was set like this
+        // "error = new Boom(e)", then the "flash" variable will be null. If the flash variable is
+        // null, then set "flash" to be a helpful error message.
+        if (!res.source.flash) {
+          // In the catch block of your endpoints, if the Boom error was set like this
+          // "error = new Boom(e)", then the "error" and "message" variables (above) will be the
+          // same (e.g., "An internal server error occurred"). In this case, set "flash" to be a
+          // helpful error message.
           if (error === message) {
-            flash = request.response.source.error.output.payload.message;
+            flash = res.source.error.output.payload.message;
           }
           // Otherwise, in the catch block, if a custom error message was used when creating the
-          // Boom error, like this: "new Boom('Custom error message')", then display the HTTP status
-          // message along with the custom error message.
+          // Boom error, like this: "new Boom('Custom error message')", then set "flash" to be the
+          // HTTP status message along with the custom error message.
           else {
             flash = `${error}: ${message}`;
           }
         }
-        // Otherwise use the flash message that was set in the endpoint.
-        // This scenario would exist when an error is thrown and a flash message is passed to the
-        // error object (e.g., "A page with this slug already exists. Please choose a different slug.");
+        // If the "flash" variable is not null, then use the flash message that was set in the
+        // endpoint. This scenario would exist when an error is thrown in the try block and a flash
+        // message is passed to the error object, for example:
+        // flash = "A page with this slug already exists. Please choose a different slug.";
+        // throw new Error(flash);
         else {
-          flash = request.response.source.flash;
+          flash = res.source.flash;
         }
 
-        // console.log(`BOOM FORMATTED ERROR (onPreResponse): \n [ERROR]: ${error} \n [FLASH]: ${flash}`);
+        // Make sure to return the error and a flash message.
         return { error, flash };
       }
       // // If there are no errors, then use the success flash message that was set in the endpoint.
       // else {
-      //   flash = request.response.source.flash;
+      //   flash = res.source.flash;
       // }
-      console.log("FLASH:", flash);
+
+      console.log("onPreResponse FLASH:", flash);
       return h.continue;
     }
     catch(e) {
@@ -184,13 +197,13 @@ const init = async () => {
         plugin: require("./plugins/database"),
         options: dbOptions
       },
-      // "plugins/auth" is where the "@hapi/cookie" strategy is configured, so "@hapi/cookie" needs
-      // to be registered before "plugins/auth".
-      { plugin: require("@hapi/cookie") },
+      // "plugins/strategies" is where the "@hapi/cookie" strategy is configured, so "@hapi/cookie"
+      // needs to be registered before "plugins/strategies".
       // If you configure a default auth strategy, then it needs to be registered before any routes
       // are registered: https://hapi.dev/tutorials/auth/?lang=en_US#default
-      { plugin: require("./plugins/auth") },
-      // { plugin: require("./plugins/users") },
+      { plugin: require("@hapi/cookie") },
+      { plugin: require("./plugins/strategies") },
+      { plugin: require("./plugins/accounts") },
       { plugin: require("./plugins/pages-admin") },
       { plugin: require("./plugins/pages-public") },
       { plugin: require("./plugins/pages-both") },
@@ -198,7 +211,6 @@ const init = async () => {
       { plugin: require("@hapi/inert") },
       // Route handlers to serve static files (HTML, CSS, JS, images)
       { plugin: require("./plugins/static-routes") },
-      // { plugin: require("./plugins/documentation") },
     ]);
 
     // Start the server and log the following message

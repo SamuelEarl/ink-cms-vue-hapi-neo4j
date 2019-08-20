@@ -1,7 +1,7 @@
 {
-  "name": "auth",
+  "name": "strategies",
   "version": "1.0.0",
-  "description": "Authentication and Authorization plugin",
+  "description": "This plugin configures authentication strategies for the app",
   "main": "index.js",
   "scripts": {
     "test": ""

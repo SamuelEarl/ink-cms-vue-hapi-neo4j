@@ -1,0 +1,11 @@
+{
+  "name": "accounts",
+  "version": "1.0.0",
+  "description": "The accounts plugin handles registrations, logins, logouts, and user permissions management",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "author": "",
+  "license": ""
+}
