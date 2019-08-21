@@ -26,88 +26,108 @@ const server = new Hapi.Server({
 });
 
 
-// The return values from your endpoint will be passed to the "onPreResponse" hook. This gives you a chance to format the error object or flash message before they are returned to the browser. If your endpoint is returning other data in addition to the error and flash values, you probably won't want to customize those data, so you can leave them alone.
-// Make sure to return the error and a flash values, which will be used to populate the FlashMessages component in the browser. If you do not return these values, then no flash message will be shown to the user. When necessary, you should always provide user feedback to improve the user experience.
+/**
+ * Comments for the onPreResponse method:
+ *
+ * The return values from your endpoints will be passed to the "onPreResponse" method. This gives
+ * you an opportunity to format any data before they are returned to the browser. I usually only
+ * format the flash message and leave everything else alone.
+ *
+ * If you return a single value in your endpoint, then that value can be found on the
+ * "request.response" object inside the "onPreResponse" method. If you return an object of values
+ * (e.g., return { error, flash, user }), then those values are found on the
+ * "request.response.source" object inside the "onPreResponse" method.
+ *
+ * To format the flash message before it is returned to the browser, you will simply do something
+ * like this:
+ * request.reponse.source.flash = "Custom flash message";
+ */
 server.ext({
   type: "onPreResponse",
   method: function(request, h) {
-
-// I need to review the code in this "onPreResponse" hook and refactor it, if necessary.
-// I need to find out what I'm doing when I return { error, flash } and then document that here. Am I updating a property on the request.resonse object? What does the response look like that is being sent to the browser? Is the last else clause in the try block necessary (it is currently commented out)?
-
     const res = request.response;
-    let error = res.source.error;
-    let message;
-    let flash = res.source.flash;
+    let httpStatusMsg;
+    let errorMsg;
 
     try {
-      // console.log("res.isBoom:", res.isBoom);
       // console.log("REQUEST.RESPONSE:", res);
-      console.log("REQUEST.RESPONSE.SOURCE:", res.source);
+      // console.log("REQUEST.RESPONSE.SOURCE:", res.source);
 
-      // If a user is unauthenticated and they gain access to a route that requires authentication,
-      // then there will be no "res.source" property. However, there will be a
-      // "res.isBoom" property. The following conditional check will check for
-      // "res.isBoom" and set the necessary error and flash values accordingly.
+      /**
+       * If an error occurs before the route handler executes (e.g., a user is not logged in and
+       * they gain access to a route that requires authentication or if the user does not have the
+       * proper permissions to perform a given task), then there will be a "res.isBoom" property
+       * instead of a "res.source.error.isBoom" property.
+       */
+      // Check if the "res.isBoom" property exists and set the "error" and "flash" properties.
       if (res.isBoom) {
-        error = res.output.payload.error;
-        message = res.output.payload.message;
-        flash = `${error}: ${message}`;
-        // Make sure to return the error and a flash message.
+        const statusCode = res.output.payload.statusCode;
+        httpStatusMsg = res.output.payload.error;
+        errorMsg = res.output.payload.message;
+        const error = res.isBoom;
+        const flash = `Error: ${statusCode} ${httpStatusMsg}: ${errorMsg}`;
+        // Skip the rest of the "onPreResponse" method and return these "error" and "flash"
+        // properties to the browser.
         return { error, flash };
       }
 
-      // If there is an error in an endpoint, then it should be set to a Boom error object before
-      // the response is returned to the client. If there is an error, then the "error" property
-      // will be set to the HTTP status message and the "flash" property will be set according to
-      // the explanations below.
+      /**
+       * If an error occurs in the route handler (e.g., an error was thrown because
+       * "A page with this slug already exists" or there was a database error), then there will be a
+       * "res.source.error.isBoom" property instead of a "res.isBoom" property.
+       * The following conditions will format the flash message depending on the scenario.
+       */
+      // Check if the "res.source.error.isBoom" property exists.
       if (res.source && res.source.error && res.source.error.isBoom) {
-        // error = HTTP status message (e.g., "Bad Request", "Internal Server Error")
-        error = res.source.error.output.payload.error;
-        // If a custom error message was defined in the endpoint, then "message" will be that custom
-        // error message. Otherwise, "message" will be the same as the HTTP status message above.
-        message = res.source.error.message;
+        // httpStatusMsg = HTTP status message (e.g., "Bad Request", "Internal Server Error")
+        httpStatusMsg = res.source.error.output.payload.error;
+        // If a custom error message was defined in the route, then "errorMsg" will be that custom
+        // error message. Otherwise, "errorMsg" will be the same as the HTTP status message above.
+        errorMsg = res.source.error.message;
 
-        // In the catch block of your endpoints, if the Boom error was set like this
-        // "error = new Boom(e)", then the "flash" variable will be null. If the flash variable is
-        // null, then set "flash" to be a helpful error message.
+        /**
+         * If an error is thrown in a route before the "flash" property can be set in that route,
+         * then the "flash" property will be null.
+         */
+        // Check if the "res.source.flash" property exists. If it doesn't (i.e., if the flash
+        // property is null), then set "res.source.flash" to be a helpful error message.
         if (!res.source.flash) {
-          // In the catch block of your endpoints, if the Boom error was set like this
-          // "error = new Boom(e)", then the "error" and "message" variables (above) will be the
-          // same (e.g., "An internal server error occurred"). In this case, set "flash" to be a
-          // helpful error message.
-          if (error === message) {
-            flash = res.source.error.output.payload.message;
+          // If errors are either thrown or created with no custom error messages
+          // (e.g., throw new Error(), new Boom(e)), then the "httpStatusMsg" and "errorMsg"
+          // variables (above) should be the same (e.g., "An internal server error occurred").
+          // In those cases, set "res.source.flash" to be the error message from the
+          // "res.source.error.output.payload.message" property.
+          if (httpStatusMsg === errorMsg) {
+            res.source.flash = res.source.error.output.payload.message;
           }
-          // Otherwise, in the catch block, if a custom error message was used when creating the
-          // Boom error, like this: "new Boom('Custom error message')", then set "flash" to be the
-          // HTTP status message along with the custom error message.
+          // If errors are either thrown or created with custom error messages
+          // (e.g., throw new Error("Custom error message"), new Boom("Custom error message"), then
+          // set "res.source.flash" to be a combination of the HTTP status message
+          // (e.g. "Bad Request") and the custom error message.
           else {
-            flash = `${error}: ${message}`;
+            res.source.flash = `${httpStatusMsg}: ${errorMsg}`;
           }
         }
-        // If the "flash" variable is not null, then use the flash message that was set in the
-        // endpoint. This scenario would exist when an error is thrown in the try block and a flash
-        // message is passed to the error object, for example:
-        // flash = "A page with this slug already exists. Please choose a different slug.";
-        // throw new Error(flash);
-        else {
-          flash = res.source.flash;
-        }
 
-        // Make sure to return the error and a flash message.
-        return { error, flash };
+        /**
+         * NOTE:
+         * If an error occurs in the route handler and if the "flash" property was also set in the
+         * route handler (either in the try block or in the catch block), then the "res.source.flash"
+         * property will exist inside this "onPreResponse" method. In that case the flash message
+         * will be passed back to the browser as it is and you don't need to worry about formatting it.
+         *
+         * One example of when that scenario would exist is when an error is thrown in the try block
+         * and a flash message is passed to the error object, like this:
+         *
+         * flash = "A page with this slug already exists. Please choose a different slug.";
+         * throw new Error(flash);
+         */
       }
-      // // If there are no errors, then use the success flash message that was set in the endpoint.
-      // else {
-      //   flash = res.source.flash;
-      // }
 
-      console.log("onPreResponse FLASH:", flash);
       return h.continue;
     }
     catch(e) {
-      console.error("onPreResponse Request Lifecycle Hook:", e);
+      console.error("Error in onPreResponse Request Lifecycle Method:", e);
     }
   }
 });

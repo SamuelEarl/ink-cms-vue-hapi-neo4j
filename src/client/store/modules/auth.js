@@ -103,7 +103,7 @@ const actions = {
         dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
       }
       else {
-        throw new Error("Unable to register user.");
+        throw new Error("Error while attempting to register user.");
       }
     }
     catch(e) {

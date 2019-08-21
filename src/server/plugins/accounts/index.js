@@ -113,7 +113,9 @@ exports.plugin = {
           flash = `"${newUserFirstName} ${newUserLastName}" has successfully registered!`;
         }
         catch(e) {
-          const msg = "Error while attempting to create a new user.";
+          // Make sure to provide a default error message for this route in the false condition of
+          // the following ternary operator.
+          const msg = e.message ? e.message : "Error while attempting to create a new user.";
           const errorRes = server.methods.catch(e, msg, request.path);
           error = errorRes;
         }
@@ -209,7 +211,7 @@ exports.plugin = {
           flash = `"${userFirstName} ${userLastName}" has successfully logged in!`;
         }
         catch(e) {
-          const msg = "Login error. Please try again.";
+          const msg = e.message ? e.message : "Login error. Please try again.";
           const errorRes = server.methods.catch(e, msg, request.path);
           error = errorRes;
         }
@@ -246,7 +248,7 @@ exports.plugin = {
           flash = "You have successfully logged out.";
         }
         catch(e) {
-          const msg = "Logout error. Please try again.";
+          const msg = e.message ? e.message : "Logout error. Please try again.";
           const errorRes = server.methods.catch(e, msg, request.path);
           error = errorRes;
         }

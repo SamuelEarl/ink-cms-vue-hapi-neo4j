@@ -18,19 +18,19 @@ exports.plugin = {
      * Use the "catch" server method in your catch blocks, like this:
      *
      * catch(e) {
-     *   const msg = "Some error message"; // This is optional
+     *   const msg = e.message ? e.message : "Default error message for the route";
      *   const errorRes = server.methods.catch(e, msg, request.path);
      *   error = errorRes;
      * }
      *
      */
-    const catchMethod = function(e, message, path) {
+    const catchMethod = function(e, msg, path) {
       try {
         let err;
 
         // Set the error object to a Boom error object.
-        if (message) {
-          err = new Boom(message);
+        if (msg) {
+          err = new Boom(msg);
         }
         else {
           err = new Boom(e);
