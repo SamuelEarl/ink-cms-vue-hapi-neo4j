@@ -128,7 +128,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-registration-token/${token}`;
+          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -181,8 +181,8 @@ exports.plugin = {
      * Verify email using a registration token
      */
     server.route({
-      method: "POST",
-      path: "/verify-registration-token",
+      method: "GET",
+      path: "/verify",
       options: {
 
       },
@@ -205,6 +205,10 @@ exports.plugin = {
     });
 
 
+// I will probably need a button for "Resend Verification" on both the LoginRegister and EmailVerified pages that users can click to resend the token.
+// I need to think through a few simple scenarios that will hanlde all of the possible "Resend Verification" situations.
+// If a user has already tried to register, but has not verified their token, and they try to login, then I will send a flash message telling them "Your email address has not been verified. Please check your email account for a verification link." If their token has expired and they try to login, then I will tell them "Your verification link has expired. Please click 'Resend Verification' below."
+// If the user has been sent a verification token and it has not yet expired and the user tries to register again, then I will tell them "A verification link has already been sent to your email account. Please click that link."
     /**
      * Resend verification token
      */
