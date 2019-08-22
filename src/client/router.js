@@ -4,6 +4,7 @@ import store from "./store";
 import Layout from "./views/layouts/Layout.vue";
 import AuthLayout from "./views/layouts/AuthLayout.vue";
 import LoginRegister from "./views/auth/LoginRegister.vue";
+import VerifyEmail from "./views/auth/VerifyEmail.vue";
 import PublicPage from "./views/pages-public/PublicPage.vue";
 import Admin from "./views/pages-admin/Admin.vue";
 import Users from "./views/pages-admin/Users.vue";
@@ -69,6 +70,11 @@ const router = new Router({
           path: "login",
           name: "login",
           component: LoginRegister
+        },
+        {
+          path: "verify-email/:email",
+          name: "verify-email",
+          component: VerifyEmail
         },
       ]
     }

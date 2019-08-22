@@ -54,7 +54,7 @@ const mutations = {
     state.userProfile.scope = [];
 
     // Redirect user to the home route
-    router.push("/");
+    router.push({ name: "home" });
   },
 };
 
@@ -95,8 +95,8 @@ const actions = {
       user.email = res.user.newUserEmail;
       user.scope = res.user.newUserScope;
 
+      // Otherwise call "setUserProfile" with the newly registered user's profile object and display a success message.
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
-        // Otherwise call "setUserProfile" with the newly registered user's profile object and display a success message.
         commit("setUserProfile", user);
         commit("setIsAuthenticated", true);
 

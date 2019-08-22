@@ -113,10 +113,38 @@ export default {
           confirmPassword: this.confirmPassword
         };
 
-        this.registerAction(newUser);
+        // this.registerAction(newUser);
+
+        const method = "POST";
+        const url = "/register";
+        const payload = newUser;
+
+        const response = await Axios({
+          method: method,
+          url: url,
+          data: payload
+        });
+
+        console.log("register RESPONSE:", response.data);
+
+        const res = response.data;
+        const msg = res.flash;
+
+        // If there is an error, then display the error message.
+        if (res.error) {
+          dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
+          return;
+        }
+
+        if (res.redirect) {
+          this.$router.push({ name: "verify-email", params: { email: this.email } });
+        }
+        else {
+          throw new Error("Error while attempting to register user.");
+        }
       }
       catch(e) {
-        console.error("Register Error:", e);
+        console.error("Registration Error:", e);
       }
     },
 

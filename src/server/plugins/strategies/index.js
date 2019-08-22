@@ -45,8 +45,10 @@ exports.plugin = {
           return { valid: false };
         }
 
-        const { firstName, lastName, email, scope } = existingUser.records[0]._fields[0].properties;
-        const userCredentials = { firstName, lastName, email, scope };
+        // If a user does exist with a matching session ID, then create an object representing the
+        // authenticated user and pass that object to the "credentials" property.
+        const { firstName, lastName, email, isVerified, scope } = existingUser.records[0]._fields[0].properties;
+        const userCredentials = { firstName, lastName, email, isVerified, scope };
 
         return { valid: true, credentials: userCredentials };
       }

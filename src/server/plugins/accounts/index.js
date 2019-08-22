@@ -7,6 +7,8 @@ const uuidv4 = require("uuid/v4");
 const Boom = require("@hapi/boom");
 const Joi = require("@hapi/joi");
 const Bcrypt = require("bcrypt");
+const Crypto = require("crypto");
+const Nodemailer = require("nodemailer");
 
 exports.plugin = {
   pkg: require("./package.json"),
@@ -38,7 +40,8 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let user = {};
+        let redirect = false;
+        // let user = {};
 
         try {
           const userUuid = uuidv4();
@@ -58,6 +61,8 @@ exports.plugin = {
             }
           );
 
+          session.close();
+
           // If a user already exists with this email, then set "flash" to an error message and
           // throw an error.
           if (existingUser.records.length > 0) {
@@ -75,42 +80,87 @@ exports.plugin = {
             scope = [ ...scope, "admin" ];
           }
 
-          // Otherwise create a new user in Neo4j and set "flash" to a success message.
-          const newUser = await session.run(
+          const token = Crypto.randomBytes(16).toString("hex");
+          const timestamp = Date.now();
+
+          // Create a new user, a token node, and the relationship between the two.
+          await session.run(
             `CREATE (u:User {
               userId: { userIdParam },
               sessionId: { sessionIdParam },
-              email: { emailParam },
               firstName: { firstNameParam },
               lastName: { lastNameParam },
+              email: { emailParam },
               password: { passwordParam },
+              isVerified: { isVerifiedParam },
               scope: { scopeParam }
             })
-            RETURN u`, {
+            CREATE (t:Token {
+              token: { tokenParam },
+              createdAt: { timestampParam }
+            })
+            MERGE (u)-[r:USER_EMAIL_VERIFICATION_TOKEN { createdAt: { timestampParam } }]->(t)
+            RETURN u,t,r`, {
               userIdParam: userId,
               sessionIdParam: sessionId,
-              emailParam: email,
               firstNameParam: firstName,
               lastNameParam: lastName,
+              emailParam: email,
               passwordParam: hash,
-              scopeParam: scope
+              isVerifiedParam: false,
+              scopeParam: scope,
+              tokenParam: token,
+              timestampParam: timestamp
             }
           );
 
           session.close();
 
-          const newUserSessionId = newUser.records[0]._fields[0].properties.sessionId;
-          const newUserFirstName = newUser.records[0]._fields[0].properties.firstName;
-          const newUserLastName = newUser.records[0]._fields[0].properties.lastName;
-          const newUserEmail = newUser.records[0]._fields[0].properties.email;
-          const newUserScope = newUser.records[0]._fields[0].properties.scope;
-          user = { newUserFirstName, newUserLastName, newUserEmail, newUserScope };
+          // const userProps = registeredUser.records[0]._fields[0].properties;
 
+          // Send the email
+          const transporter = Nodemailer.createTransport({
+            service: "Sendgrid", auth: {
+              user: process.env.SENDGRID_USERNAME,
+              pass: process.env.SENDGRID_PASSWORD
+            }
+          });
+
+          const host = request.headers.host;
+
+          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-registration-token/${token}`;
+
+          const mailOptions = {
+            from: "no-reply@yourwebapplication.com",
+            to: email,
+            subject: "Verify your account",
+            // If you place the text in between string literals (``), then the text in the email
+            // message might display in monospaced font.
+            text: "Hello " + firstName + ",\n\nPlease verify your account by clicking the link:\n\n" + confUrl + ".\n\n"
+            // html: `<p>Hello ${firstName},</p> <p>Please verify your account by clicking the link:</p> <p>${confUrl}.</p>`
+          };
+
+          await transporter.sendMail(mailOptions);
+
+          // const newUserSessionId = newUser.records[0]._fields[0].properties.sessionId;
+          // const newUserFirstName = newUser.records[0]._fields[0].properties.firstName;
+          // const newUserLastName = newUser.records[0]._fields[0].properties.lastName;
+          // const newUserEmail = newUser.records[0]._fields[0].properties.email;
+          // const newUserScope = newUser.records[0]._fields[0].properties.scope;
+          // user = { newUserFirstName, newUserLastName, newUserEmail, newUserScope };
+
+          // Once the user has successfully registered, you can set the session cookie so that the
+          // user is automatically logged in (as opposed to requiring the user to login separately
+          // after they have registered).
           // "id" is the "userSession.id" that is used in the "cookie" strategy.
           // I am setting "id" to a new "sessionId" that is created each time a user logs in.
-          request.cookieAuth.set({ id: newUserSessionId });
+          // request.cookieAuth.set({ id: newUserSessionId });
 
-          flash = `"${newUserFirstName} ${newUserLastName}" has successfully registered!`;
+
+          // Set "redirect" to true.
+          // I will probably only send a "redirect" property and if that property is true, then the user will be redirected to a page that instructs them to verify their email address.
+          redirect = true;
+          // flash = `"${newUserFirstName} ${newUserLastName}" has successfully registered!`;
         }
         catch(e) {
           // Make sure to provide a default error message for this route in the false condition of
@@ -120,7 +170,64 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash, user };
+          // return { error, flash, user };
+          return { error, flash, redirect };
+        }
+      }
+    });
+
+
+    /**
+     * Verify email using a registration token
+     */
+    server.route({
+      method: "POST",
+      path: "/verify-registration-token",
+      options: {
+
+      },
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+
+        try {
+          //
+        }
+        catch(e) {
+          const msg = e.message ? e.message : "Error while attempting to verify email.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash };
+        }
+      }
+    });
+
+
+    /**
+     * Resend verification token
+     */
+    server.route({
+      method: "POST",
+      path: "/resend-verification-token",
+      options: {
+
+      },
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+
+        try {
+          //
+        }
+        catch(e) {
+          const msg = e.message ? e.message : "Error while attempting to resend verification email.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash };
         }
       }
     });
@@ -171,6 +278,13 @@ exports.plugin = {
           // the database, then set "flash" to an error message and throw an error.
           if (existingUser.records.length === 0 || !(await Bcrypt.compare(password, existingUser.records[0]._fields[0].properties.password))) {
             flash = "The email or password that you provided does not match our records. Do you need to register for an account?";
+            throw new Error(flash);
+          }
+
+          // If the user has not verified their email address, then set "flash" to an error message
+          // and throw an error.
+          if (!existingUser.records[0]._fields[0].properties.isVerified) {
+            flash = "You have not verified your email address.";
             throw new Error(flash);
           }
 
