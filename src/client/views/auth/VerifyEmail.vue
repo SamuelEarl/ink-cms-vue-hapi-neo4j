@@ -18,6 +18,7 @@ export default {
 @media $s-up {
   #verify-email {
     text-align: center;
+    color: white;
   }
 }
 

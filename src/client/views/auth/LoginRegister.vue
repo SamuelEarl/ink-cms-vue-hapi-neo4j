@@ -1,9 +1,9 @@
 <template>
-  <div id="page-container">
-    <div id="form-container">
+  <div id="login-register">
+    <div class="form-container">
 
-      <div id="top-container">
-        <header>
+      <div class="form-top">
+        <header class="form-header">
           <div class="w3-bar">
             <button class="tablink w3-bar-item w3-button" @click="openTab('login', $event)">
               Login
@@ -14,7 +14,7 @@
           </div>
         </header>
 
-        <section id="body">
+        <section class="form-body">
           <div id="login" class="tab-content">
             <form @submit.prevent="login">
               <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
@@ -35,14 +35,14 @@
             </form>
           </div>
 
-          <div id="tip">
+          <div class="tip">
             <p><span class="bold">Security Tip:</span><br>Use a password manager like<br><a href="https://www.lastpass.com/" target="_blank">LastPass</a> or <a href="https://1password.com/" target="_blank">1Password</a>.</p>
           </div>
 
         </section>
       </div>
 
-      <footer>
+      <footer class="form-bottom form-footer">
         <button @click="goBack">Cancel</button>
         <button @click="forgotPassword">Forgot Password?</button>
       </footer>
@@ -175,28 +175,20 @@ export default {
 
 <style scoped lang="stylus">
 @media $s-up {
-  #page-container {
-    width: 100vw;
-    height: 100vh;
-    padding: 10px;
-    background-image: radial-gradient(
-      ellipse at top left,
-      lighten($ink-blue, 15%),
-      $ink-blue
-    );
+  #login-register {
 
-    #form-container {
+    .form-container {
       display: flex;
       flex-direction: column;
       height: 100%;
       background-color: white;
 
-      #top-container {
-        // Create sticky footer
+      .form-top {
+        // You can make the form-bottom element stay at the bottom by creating a sticky footer:
         // https://css-tricks.com/couple-takes-sticky-footer/#article-header-id-3
         flex: 1 0 auto;
 
-        header div {
+        .form-header div {
           display: flex;
           justify-content: space-around;
           padding: 20px 30px 10px 30px;
@@ -215,7 +207,7 @@ export default {
           }
         }
 
-        #body {
+        .form-body {
           padding: 20px 30px;
 
           form {
@@ -235,7 +227,7 @@ export default {
             }
           }
 
-          #tip {
+          .tip {
             margin: 30px 0;
             text-align: center;
 
@@ -246,7 +238,7 @@ export default {
         }
       }
 
-      footer {
+      .form-bottom {
         display: flex;
         justify-content: space-between;
         border-top: 1px solid $medium-gray;
@@ -259,18 +251,18 @@ export default {
 
 
 @media $m-up {
-  #form-container {
+  .form-container {
     margin-top: 40px;
     margin-right: auto;
     margin-left: auto;
     width: 425px;
     height: auto !important;
 
-    header div {
+    .form-header div {
       padding: 60px 60px 10px 60px !important;
     }
 
-    #body {
+    .form-body {
       padding: 20px 60px !important;
     }
   }

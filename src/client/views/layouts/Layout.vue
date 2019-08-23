@@ -2,9 +2,8 @@
   <div id="layout">
     <div id="wrapper">
 
-      <div id="top-content">
+      <div id="content-top">
         <Header />
-
         <FlashMessages />
 
         <div class="container">
@@ -13,7 +12,9 @@
         </div>
       </div>
 
-      <Footer />
+      <div id="content-bottom">
+        <Footer />
+      </div>
 
     </div>
   </div>
@@ -36,7 +37,7 @@ export default {
 
 <style scoped lang="stylus">
 @media $s-up {
-  // Create sticky footer
+  // You can make the footer stay at the bottom by creating a sticky footer:
   // https://css-tricks.com/couple-takes-sticky-footer/#article-header-id-3
   #layout {
     height: 100vh;
@@ -46,8 +47,12 @@ export default {
       display: flex;
       flex-direction: column;
 
-      #top-content {
+      #content-top {
         flex: 1 0 auto;
+      }
+
+      #content-bottom {
+        flex-shrink: 0;
       }
     }
   }
