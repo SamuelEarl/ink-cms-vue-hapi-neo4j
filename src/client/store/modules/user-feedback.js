@@ -16,6 +16,8 @@ const state = {
     //   flashMsg: null
     // }
   ],
+
+  showSpinner: false
 };
 
 
@@ -23,6 +25,10 @@ const getters = {
   getFlashMessages: (state) => {
     return state.flashMessages;
   },
+
+  getShowSpinner: (state) => {
+    return state.showSpinner;
+  }
 };
 
 
@@ -38,6 +44,10 @@ const mutations = {
   removeFlashMsg: (state, index) => {
     state.flashMessages.splice(index, 1);
   },
+
+  setShowSpinner: (state, status) => {
+    state.showSpinner = status;
+  }
 };
 
 
@@ -90,6 +100,11 @@ const actions = {
   removeFlashMsgAction: ({ commit }, index) => {
     commit("removeFlashMsg", index);
   },
+
+  showSpinnerAction: ({ commit }, status) => {
+    console.log("showSpinner Status:", status);
+    commit("setShowSpinner", status);
+  }
 };
 
 

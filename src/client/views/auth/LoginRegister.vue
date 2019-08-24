@@ -1,5 +1,6 @@
 <template>
   <div id="login-register">
+    <Spinner style="top:170px" />
     <div class="form-container">
 
       <div class="form-top">
@@ -18,19 +19,71 @@
           <div id="login" class="tab-content">
             <form @submit.prevent="login">
               <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-              <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+              <div class="validation-messages">
+                <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
+                <div v-if="!$v.email.email && $v.email.$dirty" class="error">Must be a valid email address</div>
+                <br v-if="$v.email.$invalid && $v.email.$dirty">
+              </div>
 
-              <button class="btn-primary">Login</button>
+              <br>
+
+              <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+              <div class="validation-messages">
+                <div v-if="!$v.password.required && $v.password.$dirty" class="error">Password is required</div>
+                <div v-if="!$v.password.minLength && $v.password.$dirty" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
+                <br v-if="$v.password.$invalid && $v.password.$dirty">
+              </div>
+
+              <br>
+
+              <button @click="$v.$touch()" class="btn-primary">Login</button>
             </form>
           </div>
 
           <div id="register" class="tab-content">
             <form @submit.prevent="register">
               <input v-model="firstName" class="w3-input w3-border" type="text" placeholder="First Name">
+              <div class="validation-messages">
+                <div v-if="!$v.firstName.required" class="error">First Name is required</div>
+                <br v-if="$v.firstName.$invalid">
+              </div>
+
+              <br>
+
               <input v-model="lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
+              <div class="validation-messages">
+                <div v-if="!$v.lastName.required" class="error">Last Name is required</div>
+                <br v-if="$v.lastName.$invalid">
+              </div>
+
+              <br>
+
               <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+              <div class="validation-messages">
+                <div v-if="!$v.email.required" class="error">Email is required</div>
+                <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
+                <br v-if="$v.email.$invalid">
+              </div>
+
+              <br>
+
               <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+              <div class="validation-messages">
+                <div v-if="!$v.password.required" class="error">Password is required</div>
+                <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
+                <br v-if="$v.password.$invalid">
+              </div>
+
+              <br>
+
               <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
+              <div class="validation-messages">
+                <div v-if="!$v.confirmPassword.sameAsPassword" class="error">Passwords must match</div>
+                <br v-if="$v.confirmPassword.$invalid">
+              </div>
+
+              <br>
+
               <button class="btn-primary">Register</button>
             </form>
           </div>
@@ -54,10 +107,14 @@
 <script>
 import * as Axios from "axios";
 import { mapActions } from "vuex";
+import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
+import Spinner from "@/client/components/Spinner.vue";
 
 export default {
   name: "LoginRegister",
-  components: {},
+  components: {
+    Spinner
+  },
 
   data() {
     return {
@@ -65,7 +122,30 @@ export default {
       lastName: "",
       email: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+      submitStatus: null
+    }
+  },
+
+  validations: {
+    firstName: {
+      required
+    },
+    lastName: {
+      required
+    },
+    email: {
+      required,
+      email
+    },
+    password: {
+      required,
+      minLength: minLength(6)
+    },
+    confirmPassword: {
+      // Do not use the "required" validator because it is not necessary and it will get displayed
+      // at the same time as the "sameAs" validator and the error messages will overlap.
+      sameAsPassword: sameAs("password")
     }
   },
 
@@ -79,8 +159,9 @@ export default {
   methods: {
     ...mapActions({
       flashAction: "userFeedback/flashAction",
-      registerAction: "auth/registerAction",
+      // registerAction: "auth/registerAction",
       loginAction: "auth/loginAction",
+      showSpinnerAction: "userFeedback/showSpinnerAction"
     }),
 
     openTab(tabName, event) {
@@ -118,12 +199,20 @@ export default {
         const method = "POST";
         const url = "/register";
         const payload = newUser;
+        let response;
 
-        const response = await Axios({
-          method: method,
-          url: url,
-          data: payload
-        });
+        if (this.$v.$invalid) {
+          this.submitStatus = "error";
+        }
+        else {
+          this.showSpinnerAction(true);
+
+          response = await Axios({
+            method: method,
+            url: url,
+            data: payload
+          });
+        }
 
         console.log("register RESPONSE:", response.data);
 
@@ -137,7 +226,8 @@ export default {
         }
 
         if (res.redirect) {
-          this.$router.push({ name: "verify-email", params: { email: this.email } });
+          this.showSpinnerAction(false);
+          this.$router.push({ name: "email-sent", params: { email: this.email } });
         }
         else {
           throw new Error("Error while attempting to register user.");
@@ -212,8 +302,14 @@ export default {
 
           form {
             input {
-              margin-bottom: 20px;
               background-color: #eee;
+            }
+
+            .error {
+              padding: 5px;
+              color: white;
+              background-color: darkred;
+              position: absolute;
             }
 
             button {

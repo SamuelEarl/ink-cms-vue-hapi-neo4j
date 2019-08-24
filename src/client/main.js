@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
+import Vuelidate from "vuelidate";
 import "./registerServiceWorker";
 
 library.add(faBars);
@@ -22,6 +23,8 @@ library.add(faTimesCircle);
 library.add(faSort);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
+
+Vue.use(Vuelidate);
 
 // TinyMCE Editor Configs:
 Vue.prototype.$editorApiKey = "7gka8rihodg40gmphfhqb1tk9tjbswjiu0xcdqvgetdg6057";
