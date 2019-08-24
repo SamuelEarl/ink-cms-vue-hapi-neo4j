@@ -99,7 +99,9 @@ const actions = {
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
         commit("setUserProfile", user);
         commit("setIsAuthenticated", true);
-
+        // Hide the spinner
+        dispatch("userFeedback/showSpinnerAction", false, { root: true });
+        // Show a success message to the user
         dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
       }
       else {

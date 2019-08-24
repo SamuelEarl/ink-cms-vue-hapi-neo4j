@@ -19,68 +19,69 @@
           <div id="login" class="tab-content">
             <form @submit.prevent="login">
               <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
                 <div v-if="!$v.email.email && $v.email.$dirty" class="error">Must be a valid email address</div>
                 <br v-if="$v.email.$invalid && $v.email.$dirty">
-              </div>
+              </div> -->
 
               <br>
 
               <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.password.required && $v.password.$dirty" class="error">Password is required</div>
                 <div v-if="!$v.password.minLength && $v.password.$dirty" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
                 <br v-if="$v.password.$invalid && $v.password.$dirty">
-              </div>
+              </div> -->
 
               <br>
 
-              <button @click="$v.$touch()" class="btn-primary">Login</button>
+              <!-- <button @click="$v.$touch()" class="btn-primary">Login</button> -->
+              <button class="btn-primary">Login</button>
             </form>
           </div>
 
           <div id="register" class="tab-content">
             <form @submit.prevent="register">
               <input v-model="firstName" class="w3-input w3-border" type="text" placeholder="First Name">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.firstName.required" class="error">First Name is required</div>
                 <br v-if="$v.firstName.$invalid">
-              </div>
+              </div> -->
 
               <br>
 
               <input v-model="lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.lastName.required" class="error">Last Name is required</div>
                 <br v-if="$v.lastName.$invalid">
-              </div>
+              </div> -->
 
               <br>
 
               <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.email.required" class="error">Email is required</div>
                 <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
                 <br v-if="$v.email.$invalid">
-              </div>
+              </div> -->
 
               <br>
 
               <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.password.required" class="error">Password is required</div>
                 <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
                 <br v-if="$v.password.$invalid">
-              </div>
+              </div> -->
 
               <br>
 
               <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
-              <div class="validation-messages">
+              <!-- <div class="validation-messages">
                 <div v-if="!$v.confirmPassword.sameAsPassword" class="error">Passwords must match</div>
                 <br v-if="$v.confirmPassword.$invalid">
-              </div>
+              </div> -->
 
               <br>
 
@@ -122,32 +123,31 @@ export default {
       lastName: "",
       email: "",
       password: "",
-      confirmPassword: "",
-      submitStatus: null
+      confirmPassword: ""
     }
   },
 
-  validations: {
-    firstName: {
-      required
-    },
-    lastName: {
-      required
-    },
-    email: {
-      required,
-      email
-    },
-    password: {
-      required,
-      minLength: minLength(6)
-    },
-    confirmPassword: {
-      // Do not use the "required" validator because it is not necessary and it will get displayed
-      // at the same time as the "sameAs" validator and the error messages will overlap.
-      sameAsPassword: sameAs("password")
-    }
-  },
+  // validations: {
+  //   firstName: {
+  //     required
+  //   },
+  //   lastName: {
+  //     required
+  //   },
+  //   email: {
+  //     required,
+  //     email
+  //   },
+  //   password: {
+  //     required,
+  //     minLength: minLength(6)
+  //   },
+  //   confirmPassword: {
+  //     // Do not use the "required" validator because it is not necessary and it will get displayed
+  //     // at the same time as the "sameAs" validator and the error messages will overlap.
+  //     sameAsPassword: sameAs("password")
+  //   }
+  // },
 
   mounted() {
     // Click on the first tab in the modal to select it when the modal first pops up
@@ -201,10 +201,8 @@ export default {
         const payload = newUser;
         let response;
 
-        if (this.$v.$invalid) {
-          this.submitStatus = "error";
-        }
-        else {
+        if (true) {
+        // if (!this.$v.$invalid) {
           this.showSpinnerAction(true);
 
           response = await Axios({
@@ -245,7 +243,11 @@ export default {
           password: this.password
         };
 
-        this.loginAction(credentials);
+        if (true) {
+        // if (!this.$v.email.$invalid && !this.$v.password.$invalid) {
+          this.showSpinnerAction(true);
+          this.loginAction(credentials);
+        }
       }
       catch(e) {
         console.error("Login Error:", e);
