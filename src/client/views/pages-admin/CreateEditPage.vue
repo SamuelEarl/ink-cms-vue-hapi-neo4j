@@ -184,7 +184,7 @@ export default {
 <style scoped lang="stylus">
 @media $s-up {
   input {
-    background-color: #eee;
+    background-color: $light-gray;
   }
 }
 </style>

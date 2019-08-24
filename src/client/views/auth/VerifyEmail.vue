@@ -7,7 +7,7 @@
     <div v-if="verifyingEmail">
       <h1>Verifying your email address</h1>
       <br>
-      <LargeSpinner />
+      <SpinnerLarge />
     </div>
 
     <h1 v-if="emailIsVerified">
@@ -27,12 +27,12 @@
 
 <script>
 import { mapActions } from "vuex";
-import LargeSpinner from "@/client/components/LargeSpinner.vue";
+import SpinnerLarge from "@/client/components/SpinnerLarge.vue";
 
 export default {
   name: "VerifyEmail",
   components: {
-    LargeSpinner
+    SpinnerLarge
   },
 
   data() {

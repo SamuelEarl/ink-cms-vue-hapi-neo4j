@@ -20,7 +20,7 @@ export default {
     height: 100px;
     padding: 40px 0;
     text-align: center;
-    background-color: #eee;
+    background-color: $light-gray;
   }
 }
 </style>

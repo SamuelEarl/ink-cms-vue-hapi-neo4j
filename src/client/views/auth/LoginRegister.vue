@@ -37,7 +37,7 @@
 
               <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
               <button v-if="!getShowSpinner" class="btn-primary">Login</button>
-              <SmallSpinner />
+              <SpinnerSmall />
             </form>
           </div>
 
@@ -87,7 +87,7 @@
 
               <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Register</button> -->
               <button v-if="!getShowSpinner" class="btn-primary">Register</button>
-              <SmallSpinner />
+              <SpinnerSmall />
             </form>
           </div>
 
@@ -111,12 +111,12 @@
 import * as Axios from "axios";
 import { mapActions, mapGetters } from "vuex";
 import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
-import SmallSpinner from "@/client/components/SmallSpinner.vue";
+import SpinnerSmall from "@/client/components/SpinnerSmall.vue";
 
 export default {
   name: "LoginRegister",
   components: {
-    SmallSpinner
+    SpinnerSmall
   },
 
   data() {
@@ -313,7 +313,7 @@ export default {
 
           form {
             input {
-              background-color: #eee;
+              background-color: $light-gray;
             }
 
             .error {
@@ -349,7 +349,7 @@ export default {
         justify-content: space-between;
         border-top: 1px solid $medium-gray;
         padding: 20px;
-        background-color: #eee;
+        background-color: $light-gray;
       }
     }
   }
