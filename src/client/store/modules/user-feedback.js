@@ -102,7 +102,6 @@ const actions = {
   },
 
   showSpinnerAction: ({ commit }, status) => {
-    console.log("showSpinner Status:", status);
     commit("setShowSpinner", status);
   }
 };

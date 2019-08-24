@@ -1,6 +1,5 @@
 <template>
   <div id="login-register">
-    <Spinner style="top:170px" />
     <div class="form-container">
 
       <div class="form-top">
@@ -36,8 +35,9 @@
 
               <br>
 
-              <!-- <button @click="$v.$touch()" class="btn-primary">Login</button> -->
-              <button class="btn-primary">Login</button>
+              <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
+              <button v-if="!getShowSpinner" class="btn-primary">Login</button>
+              <SmallSpinner />
             </form>
           </div>
 
@@ -85,7 +85,9 @@
 
               <br>
 
-              <button class="btn-primary">Register</button>
+              <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Register</button> -->
+              <button v-if="!getShowSpinner" class="btn-primary">Register</button>
+              <SmallSpinner />
             </form>
           </div>
 
@@ -107,14 +109,14 @@
 
 <script>
 import * as Axios from "axios";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
-import Spinner from "@/client/components/Spinner.vue";
+import SmallSpinner from "@/client/components/SmallSpinner.vue";
 
 export default {
   name: "LoginRegister",
   components: {
-    Spinner
+    SmallSpinner
   },
 
   data() {
@@ -148,6 +150,12 @@ export default {
   //     sameAsPassword: sameAs("password")
   //   }
   // },
+
+  computed: {
+    ...mapGetters({
+      getShowSpinner: "userFeedback/getShowSpinner"
+    })
+  },
 
   mounted() {
     // Click on the first tab in the modal to select it when the modal first pops up
@@ -219,7 +227,8 @@ export default {
 
         // If there is an error, then display the error message.
         if (res.error) {
-          dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
+          this.flashAction({ flashType: "error", flashMsg: msg });
+          this.showSpinnerAction(false);
           return;
         }
 

@@ -1,7 +1,7 @@
 <template>
-  <div v-if="getShowSpinner" class="spinner-container">
-    <div class="spinner"></div>
-  </div>
+  <!-- <div v-if="getShowSpinner" class="spinner-container"> -->
+    <div v-if="getShowSpinner" class="spinner"></div>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -27,16 +27,16 @@ export default {
 
 <style lang="stylus" scoped>
 @media $s-up {
-  .spinner-container {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    margin: 0 auto;
-    width: 73.5%;
-    z-index: 100;
+  // .spinner-container {
+  //   position: absolute;
+  //   display: flex;
+  //   justify-content: center;
+  //   margin: 0 auto;
+  //   width: 73.5%;
+  //   z-index: 100;
 
     .spinner {
-      border: 16px solid lightgray;
+      border: 16px solid white;
       border-top: 16px solid darkgray;
       border-bottom: 16px solid darkgray;
       border-radius: 50%;
@@ -50,7 +50,7 @@ export default {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-  }
+  // }
 }
 
 @media $l-up {
