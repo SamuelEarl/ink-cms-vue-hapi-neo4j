@@ -6,7 +6,7 @@
     <!-- After a user logs in or registers or while they are waiting for their email to be verified, I want to show some user feedback that something is happening until after they are redirected. -->
     <div v-if="verifyingEmail">
       <h1>Verifying your email address</h1>
-      <br><br>
+      <br>
       <LargeSpinner />
     </div>
 

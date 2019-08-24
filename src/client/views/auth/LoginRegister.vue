@@ -325,7 +325,6 @@ export default {
 
             button {
               width: 100%;
-              padding: 14px;
               background-image: radial-gradient(
                 ellipse at top left,
                 lighten($ink-blue, 15%),

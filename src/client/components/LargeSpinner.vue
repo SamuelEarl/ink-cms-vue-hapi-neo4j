@@ -36,13 +36,12 @@ export default {
   //   z-index: 100;
 
     .spinner {
-      border: 16px solid white;
-      border-top: 16px solid darkgray;
-      border-bottom: 16px solid darkgray;
+      border: 10px solid #474747;
+      border-top: 10px solid lightgray;
       border-radius: 50%;
-      width: 100px;
-      height: 100px;
-      animation: spin 2s linear infinite;
+      width: 75px;
+      height: 75px;
+      animation: spin 1s linear infinite;
       margin: 0 auto;
     }
 

@@ -36,13 +36,13 @@ export default {
   //   z-index: 100;
 
     .spinner {
-      border: 8px solid $ink-blue;
-      border-top: 8px solid lightgray;
-      border-bottom: 8px solid lightgray;
+      border: 6px solid lightgray;
+      border-top: 6px solid $ink-blue;
       border-radius: 50%;
+      // width and height should each equal the total height of the class="btn-primary" buttons.
       width: 46px;
       height: 46px;
-      animation: spin 2s linear infinite;
+      animation: spin 1s linear infinite;
       margin: 0 auto;
     }
 
