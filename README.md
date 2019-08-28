@@ -115,7 +115,7 @@ make prod-down
 ---
 
 # Where are the Neo4j data stored on the host machine?
-As an example, the `docker-compose.dev.yml` file is configured to mount the `neo4j_data_dev` volume in `neo4j_data_dev`. What does that mean? Where is `neo4j_data_dev` located?
+As an example, the `docker-compose.dev.yml` file is configured to mount the `neo4j_dev_data` volume in `neo4j_dev_data`. What does that mean? Where is `neo4j_dev_data` located?
 
 Volumes are stored in a part of the host filesystem which is managed by Docker (`/var/lib/docker/volumes` on Linux). Non-Docker processes should not modify this part of the filesystem. Volumes are the best way to persist data in Docker.
 

@@ -64,9 +64,9 @@ exports.plugin = {
            * Neo4j. If the "records" array has a length greater than 0, then there is a page that
            * exists with the same slug, so set "flash" to an error message and throw an error.
            */
-          // If a page already exists with the same slug, then set "flash" to an error message and
-          // throw an error.
+          // If a page already exists with the same slug, then close the database connection, set "flash" to an error message, and throw an error.
           if (pageWithMatchingSlug.records.length > 0) {
+            session.close();
             flash = "A page with this slug already exists. Please choose a different slug.";
             throw new Error(flash);
           }
@@ -217,8 +217,8 @@ exports.plugin = {
           // another node that has the same slug but has a different ID than the current node, then
           // you know that the slug you are trying to use is not unique and you need to use a
           // different slug.
-          // So you need to see if there is another Neo4j node that has the same slug but whose
-          // pageId is NOT equal to this node's pageId.
+          // So this query will check to see if there is another Neo4j node that has the same slug
+          // but whose pageId is NOT equal to this node's pageId.
           const pageWithMatchingSlug = await session.run(
             `MATCH (p:Page {
               slug: { slugParam }
@@ -237,9 +237,9 @@ exports.plugin = {
            * page in Neo4j. If the "records" array has a length greater than 0, then there is a page
            * that exists with the same slug, so set "flash" to an error message and throw an error.
            */
-          // If a page already exists with the same slug, then set "flash" to an error message and
-          // throw an error.
+          // If a page already exists with the same slug, then close the database connection, set "flash" to an error message, and throw an error.
           if (pageWithMatchingSlug.records.length > 0) {
+            session.close();
             flash = "A page with this slug already exists. Please choose a different slug.";
             throw new Error(flash);
           }

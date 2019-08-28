@@ -61,11 +61,9 @@ exports.plugin = {
             }
           );
 
-          session.close();
-
-          // If a user already exists with this email, then set "flash" to an error message and
-          // throw an error.
+          // If a user already exists with this email, then close the database connection, set "flash" to an error message, and throw an error.
           if (existingUser.records.length > 0) {
+            session.close();
             flash = "A user with this email already exists. Please use a different email address.";
             throw new Error(flash);
           }
@@ -80,8 +78,12 @@ exports.plugin = {
             scope = [ ...scope, "admin" ];
           }
 
+          // NOTES:
+          // The Neo4j APOC library has a feature that allows you to expire nodes after a specified amount of time.
+          // Since I will be using GrapheneDB to host my Neo4j database, it might be best to switch over to using Graphene at this point in my hapi server configs and I could show how to install APOC in Graphene.
+          // If I decide to use a Docker instance of Neo4j, then I will not use the APOC library in this tutorial because that will be too complicated to setup for newbies. So when a user registers, I will still create a separate node for the token (to show how to create multiple nodes in one query and connect them with a relationship), but the timestamp for the createdAt field will be set to 24 hours in the future.
           const token = Crypto.randomBytes(16).toString("hex");
-          const timestamp = Date.now();
+          const timestamp = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
 
           // Create a new user, a token node, and the relationship between the two.
           await session.run(
@@ -194,16 +196,63 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        let resendToken = null;
         const email = request.params.email;
         const token = request.params.token;
 
         try {
-          // NOTE: I will not use the APOC library in this tutorial because that will be too complicated to setup for newbies. So when a user registers, I will still create a separate node for the token (to show how to create multiple nodes in one query and connect them with a relationships), but the timestamp for the createdAt field will be 24 hours in the future. (I need to make sure that I am adding the correct amount of time to the createdAt property - is that property expressed in seconds or milliseconds?) After the node with the matching token is found and the user's "isVerified" property is set to true, then this code will manually delete the token node and the relationship. That will also be a good query to demonstrate with Neo4j.
+          // In this route, after the node with the matching token is found and the user's "isVerified" property is set to true, then this code will manually delete the token node and the relationship. That will also be a good query to demonstrate with Neo4j.
+
+          const currentTime = Date.now();
 
           // Find a node with the matching token
+          const tokenNode = await session.run(
+            `MATCH (t:Token {
+              token: { tokenParam }
+            })
+            WHERE t.createdAt > { currentTimeParam }
+            RETURN t`, {
+              tokenParam: token,
+              currentTimeParam: currentTime,
 
-          // Find a node with the matching user
-          // Set the user's "isVerified" property to true
+            }
+          );
+
+          // If no Token node exists with the above token or if the token has expired, then close the database connection, set "flash" to an error message, and throw an error.
+          if (tokenNode.records.length === 0) {
+            session.close();
+            flash = "We were unable to find a valid token. That token may have expired.";
+            resendToken = true;
+            throw new Error(flash);
+          }
+
+          // Find the matching user node, set the user's "isVerified" property to true, and delete
+          // the Token node and the relationship.
+          const userNode = await session.run(
+            `MATCH (u:User {
+              email: { emailParam }
+            })-[r:USER_EMAIL_VERIFICATION_TOKEN]->(t:Token {
+              token: { tokenParam }
+            })
+            SET u.isVerified = { isVerifiedParam }
+            DELETE t,r
+            RETURN u`, {
+              emailParam: email,
+              tokenParam: token,
+              isVerifiedParam: true
+            }
+          );
+
+          // If no User node exists with the above email or with the matching Token node, then close the database connection, set "flash" to an error message, and throw an error.
+          if (userNode.records.length === 0) {
+            session.close();
+            flash = "We were unable to find a user for this token.";
+            throw new Error(flash);
+          }
+
+          session.close();
+
+          flash = `Your email address (${email}) has been verified.`;
         }
         catch(e) {
           const msg = e.message ? e.message : "Error while attempting to verify email.";
@@ -211,7 +260,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash };
+          return { error, flash, resendToken };
         }
       }
     });

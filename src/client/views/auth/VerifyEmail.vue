@@ -10,17 +10,29 @@
       <SpinnerLarge />
     </div>
 
-    <h1 v-if="emailIsVerified">
-      Your email address ({{ $route.params.email }}) has been verified.
-      <br><br>
-      <button @click="redirectToLogin">Please login &rsaquo;</button>
-    </h1>
+    <div v-if="!verifyingEmail">
+      <!-- "We were unable to find a valid token. That token may have expired." -->
+      <h1 v-if="error && resendToken">
+        {{ flash }}
+        <br><br>
+        <button @click="resendVerificationLink">Click to resend verification link &rsaquo;</button>
+      </h1>
 
-    <h1 v-if="emailNotVerified">
-      Your email address was not verified.
-      <br><br>
-      Please do something...
-    </h1>
+      <!-- "We were unable to find a user for this token." -->
+      <h1 v-if="error && !resendToken">
+        {{ flash }}
+        <br><br>
+        <button @click="redirectToLogin">Please try to register again &rsaquo;</button>
+      </h1>
+
+      <!-- `Your email address (${email}) has been verified.` -->
+      <h1 v-if="!error && !resendToken">
+        {{ flash }}
+        <br><br>
+        <button @click="redirectToLogin">Please login &rsaquo;</button>
+      </h1>
+    </div>
+
     <br>
   </div>
 </template>
@@ -40,8 +52,7 @@ export default {
       email: this.$route.params.email,
       token: this.$route.params.token,
       verifyingEmail: true,
-      emailIsVerified: false,
-      emailNotVerified: false
+      error: false
     };
   },
 
@@ -85,6 +96,10 @@ export default {
       else {
         throw new Error("Error while attempting to register user.");
       }
+    },
+
+    async resendVerificationLink() {
+      console.log("Clicked resend verification link");
     },
 
     redirectToLogin() {
