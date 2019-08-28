@@ -37,6 +37,8 @@ export default {
 
   data() {
     return {
+      email: this.$route.params.email,
+      token: this.$route.params.token,
       verifyingEmail: true,
       emailIsVerified: false,
       emailNotVerified: false
@@ -45,12 +47,45 @@ export default {
 
   created() {
     this.showSpinnerAction(true);
+    this.verifyEmail();
   },
 
   methods: {
     ...mapActions({
       showSpinnerAction: "userFeedback/showSpinnerAction"
     }),
+
+    async verifyEmail() {
+      const method = "GET";
+      const url = "/verify-email/${this.email}/${this.token}";
+
+      const response = await Axios({
+        method: method,
+        url: url,
+        data: payload
+      });
+
+      console.log("verifyEmail RESPONSE:", response.data);
+
+      const res = response.data;
+      const msg = res.flash;
+      this.showSpinnerAction(false);
+
+      // If there is an error, then display the error message.
+      if (res.error) {
+        this.flashAction({ flashType: "error", flashMsg: msg });
+        this.showSpinnerAction(false);
+        return;
+      }
+
+      if (res.redirect) {
+        this.showSpinnerAction(false);
+        this.$router.push({ name: "email-sent", params: { email: this.email } });
+      }
+      else {
+        throw new Error("Error while attempting to register user.");
+      }
+    },
 
     redirectToLogin() {
       this.showSpinnerAction(false);

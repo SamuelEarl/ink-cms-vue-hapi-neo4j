@@ -182,16 +182,28 @@ exports.plugin = {
      */
     server.route({
       method: "GET",
-      path: "/verify-email",
+      path: "/verify-email/{email}/{token}",
       options: {
-
+        validate: {
+          params: {
+            email: Joi.string().email().required(),
+            token: Joi.string().required()
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        const email = request.params.email;
+        const token = request.params.token;
 
         try {
-          //
+          // NOTE: I will not use the APOC library in this tutorial because that will be too complicated to setup for newbies. So when a user registers, I will still create a separate node for the token (to show how to create multiple nodes in one query and connect them with a relationships), but the timestamp for the createdAt field will be 24 hours in the future. (I need to make sure that I am adding the correct amount of time to the createdAt property - is that property expressed in seconds or milliseconds?) After the node with the matching token is found and the user's "isVerified" property is set to true, then this code will manually delete the token node and the relationship. That will also be a good query to demonstrate with Neo4j.
+
+          // Find a node with the matching token
+
+          // Find a node with the matching user
+          // Set the user's "isVerified" property to true
         }
         catch(e) {
           const msg = e.message ? e.message : "Error while attempting to verify email.";

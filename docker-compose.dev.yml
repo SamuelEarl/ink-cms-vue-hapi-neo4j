@@ -29,18 +29,30 @@ services:
       - "7474:7474"
       - "7473:7473"
       - "7687:7687"
+    # Tried some configs for the APOC library, but no luck yet.
+    # environment:
+    #   - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+    #   - NEO4J_apoc_import_file_enabled=true
+    #   - NEO4J_dbms_shell_enabled=true
     # Volumes allow you to persist data. See the README to find out where the Neo4j data are stored on the host machine.
     volumes:
       - type: volume
-        source: neo4j_data_dev
+        source: neo4j_dev_data
         target: /bitnami
+      # Possible configs for the APOC library
+      # - type: volume
+      #   source: neo4j_dev_plugins
+      #   target: /plugins
+      # - ./plugins:/plugins
     networks:
       app_net:
         ipv4_address: 172.28.1.2
 
 volumes:
-  neo4j_data_dev:
+  neo4j_dev_data:
     driver: local
+  # Possible config for the APOC library
+  # neo4j_dev_plugins:
 
 networks:
   app_net:
