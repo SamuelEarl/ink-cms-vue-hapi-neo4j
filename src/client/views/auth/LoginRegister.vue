@@ -14,7 +14,18 @@
           </div>
         </header>
 
-        <section class="form-body">
+        <div class="form-body">
+          <div v-if="resendVerification">
+            <button
+              @click="resendVerificationLink"
+              id="resend-verification-button"
+              class="btn-primary"
+            >
+              Resend Verification
+            </button>
+            <br><br>
+          </div>
+
           <div id="login" class="tab-content">
             <form @submit.prevent="login">
               <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
@@ -95,7 +106,7 @@
             <p><span class="bold">Security Tip:</span><br>Use a password manager like<br><a href="https://www.lastpass.com/" target="_blank">LastPass</a> or <a href="https://1password.com/" target="_blank">1Password</a>.</p>
           </div>
 
-        </section>
+        </div>
       </div>
 
       <footer class="form-bottom form-footer">
@@ -125,7 +136,8 @@ export default {
       lastName: "",
       email: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+      resendVerification: true
     }
   },
 
@@ -258,7 +270,6 @@ export default {
           this.showSpinnerAction(true);
           this.loginAction(credentials);
 
-          // TODO: Create auth/resendVerificationLinkAction
           // TODO: If a user tries to login before they have verified their email address, then a flash message will be displayed that says "You have not verified your email address....". When that happens I want to show a red button that says "Resend Verification".
           // I might need to refactor this method by moving all of the loginAction code from Vuex to this method. I will add a new return value in the login route called "resendVerification". If that is set to true, then I will display the "Resend Verification" button.
         }
@@ -279,6 +290,11 @@ export default {
       else {
         this.$router.back();
       }
+    },
+
+    async resendVerificationLink() {
+      // TODO: Create auth/resendVerificationLinkAction
+      console.log("Clicked resend verification link");
     },
 
     forgotPassword() {
@@ -324,6 +340,11 @@ export default {
 
         .form-body {
           padding: 20px 30px;
+
+          #resend-verification-button {
+            width: 100%;
+            background-color: $red;
+          }
 
           form {
             input {
