@@ -2,8 +2,7 @@
   <div id="verify-email">
     <br>
     <br>
-    <!-- I need to put a spinner here and on the LoginRegister page. -->
-    <!-- After a user logs in or registers or while they are waiting for their email to be verified, I want to show some user feedback that something is happening until after they are redirected. -->
+
     <div v-if="verifyingEmail">
       <h1>Verifying your email address</h1>
       <br>
@@ -11,23 +10,23 @@
     </div>
 
     <div v-if="!verifyingEmail">
-      <!-- "We were unable to find a valid token. That token may have expired." -->
-      <h1 v-if="error && resendToken">
-        {{ flash }}
+      <!-- "We were unable to verify your email address. That link may have expired." -->
+      <h1 v-if="error && resendVerification">
+        {{ message }}
         <br><br>
         <button @click="resendVerificationLink">Click to resend verification link &rsaquo;</button>
       </h1>
 
-      <!-- "We were unable to find a user for this token." -->
-      <h1 v-if="error && !resendToken">
-        {{ flash }}
+      <!-- "We were unable to find a user associated with that email address." -->
+      <h1 v-if="error && !resendVerification">
+        {{ message }}
         <br><br>
-        <button @click="redirectToLogin">Please try to register again &rsaquo;</button>
+        <button @click="redirectToLogin">Please register again &rsaquo;</button>
       </h1>
 
       <!-- `Your email address (${email}) has been verified.` -->
-      <h1 v-if="!error && !resendToken">
-        {{ flash }}
+      <h1 v-if="!error && !resendVerification">
+        {{ message }}
         <br><br>
         <button @click="redirectToLogin">Please login &rsaquo;</button>
       </h1>
@@ -38,6 +37,7 @@
 </template>
 
 <script>
+import * as Axios from "axios";
 import { mapActions } from "vuex";
 import SpinnerLarge from "@/client/components/SpinnerLarge.vue";
 
@@ -52,7 +52,9 @@ export default {
       email: this.$route.params.email,
       token: this.$route.params.token,
       verifyingEmail: true,
-      error: false
+      error: null,
+      resendVerification: null,
+      message: ""
     };
   },
 
@@ -68,37 +70,25 @@ export default {
 
     async verifyEmail() {
       const method = "GET";
-      const url = "/verify-email/${this.email}/${this.token}";
+      const url = `/verify-email/${this.email}/${this.token}`;
 
       const response = await Axios({
         method: method,
-        url: url,
-        data: payload
+        url: url
       });
 
       console.log("verifyEmail RESPONSE:", response.data);
 
       const res = response.data;
-      const msg = res.flash;
       this.showSpinnerAction(false);
-
-      // If there is an error, then display the error message.
-      if (res.error) {
-        this.flashAction({ flashType: "error", flashMsg: msg });
-        this.showSpinnerAction(false);
-        return;
-      }
-
-      if (res.redirect) {
-        this.showSpinnerAction(false);
-        this.$router.push({ name: "email-sent", params: { email: this.email } });
-      }
-      else {
-        throw new Error("Error while attempting to register user.");
-      }
+      this.verifyingEmail = false;
+      this.error = res.error;
+      this.resendVerification = res.resendVerification;
+      this.message = res.flash;
     },
 
     async resendVerificationLink() {
+      // TODO: Create auth/resendVerificationLinkAction
       console.log("Clicked resend verification link");
     },
 

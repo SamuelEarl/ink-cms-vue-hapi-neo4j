@@ -42,9 +42,17 @@ const mutations = {
     state.isAuthenticated = isAuthenticated;
   },
 
-  setUserProfile: (state, userProfile) => {
+  setUserProfile: (state, [ userProfile, prevRouteName ]) => {
     state.userProfile = userProfile;
-    router.back();
+
+    // If the previous route is "verify-email", then redirect the user to the home route.
+    if (prevRouteName === "verify-email") {
+      router.push({ name: "home" });
+    }
+    // Otherwise redirect the user to the previous route.
+    else {
+      router.back();
+    }
   },
 
   clearUserProfile: (state) => {
@@ -114,7 +122,7 @@ const actions = {
     }
   },
 
-  loginAction: async ({ commit, dispatch }, credentials) => {
+  loginAction: async ({ commit, dispatch, rootState }, credentials) => {
     try {
       let user = {
         firstName: "",
@@ -138,8 +146,9 @@ const actions = {
       const res = response.data;
       const msg = res.flash;
 
-      // If there is an error, then display the error message.
+      // If there is an error, then hide the spinner and display the error message.
       if (res.error) {
+        dispatch("userFeedback/showSpinnerAction", false, { root: true });
         dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
         return;
       }
@@ -149,12 +158,17 @@ const actions = {
       user.email = res.user.userEmail;
       user.scope = res.user.userScope;
 
+      const prevRouteName = rootState.helpers.prevRouteName;
+
       // If the user is logged in, then call "setUserProfile" with the logged in user's profile
       // object and display a success message.
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
-        commit("setUserProfile", user);
+        commit("setUserProfile", [ user, prevRouteName ]);
         commit("setIsAuthenticated", true);
 
+        // Hide the spinner
+        dispatch("userFeedback/showSpinnerAction", false, { root: true });
+        // Show a success message to the user
         dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
       }
     }

@@ -186,17 +186,17 @@ exports.plugin = {
       method: "GET",
       path: "/verify-email/{email}/{token}",
       options: {
-        validate: {
-          params: {
-            email: Joi.string().email().required(),
-            token: Joi.string().required()
-          }
-        },
+        // validate: {
+        //   params: {
+        //     email: Joi.string().email().required(),
+        //     token: Joi.string().required()
+        //   }
+        // },
       },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let resendToken = null;
+        let resendVerification = null;
         const email = request.params.email;
         const token = request.params.token;
 
@@ -221,8 +221,8 @@ exports.plugin = {
           // If no Token node exists with the above token or if the token has expired, then close the database connection, set "flash" to an error message, and throw an error.
           if (tokenNode.records.length === 0) {
             session.close();
-            flash = "We were unable to find a valid token. That token may have expired.";
-            resendToken = true;
+            flash = "We were unable to verify your email address. That link may have expired.";
+            resendVerification = true;
             throw new Error(flash);
           }
 
@@ -246,7 +246,7 @@ exports.plugin = {
           // If no User node exists with the above email or with the matching Token node, then close the database connection, set "flash" to an error message, and throw an error.
           if (userNode.records.length === 0) {
             session.close();
-            flash = "We were unable to find a user for this token.";
+            flash = "We were unable to find a user associated with that email address.";
             throw new Error(flash);
           }
 
@@ -260,7 +260,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash, resendToken };
+          return { error, flash, resendVerification };
         }
       }
     });
@@ -349,7 +349,7 @@ exports.plugin = {
           // If the user has not verified their email address, then set "flash" to an error message
           // and throw an error.
           if (!existingUser.records[0]._fields[0].properties.isVerified) {
-            flash = "You have not verified your email address.";
+            flash = "You have not verified your email address. Please check your email for a verification link or click the button below to resend a verification link.";
             throw new Error(flash);
           }
 

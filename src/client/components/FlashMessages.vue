@@ -72,11 +72,11 @@ export default {
   }
 
   .success {
-    background-color: rgb(34, 139, 34); // forest green
+    background-color: $green;
   }
 
   .error {
-    background-color: rgb(196, 0, 0); // strong red
+    background-color: $red;
   }
 
   .remove-flash-msg {

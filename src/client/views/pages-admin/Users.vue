@@ -21,7 +21,7 @@
           <td>{{ user.email }}</td>
           <td>{{ user.scope }}</td>
           <td style="text-align:center;">
-            <button class="table-btn" @click="openUserModal(user)">
+            <button class="btn-table" @click="openUserModal(user)">
               <font-awesome-icon icon="edit" />
             </button>
           </td>
