@@ -2,7 +2,7 @@
   <div id="auth-layout">
     <div id="wrapper">
 
-      <div id="content-top">
+      <div id="content-top" class="gradient-blue">
         <div class="container">
           <br>
           <router-view />
@@ -36,11 +36,6 @@ export default {
 
       #content-top {
         flex: 1 0 auto;
-        background-image: radial-gradient(
-          ellipse at top left,
-          lighten($ink-blue, 15%),
-          $ink-blue
-        );
       }
 
       #content-bottom {

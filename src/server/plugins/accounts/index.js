@@ -197,7 +197,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let userAction = null;
+        let cta = null;
         const email = request.params.email;
         const token = request.params.token;
 
@@ -221,7 +221,7 @@ exports.plugin = {
           if (userNode.records.length === 0) {
             session.close();
             flash = "We were unable to find a user associated with that email address.";
-            userAction = "register";
+            cta = "register";
             throw new Error(flash);
           }
 
@@ -230,7 +230,7 @@ exports.plugin = {
           if (userNode.records[0]._fields[0].properties.isVerified) {
             session.close();
             flash = `Your email address (${email}) has already been verified.`;
-            userAction = "login";
+            cta = "login";
             return;
           }
 
@@ -253,7 +253,7 @@ exports.plugin = {
           if (tokenNode.records.length === 0) {
             session.close();
             flash = "We were unable to verify your email address. That link may have expired.";
-            userAction = "resendVerification";
+            cta = "resendVerification";
             throw new Error(flash);
           }
 
@@ -284,14 +284,14 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash, userAction };
+          return { error, flash, cta };
         }
       }
     });
 
 
 // TODO:
-// I will probably need a button for "Resend Verification" on both the LoginRegister and VerifyEmail pages that users can click to resend the token.
+// I will probably need a button for "Resend Verification" on both the AuthForms and VerifyEmail pages that users can click to resend the token.
 // I need to think through a few simple scenarios that will handle all of the possible "Resend Verification" situations.
 
 // (1) If a user tries to login but they have not verified their email address, then I will redirect the user to the "VerificationNotices.vue" page that says, "Your email address has not been verified. Please check your email account for a verification link."
@@ -315,7 +315,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let userAction = null;
+        let cta = null;
         const email = request.params.email;
 
         try {
@@ -447,7 +447,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let userAction = null;
+        let cta = null;
         let user = null;
 
         try {
@@ -476,7 +476,7 @@ exports.plugin = {
           // and throw an error.
           if (!existingUser.records[0]._fields[0].properties.isVerified) {
             flash = "You have not verified your email address. Please check your email for a verification link or...";
-            userAction = "resendVerification";
+            cta = "resendVerification";
             throw new Error(flash);
           }
 
@@ -521,7 +521,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash, userAction, user };
+          return { error, flash, cta, user };
         }
       }
     });

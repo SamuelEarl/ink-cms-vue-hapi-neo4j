@@ -3,7 +3,7 @@ import Router from "vue-router";
 import store from "./store";
 import Layout from "./views/layouts/Layout.vue";
 import AuthLayout from "./views/layouts/AuthLayout.vue";
-import LoginRegister from "./views/auth/LoginRegister.vue";
+import AuthForms from "./views/auth/AuthForms.vue";
 import EmailSent from "./views/auth/EmailSent.vue";
 import VerifyEmail from "./views/auth/VerifyEmail.vue";
 import PublicPage from "./views/pages-public/PublicPage.vue";
@@ -68,9 +68,9 @@ const router = new Router({
       component: AuthLayout,
       children: [
         {
-          path: "login",
-          name: "login",
-          component: LoginRegister
+          path: "auth",
+          name: "auth",
+          component: AuthForms
         },
         {
           path: "email-sent/:email",

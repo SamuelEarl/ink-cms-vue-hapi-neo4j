@@ -146,8 +146,8 @@ const actions = {
       const res = response.data;
       const msg = res.flash;
 
-      if (res.userAction) {
-        const userNotice = { msg: msg, action: res.userAction };
+      if (res.cta) {
+        const userNotice = { msg: msg, action: res.cta };
         dispatch("userFeedback/showSpinnerAction", false, { root: true });
         dispatch("userFeedback/redirectUserNoticeAction", [ "verify-email", userNotice ], { root: true});
         return;

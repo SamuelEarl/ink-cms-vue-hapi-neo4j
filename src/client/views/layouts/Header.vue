@@ -100,7 +100,7 @@
         </a>
         <router-link
           v-else
-          :to="{ name: 'login' }"
+          :to="{ name: 'auth' }"
           exact
         >
           Login / Register

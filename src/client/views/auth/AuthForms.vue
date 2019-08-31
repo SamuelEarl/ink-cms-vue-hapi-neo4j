@@ -1,10 +1,10 @@
 <template>
   <div id="login-register">
-    <div class="form-container">
+    <div v-if="showLoginForm" class="form-container">
 
       <div class="form-top">
         <header class="form-header">
-          <div class="w3-bar">
+          <div class="tabbed-links w3-bar">
             <button class="tablink w3-bar-item w3-button" @click="openTab('login', $event)">
               Login
             </button>
@@ -15,16 +15,6 @@
         </header>
 
         <div class="form-body">
-          <div v-if="resendVerification">
-            <button
-              @click="resendVerificationLink"
-              id="resend-verification-button"
-              class="btn-primary"
-            >
-              Resend Verification
-            </button>
-            <br><br>
-          </div>
 
           <div id="login" class="tab-content">
             <form @submit.prevent="login">
@@ -47,7 +37,7 @@
               <br>
 
               <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
-              <button v-if="!getShowSpinner" class="btn-primary">Login</button>
+              <button v-if="!getShowSpinner" class="btn-primary btn-form gradient-blue">Login</button>
               <SpinnerSmall />
             </form>
           </div>
@@ -97,7 +87,7 @@
               <br>
 
               <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Register</button> -->
-              <button v-if="!getShowSpinner" class="btn-primary">Register</button>
+              <button v-if="!getShowSpinner" class="btn-primary btn-form gradient-blue">Register</button>
               <SpinnerSmall />
             </form>
           </div>
@@ -110,11 +100,100 @@
       </div>
 
       <footer class="form-bottom form-footer">
-        <button @click="forgotPassword">Forgot your password?</button>
-        <button @click="!resendVerification">Need to verify your email?</button>
+        <button @click="displayForgotPasswordForm">Forgot your password?</button>
+        <button @click="displayVerifyEmailForm">Need to verify your email?</button>
       </footer>
 
     </div>
+
+    <!-- Beginning of "Need to verify your email?"" -->
+    <div v-if="showVerifyEmailForm" class="form-container">
+
+      <div class="form-top">
+        <header class="form-header">
+          <div class="header-content">
+            <h3>Verify Your Email</h3>
+            <p>If you have not received a verification email, then check your spam folder. Otherwise, we can send a new verification email to you.</p>
+          </div>
+        </header>
+
+        <div class="form-body">
+          <form @submit.prevent="resendVerificationLink">
+            <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+            <!-- <div class="validation-messages">
+              <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
+              <div v-if="!$v.email.email && $v.email.$dirty" class="error">Must be a valid email address</div>
+              <br v-if="$v.email.$invalid && $v.email.$dirty">
+            </div> -->
+
+            <br>
+
+            <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
+            <button
+              v-if="!getShowSpinner"
+              class="btn-tertiary btn-form"
+            >
+              Send
+            </button>
+
+            <SpinnerSmall />
+          </form>
+
+        </div>
+      </div>
+
+      <footer class="form-bottom form-footer">
+        <button @click="displayLoginForm">Already a user? Login</button>
+      </footer>
+
+    </div>
+    <!-- End of "Need to verify your email?" -->
+
+
+    <!-- Beginning of "Forgot your password?"" -->
+    <div v-if="showForgotPasswordForm" class="form-container">
+
+      <div class="form-top">
+        <header class="form-header">
+          <div class="header-content">
+            <h3>Forgot Your Password?</h3>
+            <p>Please enter the email address that you used to register with us and we will reset your password.</p>
+          </div>
+        </header>
+
+        <div class="form-body">
+          <form @submit.prevent="resetPassword">
+            <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+            <!-- <div class="validation-messages">
+              <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
+              <div v-if="!$v.email.email && $v.email.$dirty" class="error">Must be a valid email address</div>
+              <br v-if="$v.email.$invalid && $v.email.$dirty">
+            </div> -->
+
+            <br>
+
+            <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
+            <button
+              v-if="!getShowSpinner"
+              class="btn-tertiary btn-form"
+            >
+              Send
+            </button>
+
+            <SpinnerSmall />
+          </form>
+
+        </div>
+      </div>
+
+      <footer class="form-bottom form-footer">
+        <button @click="displayLoginForm">Already a user? Login</button>
+      </footer>
+
+    </div>
+    <!-- End of "Forgot your password?" -->
+
+
   </div>
 </template>
 
@@ -125,7 +204,7 @@ import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
 import SpinnerSmall from "@/client/components/SpinnerSmall.vue";
 
 export default {
-  name: "LoginRegister",
+  name: "AuthForms",
   components: {
     SpinnerSmall
   },
@@ -137,7 +216,9 @@ export default {
       email: "",
       password: "",
       confirmPassword: "",
-      resendVerification: true
+      showLoginForm: true,
+      showForgotPasswordForm: false,
+      showVerifyEmailForm: false,
     }
   },
 
@@ -171,10 +252,7 @@ export default {
   },
 
   mounted() {
-    // Click on the first tab in the modal to select it when the modal first pops up
-    let firstTab = document.getElementsByClassName("tablink")[0].click();
-    // Add the "active-tab" class to the currently selected tab.
-    firstTab += " active-tab";
+    this.displayLoginForm();
   },
 
   methods: {
@@ -203,6 +281,34 @@ export default {
       document.getElementById(tabName).style.display = "block";
       // Add the "active-tab" class to the currently selected tab.
       event.currentTarget.className += " active-tab";
+    },
+
+    async displayLoginForm() {
+      this.showLoginForm = true;
+      this.showForgotPasswordForm = false;
+      this.showVerifyEmailForm = false;
+
+      // Use "this.$nextTick()" to wait for the next DOM update cycle before you call the functions
+      // afterwards. If you do not wait until the next DOM update, then the DOM won't be updated
+      // before document.getElementByClassName() is called and you will get an undefined error.
+      await this.$nextTick();
+
+      // Click on the first tab in the login form to select it when the form first loads
+      let firstTab = document.getElementsByClassName("tablink")[0].click();
+      // Add the "active-tab" class to the currently selected tab.
+      firstTab += " active-tab";
+    },
+
+    displayForgotPasswordForm() {
+      this.showLoginForm = false;
+      this.showForgotPasswordForm = true;
+      this.showVerifyEmailForm = false;
+    },
+
+    displayVerifyEmailForm() {
+      this.showLoginForm = false;
+      this.showForgotPasswordForm = false;
+      this.showVerifyEmailForm = true;
     },
 
     async register() {
@@ -306,32 +412,34 @@ export default {
         // https://css-tricks.com/couple-takes-sticky-footer/#article-header-id-3
         flex: 1 0 auto;
 
-        .form-header div {
-          display: flex;
-          justify-content: space-around;
-          padding: 20px 30px 10px 30px;
+        .form-header {
+          .tabbed-links {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 30px 10px 30px;
 
-          button {
-            border-bottom: 3px solid transparent;
+            button {
+              border-bottom: 3px solid transparent;
 
-            &:hover {
-              background-color: transparent !important;
-              border-bottom: 3px solid $medium-gray;
+              &:hover {
+                background-color: transparent !important;
+                border-bottom: 3px solid $medium-gray;
+              }
+              &.active-tab {
+                background-color: transparent !important;
+                border-bottom: 3px solid $ink-blue;
+              }
             }
-            &.active-tab {
-              background-color: transparent !important;
-              border-bottom: 3px solid $ink-blue;
-            }
+          }
+
+          .header-content {
+            text-align: center;
+            padding: 30px 60px 0 60px;
           }
         }
 
         .form-body {
           padding: 20px 30px;
-
-          #resend-verification-button {
-            width: 100%;
-            background-color: $red;
-          }
 
           form {
             input {
@@ -343,15 +451,6 @@ export default {
               color: white;
               background-color: darkred;
               position: absolute;
-            }
-
-            button {
-              width: 100%;
-              background-image: radial-gradient(
-                ellipse at top left,
-                lighten($ink-blue, 15%),
-                $ink-blue
-              );
             }
           }
 
@@ -387,7 +486,7 @@ export default {
     width: 425px;
     height: auto !important;
 
-    .form-header div {
+    .form-header .tabbed-links {
       padding: 60px 60px 10px 60px !important;
     }
 

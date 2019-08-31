@@ -17,7 +17,7 @@
       <!-- "We were unable to verify your email address. That link may have expired." -->
       <h2>
         <button
-          v-if="userAction === 'resendVerification'"
+          v-if="cta === 'resendVerification'"
           @click="resendVerificationLink"
         >
           Click here to send a new verification link &rsaquo;
@@ -27,7 +27,7 @@
       <!-- "We were unable to find a user associated with that email address." -->
       <h2>
         <button
-          v-if="userAction === 'register'"
+          v-if="cta === 'register'"
           @click="redirectToLogin"
         >
           Please register again &rsaquo;
@@ -37,7 +37,7 @@
       <!-- `Your email address (${email}) has (already) been verified.` -->
       <h2>
         <button
-          v-if="userAction === 'login'"
+          v-if="cta === 'login'"
           @click="redirectToLogin"
         >
           Please login &rsaquo;
@@ -93,7 +93,7 @@ export default {
       token: this.$route.params.token,
       verifyingEmail: true,
       message: "",
-      userAction: "" // This can be "resendVerification", "register", or "login"
+      cta: "" // This can be "resendVerification", "register", or "login"
     };
   },
 
@@ -122,7 +122,7 @@ export default {
       this.showSpinnerAction(false);
       this.verifyingEmail = false;
       this.message = res.flash;
-      this.userAction = res.userAction;
+      this.cta = res.cta;
     },
 
     async resendVerificationLink() {

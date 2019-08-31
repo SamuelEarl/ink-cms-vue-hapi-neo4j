@@ -4,3 +4,11 @@ $light-gray = #eee;
 
 $green = rgb(34, 139, 34); // forest green
 $red = rgb(157, 0, 0); // strong red
+
+.gradient-blue {
+  background-image: radial-gradient(
+    ellipse at top left,
+    lighten($ink-blue, 15%),
+    $ink-blue
+  );
+}
