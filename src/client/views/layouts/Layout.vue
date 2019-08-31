@@ -4,8 +4,6 @@
 
       <div id="content-top">
         <Header />
-        <FlashMessages />
-
         <div class="container">
           <br>
           <router-view />
@@ -23,14 +21,12 @@
 <script>
 import Header from "./Header";
 import Footer from "./Footer";
-import FlashMessages from "../../components/FlashMessages.vue";
 
 export default {
   name: "Layout",
   components: {
     Header,
-    Footer,
-    FlashMessages
+    Footer
   },
 }
 </script>

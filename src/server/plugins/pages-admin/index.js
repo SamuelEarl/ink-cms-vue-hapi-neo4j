@@ -223,7 +223,7 @@ exports.plugin = {
             `MATCH (p:Page {
               slug: { slugParam }
             })
-            WHERE NOT p.pageId={ pageIdParam }
+            WHERE NOT p.pageId = { pageIdParam }
             RETURN p`, {
               slugParam: slug,
               pageIdParam: pageId
@@ -250,9 +250,9 @@ exports.plugin = {
                 pageId: { pageIdParam }
               })
               SET
-                p.title={ titleParam },
-                p.slug={ slugParam },
-                p.content={ contentParam }
+                p.title = { titleParam },
+                p.slug = { slugParam },
+                p.content = { contentParam }
               RETURN p`, {
                 pageIdParam: pageId,
                 titleParam: title,
@@ -361,7 +361,7 @@ exports.plugin = {
               `MATCH (p:Page {
                 pageId: { pageIdParam }
               })
-              SET p.sortPosition={ sortPositionParam }
+              SET p.sortPosition = { sortPositionParam }
               RETURN p`, {
                 pageIdParam: page.pageId,
                 sortPositionParam: index

@@ -30,7 +30,7 @@
   ],
   "summary": {
     "statement": {
-      "text": "MATCH (p:Page {\n                  id: { idParam }\n                })\n                SET p.sortPosition={ sortPositionParam }\n                RETURN p",
+      "text": "MATCH (p:Page {\n                  id: { idParam }\n                })\n                SET p.sortPosition = { sortPositionParam }\n                RETURN p",
       "parameters": {
         "idParam": "08f4c77b-32ef-4dd7-b5e5-b87dc3a8b8ba-1564155137944",
         "sortPositionParam": 0

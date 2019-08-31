@@ -3,8 +3,6 @@
     <div id="wrapper">
 
       <div id="content-top">
-        <FlashMessages />
-
         <div class="container">
           <br>
           <router-view />
@@ -19,13 +17,8 @@
 </template>
 
 <script>
-import FlashMessages from "../../components/FlashMessages.vue";
-
 export default {
-  name: "AuthLayout",
-  components: {
-    FlashMessages
-  },
+  name: "AuthLayout"
 }
 </script>
 

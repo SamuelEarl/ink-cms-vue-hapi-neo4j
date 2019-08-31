@@ -25,6 +25,7 @@
       </h1>
 
       <!-- `Your email address (${email}) has been verified.` -->
+      <!-- `Your email address (${email}) has already been verified.` -->
       <h1 v-if="!error && !resendVerification">
         {{ message }}
         <br><br>

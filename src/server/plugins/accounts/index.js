@@ -79,11 +79,12 @@ exports.plugin = {
           }
 
           // NOTES:
-          // The Neo4j APOC library has a feature that allows you to expire nodes after a specified amount of time.
+          // The Neo4j APOC library has a feature that allows you to expire nodes after a specified amount of time. However, I will probably show how to use APOC in an advanced course instead of this course.
           // Since I will be using GrapheneDB to host my Neo4j database, it might be best to switch over to using Graphene at this point in my hapi server configs and I could show how to install APOC in Graphene.
           // If I decide to use a Docker instance of Neo4j, then I will not use the APOC library in this tutorial because that will be too complicated to setup for newbies. So when a user registers, I will still create a separate node for the token (to show how to create multiple nodes in one query and connect them with a relationship), but the timestamp for the createdAt field will be set to 24 hours in the future.
           const token = Crypto.randomBytes(16).toString("hex");
           const timestamp = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
+          // const timestamp = Date.now() + 3000; // 3 seconds = 3000 milliseconds
 
           // Create a new user, a token node, and the relationship between the two.
           await session.run(
@@ -201,11 +202,39 @@ exports.plugin = {
         const token = request.params.token;
 
         try {
-          // In this route, after the node with the matching token is found and the user's "isVerified" property is set to true, then this code will manually delete the token node and the relationship. That will also be a good query to demonstrate with Neo4j.
+          // In this route, after the node with the matching token is found and the user's "isVerified" property is set to true, then this code will manually delete the token node and the relationship (instead of automatically deleting the token node and the relationship with the APOC library and the Time To Live feature). This will be a good Neo4j query to demonstrate in the course.
+
+          // NOTE: It is important to look for the matching User node first because if a user verifies their email address, navigates to the login page, and then clicks their browser's back button, the user will see this message on the page: `Your email address (${email}) has already been verified.`, which is accurate. If we looked for the matching Token node first and the same scenario hapened, then the user would see this message on the page: "We were unable to verify your email address. That link may have expired.", which is not accurate.
+
+          // Find a user node with the matching email.
+          const userNode = await session.run(
+            `MATCH (u:User {
+              email: { emailParam }
+            })
+            RETURN u`, {
+              emailParam: email
+            }
+          );
+
+          // If no User node exists with the above email, then close the database connection,
+          // set "flash" to an error message, and throw an error.
+          if (userNode.records.length === 0) {
+            session.close();
+            flash = "We were unable to find a user associated with that email address.";
+            throw new Error(flash);
+          }
+
+          // If the user's email address has already been verified, then close the database
+          // connection, set "flash" to a helpful message, and return.
+          if (userNode.records[0]._fields[0].properties.isVerified) {
+            session.close();
+            flash = `Your email address (${email}) has already been verified.`;
+            return;
+          }
 
           const currentTime = Date.now();
 
-          // Find a node with the matching token
+          // If the above User node exists, then find a Token node with the matching token.
           const tokenNode = await session.run(
             `MATCH (t:Token {
               token: { tokenParam }
@@ -226,9 +255,9 @@ exports.plugin = {
             throw new Error(flash);
           }
 
-          // Find the matching user node, set the user's "isVerified" property to true, and delete
-          // the Token node and the relationship.
-          const userNode = await session.run(
+          // If both the User and Token nodes exist and if the user has not been verified, then set
+          // the user's "isVerified" property to true, and delete the Token node and the relationship.
+          await session.run(
             `MATCH (u:User {
               email: { emailParam }
             })-[r:USER_EMAIL_VERIFICATION_TOKEN]->(t:Token {
@@ -242,13 +271,6 @@ exports.plugin = {
               isVerifiedParam: true
             }
           );
-
-          // If no User node exists with the above email or with the matching Token node, then close the database connection, set "flash" to an error message, and throw an error.
-          if (userNode.records.length === 0) {
-            session.close();
-            flash = "We were unable to find a user associated with that email address.";
-            throw new Error(flash);
-          }
 
           session.close();
 
@@ -266,8 +288,9 @@ exports.plugin = {
     });
 
 
+// TODO:
 // I will probably need a button for "Resend Verification" on both the LoginRegister and VerifyEmail pages that users can click to resend the token.
-// I need to think through a few simple scenarios that will hanlde all of the possible "Resend Verification" situations.
+// I need to think through a few simple scenarios that will handle all of the possible "Resend Verification" situations.
 // If a user has already tried to register, but has not verified their token, and they try to login, then I will send a flash message telling them "Your email address has not been verified. Please check your email account for a verification link." If their token has expired and they try to login, then I will tell them "Your verification link has expired. Please click 'Resend Verification' below."
 // If the user has been sent a verification token and it has not yet expired and the user tries to register again, then I will tell them "A verification link has already been sent to your email account. Please click that link."
     /**
@@ -361,7 +384,7 @@ exports.plugin = {
             `MATCH (u:User {
               email: { emailParam }
             })
-            SET u.sessionId={ sessionIdParam }
+            SET u.sessionId = { sessionIdParam }
             RETURN u`, {
               emailParam: email,
               sessionIdParam: newSessionId
@@ -502,7 +525,7 @@ exports.plugin = {
             `MATCH (u:User {
               userId: { userIdParam }
             })
-            SET u.scope={ scopeParam }
+            SET u.scope = { scopeParam }
             RETURN u`, {
               userIdParam: userId,
               scopeParam: updatedScopeArray
