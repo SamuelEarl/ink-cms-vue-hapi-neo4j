@@ -14,7 +14,6 @@
 
       <br><br>
 
-      <!-- "We were unable to verify your email address. That link may have expired." -->
       <h2>
         <button
           v-if="userAction === 'resendVerification'"
@@ -24,7 +23,6 @@
         </button>
       </h2>
 
-      <!-- "We were unable to find a user associated with that email address." -->
       <h2>
         <button
           v-if="userAction === 'register'"
@@ -34,7 +32,6 @@
         </button>
       </h2>
 
-      <!-- `Your email address (${email}) has (already) been verified.` -->
       <h2>
         <button
           v-if="userAction === 'login'"
@@ -78,7 +75,7 @@
 
 <script>
 import * as Axios from "axios";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import SpinnerLarge from "@/client/components/SpinnerLarge.vue";
 
 export default {
@@ -97,9 +94,29 @@ export default {
     };
   },
 
-  created() {
-    this.showSpinnerAction(true);
-    this.verifyEmail();
+  computed: {
+    ...mapGetters({
+      getPrevRouteName: "helpers/getPrevRouteName",
+      getUserNotice: "userFeedback/getUserNotice",
+    }),
+  },
+
+  mounted() {
+    // If a user clicks a link in their email to verify their email address, then the previous route
+    // name should not exist. In that case call the following methods.
+    if (!this.getPrevRouteName) {
+      console.log("FIRED IF");
+      this.showSpinnerAction(true);
+      this.verifyEmail();
+    }
+    // If the user has been redirected to this page from another page in the app, then set the
+    // message and userAction properties.
+    else {
+      console.log("FIRED ELSE");
+      this.verifyingEmail = false;
+      this.message = this.getUserNotice.msg;
+      this.userAction = this.getUserNotice.action;
+    }
   },
 
   methods: {
@@ -121,8 +138,10 @@ export default {
       const res = response.data;
       this.showSpinnerAction(false);
       this.verifyingEmail = false;
+
+      this.error = res.error;
+      this.resendVerification = res.resendVerification;
       this.message = res.flash;
-      this.userAction = res.userAction;
     },
 
     async resendVerificationLink() {

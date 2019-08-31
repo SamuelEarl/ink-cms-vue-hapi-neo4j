@@ -7,8 +7,9 @@
 //   })
 // }
 
+
 const state = {
-  prevRouteName: null
+  prevRouteName: null,
 };
 
 
@@ -29,7 +30,7 @@ const mutations = {
 const actions = {
   setPrevRouteNameAction: ({ commit }, prevRouteName) => {
     commit("setPrevRouteName", prevRouteName);
-  }
+  },
 };
 
 

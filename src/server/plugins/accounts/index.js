@@ -197,7 +197,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let resendVerification = null;
+        let userAction = null;
         const email = request.params.email;
         const token = request.params.token;
 
@@ -221,6 +221,7 @@ exports.plugin = {
           if (userNode.records.length === 0) {
             session.close();
             flash = "We were unable to find a user associated with that email address.";
+            userAction = "register";
             throw new Error(flash);
           }
 
@@ -229,6 +230,7 @@ exports.plugin = {
           if (userNode.records[0]._fields[0].properties.isVerified) {
             session.close();
             flash = `Your email address (${email}) has already been verified.`;
+            userAction = "login";
             return;
           }
 
@@ -251,7 +253,7 @@ exports.plugin = {
           if (tokenNode.records.length === 0) {
             session.close();
             flash = "We were unable to verify your email address. That link may have expired.";
-            resendVerification = true;
+            userAction = "resendVerification";
             throw new Error(flash);
           }
 
@@ -282,7 +284,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash, resendVerification };
+          return { error, flash, userAction };
         }
       }
     });
@@ -291,23 +293,123 @@ exports.plugin = {
 // TODO:
 // I will probably need a button for "Resend Verification" on both the LoginRegister and VerifyEmail pages that users can click to resend the token.
 // I need to think through a few simple scenarios that will handle all of the possible "Resend Verification" situations.
-// If a user has already tried to register, but has not verified their token, and they try to login, then I will send a flash message telling them "Your email address has not been verified. Please check your email account for a verification link." If their token has expired and they try to login, then I will tell them "Your verification link has expired. Please click 'Resend Verification' below."
-// If the user has been sent a verification token and it has not yet expired and the user tries to register again, then I will tell them "A verification link has already been sent to your email account. Please click that link."
+
+// (1) If a user tries to login but they have not verified their email address, then I will redirect the user to the "VerificationNotices.vue" page that says, "Your email address has not been verified. Please check your email account for a verification link."
+// (2) If the user has already registered and they try to register again and they still have a valid token, then redirect the user to a page that says "A verification link has already been sent to your email account. Please click that link."
+// (3) If the user has already registered and they try to register again and their token is invalid, then redirect the user to a page that says "A verification link was sent to your email account, but that link has now expired. Please click here to send a new verification link."
+// (4) If the user's token has expired and they try to verify their email address by clicking the link in their email account, then I will do the same as #3 above.
+
     /**
      * Resend verification token
      */
     server.route({
       method: "POST",
-      path: "/resend-verification-token",
+      path: "/resend-verification-link",
       options: {
-
+        // validate: {
+        //   params: {
+        //     email: Joi.string().email().required(),
+        //   }
+        // },
       },
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        let userAction = null;
+        const email = request.params.email;
 
         try {
-          //
+          // Delete any existing Token nodes that are associated with the user.
+
+          // Find a user node with the matching email.
+          const userNode = await session.run(
+            `MATCH (u:User {
+              email: { emailParam }
+            })
+            RETURN u`, {
+              emailParam: email
+            }
+          );
+
+          // If no User node exists with the above email, then close the database connection,
+          // set "flash" to an error message, and throw an error.
+          if (userNode.records.length === 0) {
+            session.close();
+            flash = "We were unable to find a user associated with that email address.";
+            throw new Error(flash);
+          }
+
+          // If the user's email address has already been verified, then close the database
+          // connection, set "flash" to a helpful message, and return.
+          if (userNode.records[0]._fields[0].properties.isVerified) {
+            session.close();
+            flash = `Your email address (${email}) has already been verified.`;
+            return;
+          }
+
+          // If the User node exists and the user's email address has not already been verified,
+          // then create the verification token and send the verification email.
+
+          // Create the verification token.
+          const token = Crypto.randomBytes(16).toString("hex");
+          const timestamp = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
+          // const timestamp = Date.now() + 3000; // 3 seconds = 3000 milliseconds
+
+          // Find the matching user and create the token node and the relationship between the user
+          // and their token.
+          const userTokenRelationship = await session.run(
+            `MATCH (u:User {
+              email: { emailParam }
+            })
+            CREATE (t:Token {
+              token: { tokenParam },
+              createdAt: { timestampParam }
+            })
+            MERGE (u)-[r:USER_EMAIL_VERIFICATION_TOKEN { createdAt: { timestampParam } }]->(t)
+            RETURN u,t,r`, {
+              emailParam: email,
+              tokenParam: token,
+              timestampParam: timestamp
+            }
+          );
+
+          console.log(JSON.stringify(userTokenRelationship));
+
+          // if (userTokenRelationship.records[0]._fields[0].properties.isVerified) {
+          //   session.close();
+          //   flash = `Your email address (${email}) has already been verified.`;
+          //   return;
+          // }
+
+          session.close();
+
+          // Send the email
+          const transporter = Nodemailer.createTransport({
+            service: "Sendgrid", auth: {
+              user: process.env.SENDGRID_USERNAME,
+              pass: process.env.SENDGRID_PASSWORD
+            }
+          });
+
+          const host = request.headers.host;
+
+          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
+
+          const mailOptions = {
+            from: "no-reply@yourwebapplication.com",
+            to: email,
+            subject: "Verify your email address",
+            // If you place the text in between string literals (``), then the text in the email
+            // message might display in monospaced font.
+            text: "Hello " + "firstName" + ",\n\nPlease verify your email address by clicking the link:\n\n" + confUrl + ".\n\n"
+            // html: `<p>Hello ${firstName},</p> <p>Please verify your email address by clicking the link:</p> <p>${confUrl}.</p>`
+          };
+
+          await transporter.sendMail(mailOptions);
+
+          // Set "redirect" to true.
+          // I will probably only send a "redirect" property and if that property is true, then the user will be redirected to a page that instructs them to verify their email address.
+          // redirect = true;
         }
         catch(e) {
           const msg = e.message ? e.message : "Error while attempting to resend verification email.";
@@ -345,6 +447,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        let userAction = null;
         let user = null;
 
         try {
@@ -372,14 +475,14 @@ exports.plugin = {
           // If the user has not verified their email address, then set "flash" to an error message
           // and throw an error.
           if (!existingUser.records[0]._fields[0].properties.isVerified) {
-            flash = "You have not verified your email address. Please check your email for a verification link or click the button below to resend a verification link.";
+            flash = "You have not verified your email address. Please check your email for a verification link or...";
+            userAction = "resendVerification";
             throw new Error(flash);
           }
 
-          // Otherwise set the new sessionId in the database.
+          // Otherwise set the user's new sessionId in the database.
           const newSessionId = `${uuid}-${currentTime}`;
 
-          // Set a new sessionId for this user.
           const userAccount = await session.run(
             `MATCH (u:User {
               email: { emailParam }
@@ -418,7 +521,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash, user };
+          return { error, flash, userAction, user };
         }
       }
     });

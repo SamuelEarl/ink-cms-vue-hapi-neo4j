@@ -110,8 +110,8 @@
       </div>
 
       <footer class="form-bottom form-footer">
-        <button @click="goBack">Cancel</button>
-        <button @click="forgotPassword">Forgot Password?</button>
+        <button @click="forgotPassword">Forgot your password?</button>
+        <button @click="!resendVerification">Need to verify your email?</button>
       </footer>
 
     </div>
@@ -270,25 +270,12 @@ export default {
           this.showSpinnerAction(true);
           this.loginAction(credentials);
 
-          // TODO: If a user tries to login before they have verified their email address, then a flash message will be displayed that says "You have not verified your email address....". When that happens I want to show a red button that says "Resend Verification".
-          // I might need to refactor this method by moving all of the loginAction code from Vuex to this method. I will add a new return value in the login route called "resendVerification". If that is set to true, then I will display the "Resend Verification" button.
+          // TODO:
+          // I might need to refactor this method by moving all of the loginAction code from Vuex to this method. I will add a new return value in the login route called "resendVerification". If that is set to true, then I will redirect the user to the "VerifyEmail" page.
         }
       }
       catch(e) {
         console.error("Login Error:", e);
-      }
-    },
-
-    goBack() {
-      const prevRouteName = this.getPrevRouteName;
-
-      // If the previous route is "verify-email", then redirect the user to the home route.
-      if (prevRouteName === "verify-email") {
-        this.$router.push({ name: "home" });
-      }
-      // Otherwise redirect the user to the previous route.
-      else {
-        this.$router.back();
       }
     },
 
@@ -381,6 +368,7 @@ export default {
 
       .form-bottom {
         display: flex;
+        flex-direction: column;
         justify-content: space-between;
         border-top: 1px solid $medium-gray;
         padding: 20px;

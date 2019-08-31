@@ -7,7 +7,9 @@
 //   })
 // }
 
+
 import debounce from "lodash.debounce";
+import router from "../../router";
 
 const state = {
   flashMessages: [
@@ -17,7 +19,12 @@ const state = {
     // }
   ],
 
-  showSpinner: false
+  showSpinner: false,
+
+  userNotice: {
+    msg: "",
+    action: ""
+  }
 };
 
 
@@ -28,7 +35,11 @@ const getters = {
 
   getShowSpinner: (state) => {
     return state.showSpinner;
-  }
+  },
+
+  getUserNotice: (state) => {
+    return state.userNotice;
+  },
 };
 
 
@@ -47,7 +58,13 @@ const mutations = {
 
   setShowSpinner: (state, status) => {
     state.showSpinner = status;
-  }
+  },
+
+  setUserNotice: (state, [ routeName, userNotice ]) => {
+    state.userNotice.msg = userNotice.msg;
+    state.userNotice.action = userNotice.action;
+    router.push({ name: routeName });
+  },
 };
 
 
@@ -103,7 +120,11 @@ const actions = {
 
   showSpinnerAction: ({ commit }, status) => {
     commit("setShowSpinner", status);
-  }
+  },
+
+  redirectUserNoticeAction: ({ commit }, [ routeName, userNotice ]) => {
+    commit("setUserNotice", [ routeName, userNotice ]);
+  },
 };
 
 
