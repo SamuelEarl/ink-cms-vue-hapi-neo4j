@@ -4,81 +4,57 @@
     <br><br>
 
     <div v-if="verifyingEmail">
-      <h2>Verifying your email address</h2>
+      <h1>Verifying your email address</h1>
       <br>
       <SpinnerLarge />
     </div>
 
     <div v-if="!verifyingEmail">
-      <h2>{{ message }}</h2>
+      <h1>{{ message }}</h1>
 
       <br><br>
 
       <!-- "We were unable to verify your email address. That link may have expired." -->
-      <h2>
+      <h1 v-if="!getShowSpinner">
         <button
-          v-if="cta === 'resendVerification'"
-          @click="resendVerificationLink"
+          v-if="cta === 'sendVerification'"
+          @click="sendVerificationLink"
         >
           Click here to send a new verification link &rsaquo;
         </button>
-      </h2>
+      </h1>
+
+      <SpinnerLarge />
 
       <!-- "We were unable to find a user associated with that email address." -->
-      <h2>
+      <h1>
         <button
           v-if="cta === 'register'"
           @click="redirectToLogin"
         >
           Please register again &rsaquo;
         </button>
-      </h2>
+      </h1>
 
       <!-- `Your email address (${email}) has (already) been verified.` -->
-      <h2>
+      <h1>
         <button
           v-if="cta === 'login'"
           @click="redirectToLogin"
         >
           Please login &rsaquo;
         </button>
-      </h2>
+      </h1>
     </div>
 
-
-<!--
-    <div v-if="!verifyingEmail">
-      "We were unable to verify your email address. That link may have expired."
-      <h2 v-if="error && resendVerification">
-        {{ message }}
-        <br><br>
-        <button @click="resendVerificationLink">Click to resend verification link &rsaquo;</button>
-      </h2>
-
-      "We were unable to find a user associated with that email address."
-      <h2 v-if="error && !resendVerification">
-        {{ message }}
-        <br><br>
-        <button @click="redirectToLogin">Please register again &rsaquo;</button>
-      </h2>
-
-      `Your email address (${email}) has been verified.`
-      `Your email address (${email}) has already been verified.`
-      <h2 v-if="!error && !resendVerification">
-        {{ message }}
-        <br><br>
-        <button @click="redirectToLogin">Please login &rsaquo;</button>
-      </h2>
-    </div> -->
-
-
     <br>
+
   </div>
 </template>
 
 <script>
 import * as Axios from "axios";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import SpinnerLarge from "@/client/components/SpinnerLarge.vue";
 
 export default {
@@ -93,8 +69,14 @@ export default {
       token: this.$route.params.token,
       verifyingEmail: true,
       message: "",
-      cta: "" // This can be "resendVerification", "register", or "login"
+      cta: "" // This can be "sendVerification", "register", or "login"
     };
+  },
+
+  computed: {
+    ...mapGetters({
+      getShowSpinner: "userFeedback/getShowSpinner",
+    })
   },
 
   created() {
@@ -104,7 +86,8 @@ export default {
 
   methods: {
     ...mapActions({
-      showSpinnerAction: "userFeedback/showSpinnerAction"
+      showSpinnerAction: "userFeedback/showSpinnerAction",
+      sendVerificationLinkAction: "auth/sendVerificationLinkAction"
     }),
 
     async verifyEmail() {
@@ -125,14 +108,14 @@ export default {
       this.cta = res.cta;
     },
 
-    async resendVerificationLink() {
-      // TODO: Create auth/resendVerificationLinkAction
-      console.log("Clicked resend verification link");
+    sendVerificationLink() {
+      this.showSpinnerAction(true);
+      this.sendVerificationLinkAction(this.email);
     },
 
     redirectToLogin() {
       this.showSpinnerAction(false);
-      this.$router.push({ name: "login" });
+      this.$router.push({ name: "auth" });
     }
   }
 }
@@ -143,7 +126,7 @@ export default {
   #verify-email {
     text-align: center;
 
-    div, h2, button {
+    div, h1, button {
       color: white;
     }
   }

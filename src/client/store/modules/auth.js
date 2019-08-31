@@ -68,6 +68,7 @@ const mutations = {
 
 
 const actions = {
+  // TODO: The "registerAction" is not currently being used. I need to see if I still need it here after I have completed all of the input validations. I think the current register() method that is being used in AuthForms.vue has different behavior than this registerAction.
   registerAction: async ({ commit, dispatch }, newUser) => {
     try {
       let user = {
@@ -122,6 +123,10 @@ const actions = {
     }
   },
 
+  /**
+   * I wanted to keep the login action in Vuex so that I could set the user profile that will be
+   * used throughout the entire app.
+   */
   loginAction: async ({ commit, dispatch, rootState }, credentials) => {
     try {
       let user = {
@@ -146,13 +151,6 @@ const actions = {
       const res = response.data;
       const msg = res.flash;
 
-      if (res.cta) {
-        const userNotice = { msg: msg, action: res.cta };
-        dispatch("userFeedback/showSpinnerAction", false, { root: true });
-        dispatch("userFeedback/redirectUserNoticeAction", [ "verify-email", userNotice ], { root: true});
-        return;
-      }
-
       // If there is an error, then hide the spinner and display the error message.
       if (res.error) {
         dispatch("userFeedback/showSpinnerAction", false, { root: true });
@@ -167,8 +165,8 @@ const actions = {
 
       const prevRouteName = rootState.helpers.prevRouteName;
 
-      // If the user is logged in, then call "setUserProfile" with the logged in user's profile
-      // object and display a success message.
+      // If the user is successfully logged in, then call "setUserProfile" with the logged in user's
+      // profile object and display a success message.
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
         commit("setUserProfile", [ user, prevRouteName ]);
         commit("setIsAuthenticated", true);
@@ -216,11 +214,13 @@ const actions = {
     }
   },
 
-  resendVerificationLinkAction: async ({ commit, dispatch, rootState }, email) => {
+  sendVerificationLinkAction: async ({ commit, dispatch, rootState }, email) => {
     try {
       const method = "POST";
-      const url = "/resend-verification-link";
-      const payload = email;
+      const url = "/send-verification-link";
+      const payload = {
+        email: email
+      };
 
       const response = await Axios({
         method: method,
@@ -228,36 +228,22 @@ const actions = {
         data: payload
       });
 
-      console.log("resendVerificationLinkActon RESPONSE:", response.data);
+      console.log("sendVerificationLinkActon RESPONSE:", response.data);
 
       const res = response.data;
       const msg = res.flash;
 
-      // If there is an error, then hide the spinner and display the error message.
+      // Once the response comes back from the server, then hide the spinner.
+      dispatch("userFeedback/showSpinnerAction", false, { root: true });
+
+      // If there is an error, then display the error message.
       if (res.error) {
-        dispatch("userFeedback/showSpinnerAction", false, { root: true });
         dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
         return;
       }
 
-      user.firstName = res.user.userFirstName;
-      user.lastName = res.user.userLastName;
-      user.email = res.user.userEmail;
-      user.scope = res.user.userScope;
-
-      const prevRouteName = rootState.helpers.prevRouteName;
-
-      // If the user is logged in, then call "setUserProfile" with the logged in user's profile
-      // object and display a success message.
-      if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
-        commit("setUserProfile", [ user, prevRouteName ]);
-        commit("setIsAuthenticated", true);
-
-        // Hide the spinner
-        dispatch("userFeedback/showSpinnerAction", false, { root: true });
-        // Show a success message to the user
-        dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
-      }
+      // Route the user to the EmailSent component.
+      router.push({ name: "email-sent", params: { email: email } });
     }
     catch(e) {
       console.error("loginAction Error:", e);

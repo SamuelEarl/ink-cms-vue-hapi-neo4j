@@ -2,7 +2,7 @@
   <div id="auth-layout">
     <div id="wrapper">
 
-      <div id="content-top" class="gradient-blue">
+      <div id="content-top" class="blue-gradient">
         <div class="container">
           <br>
           <router-view />

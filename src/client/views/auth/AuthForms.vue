@@ -37,7 +37,7 @@
               <br>
 
               <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
-              <button v-if="!getShowSpinner" class="btn-primary btn-form gradient-blue">Login</button>
+              <button v-if="!getShowSpinner" class="btn-primary btn-form blue-gradient">Login</button>
               <SpinnerSmall />
             </form>
           </div>
@@ -87,7 +87,7 @@
               <br>
 
               <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Register</button> -->
-              <button v-if="!getShowSpinner" class="btn-primary btn-form gradient-blue">Register</button>
+              <button v-if="!getShowSpinner" class="btn-primary btn-form blue-gradient">Register</button>
               <SpinnerSmall />
             </form>
           </div>
@@ -118,7 +118,7 @@
         </header>
 
         <div class="form-body">
-          <form @submit.prevent="resendVerificationLink">
+          <form @submit.prevent="sendVerificationLink">
             <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
             <!-- <div class="validation-messages">
               <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
@@ -260,7 +260,8 @@ export default {
       flashAction: "userFeedback/flashAction",
       // registerAction: "auth/registerAction",
       loginAction: "auth/loginAction",
-      showSpinnerAction: "userFeedback/showSpinnerAction"
+      showSpinnerAction: "userFeedback/showSpinnerAction",
+      sendVerificationLinkAction: "auth/sendVerificationLinkAction"
     }),
 
     openTab(tabName, event) {
@@ -351,6 +352,8 @@ export default {
           return;
         }
 
+        // If a user successfully registers, they will be redirected to the "email-sent" route
+        // where they will be instructed to verify their email address.
         if (res.redirect) {
           this.showSpinnerAction(false);
           this.$router.push({ name: "email-sent", params: { email: this.email } });
@@ -375,9 +378,6 @@ export default {
         // if (!this.$v.email.$invalid && !this.$v.password.$invalid) {
           this.showSpinnerAction(true);
           this.loginAction(credentials);
-
-          // TODO:
-          // I might need to refactor this method by moving all of the loginAction code from Vuex to this method. I will add a new return value in the login route called "resendVerification". If that is set to true, then I will redirect the user to the "VerifyEmail" page.
         }
       }
       catch(e) {
@@ -385,9 +385,9 @@ export default {
       }
     },
 
-    async resendVerificationLink() {
-      // TODO: Create auth/resendVerificationLinkAction
-      console.log("Clicked resend verification link");
+    sendVerificationLink() {
+      this.showSpinnerAction(true);
+      this.sendVerificationLinkAction(this.email);
     },
 
     forgotPassword() {

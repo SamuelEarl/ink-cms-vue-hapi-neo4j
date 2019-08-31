@@ -1,0 +1,128 @@
+{
+  "records": [
+    {
+      "keys": [
+        "u",
+        "t",
+        "r"
+      ],
+      "length": 3,
+      "_fields": [
+        {
+          "identity": {
+            "low": 28,
+            "high": 0
+          },
+          "labels": [
+            "User"
+          ],
+          "properties": {
+            "lastName": "Earl",
+            "firstName": "Samuel",
+            "password": "$2b$10$w3BrdpH2TClkVZqpzXrqs.BikqCDSUK.viRWGqzAnIwhpDOPVPvCa",
+            "isVerified": false,
+            "scope": [
+              "user",
+              "admin"
+            ],
+            "sessionId": "62860198-b064-4881-86fa-037ac0d39e8a-1567269397368",
+            "userId": "4267e8ed-50fc-45b8-8c0f-f009833b1851-1567269397368",
+            "email": "samueltremain@gmail.com"
+          }
+        },
+        {
+          "identity": {
+            "low": 24,
+            "high": 0
+          },
+          "labels": [
+            "Token"
+          ],
+          "properties": {
+            "createdAt": 1567377880937,
+            "token": "bdb1336280cf7367a69448c5ab72fe3d"
+          }
+        },
+        {
+          "identity": {
+            "low": 23,
+            "high": 0
+          },
+          "start": {
+            "low": 28,
+            "high": 0
+          },
+          "end": {
+            "low": 24,
+            "high": 0
+          },
+          "type": "EMAIL_VERIFICATION_TOKEN",
+          "properties": {
+            "createdAt": 1567377880937
+          }
+        }
+      ],
+      "_fieldLookup": {
+        "u": 0,
+        "t": 1,
+        "r": 2
+      }
+    }
+  ],
+  "summary": {
+    "statement": {
+      "text": "MATCH (u:User {\n              email: { emailParam }\n            })\n            CREATE (t:Token {\n              token: { tokenParam },\n              createdAt: { timestampParam }\n            })\n            MERGE (u)-[r:EMAIL_VERIFICATION_TOKEN { createdAt: { timestampParam } }]->(t)\n            RETURN u,t,r",
+      "parameters": {
+        "emailParam": "samueltremain@gmail.com",
+        "tokenParam": "bdb1336280cf7367a69448c5ab72fe3d",
+        "timestampParam": 1567377880937
+      }
+    },
+    "statementType": "rw",
+    "counters": {
+      "_stats": {
+        "nodesCreated": 1,
+        "nodesDeleted": 0,
+        "relationshipsCreated": 1,
+        "relationshipsDeleted": 0,
+        "propertiesSet": 3,
+        "labelsAdded": 1,
+        "labelsRemoved": 0,
+        "indexesAdded": 0,
+        "indexesRemoved": 0,
+        "constraintsAdded": 0,
+        "constraintsRemoved": 0
+      }
+    },
+    "updateStatistics": {
+      "_stats": {
+        "nodesCreated": 1,
+        "nodesDeleted": 0,
+        "relationshipsCreated": 1,
+        "relationshipsDeleted": 0,
+        "propertiesSet": 3,
+        "labelsAdded": 1,
+        "labelsRemoved": 0,
+        "indexesAdded": 0,
+        "indexesRemoved": 0,
+        "constraintsAdded": 0,
+        "constraintsRemoved": 0
+      }
+    },
+    "plan": false,
+    "profile": false,
+    "notifications": [],
+    "server": {
+      "address": "172.28.1.2:7687",
+      "version": "Neo4j/3.5.3"
+    },
+    "resultConsumedAfter": {
+      "low": 1,
+      "high": 0
+    },
+    "resultAvailableAfter": {
+      "low": 184,
+      "high": 0
+    }
+  }
+}
