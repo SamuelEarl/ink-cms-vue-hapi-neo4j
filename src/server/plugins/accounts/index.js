@@ -287,6 +287,13 @@ exports.plugin = {
 
     /**
      * Send verification link
+     * NOTE: To keep things easy and simple for a better user experience, I do not tell users who
+     * have a valid email verification token to check their email for a verification link. Instead
+     * if the user has registered but has not verified their email address and if they try to
+     * register again or login, then I simply tell the user to "click the link below to send a new
+     * verification token". That also keeps things simpler for me as a developer because I do not
+     * have to check for all sorts of scenarios. I simply delete any old verification tokens and
+     * create a new one that gets sent to the user's email address.
      */
     server.route({
       method: "POST",
