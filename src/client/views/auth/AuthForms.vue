@@ -118,7 +118,7 @@
         </header>
 
         <div class="form-body">
-          <form @submit.prevent="sendVerificationLink">
+          <form @submit.prevent="resendVerificationLink">
             <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
             <!-- <div class="validation-messages">
               <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
@@ -157,7 +157,7 @@
         <header class="form-header">
           <div class="header-content">
             <h3>Forgot Your Password?</h3>
-            <p>Please enter the email address that you used to register with us and we will reset your password.</p>
+            <p>Please enter the email address that you used to register for an account and we will reset your password.</p>
           </div>
         </header>
 
@@ -261,7 +261,7 @@ export default {
       // registerAction: "auth/registerAction",
       loginAction: "auth/loginAction",
       showSpinnerAction: "userFeedback/showSpinnerAction",
-      sendVerificationLinkAction: "auth/sendVerificationLinkAction"
+      resendVerificationLinkAction: "auth/resendVerificationLinkAction"
     }),
 
     openTab(tabName, event) {
@@ -385,9 +385,9 @@ export default {
       }
     },
 
-    sendVerificationLink() {
+    resendVerificationLink() {
       this.showSpinnerAction(true);
-      this.sendVerificationLinkAction(this.email);
+      this.resendVerificationLinkAction(this.email);
     },
 
     forgotPassword() {

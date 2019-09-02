@@ -214,10 +214,10 @@ const actions = {
     }
   },
 
-  sendVerificationLinkAction: async ({ commit, dispatch, rootState }, email) => {
+  resendVerificationLinkAction: async ({ commit, dispatch, rootState }, email) => {
     try {
       const method = "POST";
-      const url = "/send-verification-link";
+      const url = "/resend-verification-link";
       const payload = {
         email: email
       };
@@ -228,7 +228,7 @@ const actions = {
         data: payload
       });
 
-      console.log("sendVerificationLinkActon RESPONSE:", response.data);
+      console.log("resendVerificationLinkActon RESPONSE:", response.data);
 
       const res = response.data;
       const msg = res.flash;

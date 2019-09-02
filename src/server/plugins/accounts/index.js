@@ -247,7 +247,7 @@ exports.plugin = {
           if (tokenNode.records.length === 0) {
             session.close();
             flash = "We were unable to verify your email address. That link may have expired.";
-            cta = "sendVerification";
+            cta = "resendVerification";
             throw new Error(flash);
           }
 
@@ -286,7 +286,7 @@ exports.plugin = {
 
 
     /**
-     * Send verification link
+     * Resend verification link
      * NOTE: To keep things easy and simple for a better user experience, I do not tell users who
      * have a valid email verification token to check their email for a verification link. Instead
      * if the user has registered but has not verified their email address and if they try to
@@ -297,10 +297,10 @@ exports.plugin = {
      */
     server.route({
       method: "POST",
-      path: "/send-verification-link",
+      path: "/resend-verification-link",
       options: {
         // validate: {
-        //   params: {
+        //   payload: {
         //     email: Joi.string().email().required(),
         //   }
         // },
@@ -418,14 +418,14 @@ exports.plugin = {
 
     // TODO: Finish this route and test it!!!
     /**
-     * Password reset for forgot password flow
+     * Forgot your password? Send a password reset link.
      */
     server.route({
       method: "POST",
-      path: "/forgot-password",
+      path: "/send-password-reset-link",
       options: {
         // validate: {
-        //   params: {
+        //   payload: {
         //     email: Joi.string().email().required(),
         //   }
         // },
@@ -454,56 +454,31 @@ exports.plugin = {
             throw new Error(flash);
           }
 
-          // If the user's email address has already been verified, then close the database
-          // connection, set "flash" to a helpful message, and return.
-          if (userNode.records.length > 0 && userNode.records[0]._fields[0].properties.isVerified) {
-            session.close();
-            flash = `Your email address (${email}) has already been verified. Please login.`;
-            return;
-          }
-
-          // If the User node exists and the user's email address has not already been verified, then:
-          // (1) Delete any existing Token nodes that are associated with the user.
-          // (2) Create a new the verification token node and associate it with the user.
-          // (3) Send the verification email.
-
-          // Delete any existing Token nodes that are associated with the user.
-          await session.run(
-            `MATCH (u:User {
-              email: { emailParam }
-            })-[r:EMAIL_VERIFICATION_TOKEN]->(t:Token)
-            DELETE t,r
-            RETURN u`, {
-              emailParam: email
-            }
-          );
-
-          // Create a new verification token.
+          // If a User node exists with the above email, then create a token, set a property on the
+          // User node called "passwordResetToken" that equals the token, set another property on
+          // the User node called "passwordResetExpires" that equals a timestamp that is 24 hours in
+          // the future.
           const token = Crypto.randomBytes(16).toString("hex");
           const timestamp = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
           // const timestamp = Date.now() + 3000; // 3 seconds = 3000 milliseconds
 
-          // Find the matching user and create the token node and the relationship between the user
-          // and their token.
-          const userTokenRelationship = await session.run(
+          const setPasswordReset = await session.run(
             `MATCH (u:User {
               email: { emailParam }
             })
-            CREATE (t:Token {
-              token: { tokenParam },
-              createdAt: { timestampParam }
-            })
-            MERGE (u)-[r:EMAIL_VERIFICATION_TOKEN { createdAt: { timestampParam } }]->(t)
-            RETURN u,t,r`, {
+            SET
+              passwordResetToken = { tokenParam },
+              passwordResetExpires = { timestampParam }
+            RETURN u`, {
               emailParam: email,
               tokenParam: token,
               timestampParam: timestamp
             }
           );
 
-          const firstName = userTokenRelationship.records[0]._fields[0].properties.firstName;
-
           session.close();
+
+          const firstName = setPasswordReset.records[0]._fields[0].properties.firstName;
 
           // Send the email
           const transporter = Nodemailer.createTransport({
@@ -515,27 +490,181 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
+          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/reset-password/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
             to: email,
-            subject: "Verify your email address",
+            subject: "Reset your password",
             // If you place the text in between string literals (``), then the text in the email
             // message might display in monospaced font.
-            text: "Hello " + firstName + ",\n\nPlease verify your email address by clicking the link:\n\n" + confUrl + ".\n\n"
-            // html: `<p>Hello ${firstName},</p> <p>Please verify your email address by clicking the link:</p> <p>${confUrl}.</p>`
+            text: "Hello " + firstName + ",\n\nYou are receiving this email because you requested a password reset for your account. Please click the following link to reset your password:\n\n" + confUrl + ".\n\nIf you did not request a password reset, then ignore this email and your password will remain unchanged."
           };
 
           await transporter.sendMail(mailOptions);
         }
         catch(e) {
-          const msg = e.message ? e.message : "Error while attempting to resend verification email.";
+          const msg = e.message ? e.message : "Error while attempting to send password reset email.";
           const errorRes = server.methods.catch(e, msg, request.path);
           error = errorRes;
         }
         finally {
           return { error, flash };
+        }
+      }
+    });
+
+
+    // TODO: Finish this route and test it.
+    /**
+     * Forgot your password? Check if the user's password reset token is still valid.
+     */
+    server.route({
+      method: "GET",
+      path: "/reset-password/{email}/{token}",
+      options: {
+        // validate: {
+        //   params: {
+        //     email: Joi.string().email().required(),
+        //     token: Joi.string().required()
+        //   }
+        // },
+      },
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+        let cta = null;
+        const email = request.params.email;
+        const token = request.params.token;
+
+        try {
+          const currentTime = Date.now();
+
+          // Find a user node with a matching "passwordResetToken" and a "passwordResetExpires"
+          // property that has not expired.
+          const userNode = await session.run(
+            `MATCH (u:User {
+              passwordResetToken: { tokenParam },
+            })
+            WHERE u.passwordResetExpires > { currentTimeParam }
+            RETURN u`, {
+              tokenParam: token,
+              currentTimeParam: currentTime,
+            }
+          );
+
+          session.close();
+
+          // If no User node exists with the above passwordResetToken, then set "flash" to an error
+          // message and throw an error.
+          if (userNode.records.length === 0) {
+            flash = "Your password reset link is invalid or has expired.";
+            cta = "tryAgain";
+            throw new Error(flash);
+          }
+
+          flash = `Please reset the password that is associated with this email address: ${email}.`;
+          cta = "resetPassword";
+        }
+        catch(e) {
+          const msg = e.message ? e.message : "Error while attempting to verify request for password reset.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash, cta };
+        }
+      }
+    });
+
+
+    // TODO: Finish this route and test it.
+    /**
+     * Forgot your password? Reset the user's password.
+     */
+    server.route({
+      method: "POST",
+      path: "/reset-password",
+      options: {
+        // validate: {
+        //   payload: {
+        //     email: Joi.string().email().required(),
+        //   }
+        // },
+      },
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+        let cta = null;
+        const email = request.payload.email;
+        const token = request.payload.token;
+        const password = request.payload.password;
+
+        try {
+          const currentTime = Date.now();
+
+          // Find a user node with a matching "passwordResetToken" and a "passwordResetExpires"
+          // property that has not expired. If there is a matching node, then update the "password"
+          // property with the password that the user submitted and remove the "passwordResetToken"
+          // and "passwordResetExpires" properties.
+          const userNode = await session.run(
+            `MATCH (u:User {
+              passwordResetToken: { tokenParam },
+            })
+            WHERE u.passwordResetExpires > { currentTimeParam }
+            SET u.password = { passwordParam }
+            REMOVE
+              u.passwordResetToken,
+              u.passwordResetExpires
+            RETURN u`, {
+              tokenParam: token,
+              currentTimeParam: currentTime,
+              passwordParam: password
+            }
+          );
+
+          session.close();
+
+          // If no User node exists with the above passwordResetToken or if the token has expired,
+          // then set "flash" to an error message and throw an error.
+          if (userNode.records.length === 0) {
+            flash = "Your password reset link is invalid or has expired.";
+            cta = "tryAgain";
+            throw new Error(flash);
+          }
+
+          // If the password was successfully updated, then send a confirmation email to the user.
+          const firstName = userNode.records[0]._fields[0].properties.firstName;
+
+          // Send the email
+          const transporter = Nodemailer.createTransport({
+            service: "Sendgrid", auth: {
+              user: process.env.SENDGRID_USERNAME,
+              pass: process.env.SENDGRID_PASSWORD
+            }
+          });
+
+          const mailOptions = {
+            from: "no-reply@yourwebapplication.com",
+            to: email,
+            subject: "Your password has been reset",
+            // If you place the text in between string literals (``), then the text in the email
+            // message might display in monospaced font.
+            text: "Hello " + firstName + ",\n\nThe password for your account has been successfully updated."
+          };
+
+          await transporter.sendMail(mailOptions);
+
+          flash = "You have successfully updated your password.";
+          cta = "login";
+        }
+        catch(e) {
+          const msg = e.message ? e.message : "Error while attempting to reset password.";
+          const errorRes = server.methods.catch(e, msg, request.path);
+          error = errorRes;
+        }
+        finally {
+          return { error, flash, cta };
         }
       }
     });
@@ -588,7 +717,7 @@ exports.plugin = {
           // If no user exists with the above email or the password does not match the one stored in
           // the database, then set "flash" to an error message and throw an error.
           if (existingUser.records.length === 0 || !(await Bcrypt.compare(password, existingUser.records[0]._fields[0].properties.password))) {
-            flash = "The email or password that you provided does not match our records. Do you need to register for an account?";
+            flash = "The email or password that you provided does not match our records. Please register.";
             throw new Error(flash);
           }
 
@@ -596,7 +725,7 @@ exports.plugin = {
           // and throw an error.
           if (!existingUser.records[0]._fields[0].properties.isVerified) {
             flash = "You have not verified your email address. Click the link below to send a new verification email.";
-            cta = "sendVerification";
+            cta = "resendVerification";
             throw new Error(flash);
           }
 
