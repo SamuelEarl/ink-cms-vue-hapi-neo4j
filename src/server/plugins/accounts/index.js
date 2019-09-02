@@ -404,7 +404,7 @@ exports.plugin = {
     });
 
 
-    // TODO: Finish this route and test it!!!
+    // TODO: I think I am done with this route, but I want to test it again.
     /**
      * Forgot your password? Send a password reset link.
      */
@@ -486,7 +486,7 @@ exports.plugin = {
             subject: "Reset your password",
             // If you place the text in between string literals (``), then the text in the email
             // message might display in monospaced font.
-            text: "Hello " + firstName + ",\n\nYou are receiving this email because you requested a password reset for your account. Please click the following link to reset your password:\n\n" + confUrl + ".\n\nIf you did not request a password reset, then ignore this email and your password will remain unchanged."
+            text: "Hello " + firstName + ",\n\nYou have requested to reset your password. Please click the following link to reset your password:\n\n" + confUrl + ".\n\nIf you did not request a password reset, then ignore this email and your password will remain unchanged."
           };
 
           await transporter.sendMail(mailOptions);
@@ -503,7 +503,7 @@ exports.plugin = {
     });
 
 
-    // TODO: Finish this route and test it.
+    // TODO: I think I am done with this route, but I want to test it again.
     /**
      * Forgot your password? Check if the user's password reset token is still valid.
      */
@@ -541,9 +541,6 @@ exports.plugin = {
             }
           );
 
-          console.log("FIRED 2!");
-
-
           session.close();
 
           // If no User node exists with the above passwordResetToken, then set "flash" to an error
@@ -554,7 +551,7 @@ exports.plugin = {
             throw new Error(flash);
           }
 
-          // flash = `Please reset the password that is associated with this email address: ${email}.`;
+          flash = "Reset your password";
           cta = "resetPassword";
         }
         catch(e) {
@@ -569,7 +566,7 @@ exports.plugin = {
     });
 
 
-    // TODO: Finish this route and test it.
+    // TODO: I think I am done with this route, but I want to test it again.
     /**
      * Forgot your password? Reset the user's password.
      */
@@ -580,6 +577,9 @@ exports.plugin = {
         // validate: {
         //   payload: {
         //     email: Joi.string().email().required(),
+        //     password: Joi.string().min(6).max(200).required().strict(),
+        //     confirmPassword: Joi.string().valid(Joi.ref("password")).required().strict(),
+        //     token: Joi.string().required(),
         //   }
         // },
       },
@@ -588,11 +588,16 @@ exports.plugin = {
         let flash = null;
         let cta = null;
         const email = request.payload.email;
-        const token = request.payload.token;
         const password = request.payload.password;
+        const token = request.payload.token;
 
         try {
           const currentTime = Date.now();
+
+          // Hash the password before it is stored in the database.
+          // See https://www.npmjs.com/package/bcrypt.
+          const saltRounds = 10;
+          const hash = await Bcrypt.hash(password, saltRounds);
 
           // Find a user node with a matching "passwordResetToken" and a "passwordResetExpires"
           // property that has not expired. If there is a matching node, then update the "password"
@@ -610,7 +615,7 @@ exports.plugin = {
             RETURN u`, {
               tokenParam: token,
               currentTimeParam: currentTime,
-              passwordParam: password
+              passwordParam: hash
             }
           );
 
@@ -641,13 +646,12 @@ exports.plugin = {
             subject: "Your password has been reset",
             // If you place the text in between string literals (``), then the text in the email
             // message might display in monospaced font.
-            text: "Hello " + firstName + ",\n\nThe password for your account has been successfully updated."
+            text: "Hello " + firstName + ",\n\nYou have successfully updated your password."
           };
 
           await transporter.sendMail(mailOptions);
 
-          flash = "You have successfully updated your password.";
-          cta = "login";
+          flash = "You have successfully updated your password. Please log in.";
         }
         catch(e) {
           const msg = e.message ? e.message : "Error while attempting to reset password.";

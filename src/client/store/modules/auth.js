@@ -46,7 +46,7 @@ const mutations = {
     state.userProfile = userProfile;
 
     // If the previous route is "verify-email", then redirect the user to the home route.
-    if (prevRouteName === "verify-email") {
+    if (prevRouteName === "verify-email" || prevRouteName === "reset-password") {
       router.push({ name: "home" });
     }
     // Otherwise redirect the user to the previous route.

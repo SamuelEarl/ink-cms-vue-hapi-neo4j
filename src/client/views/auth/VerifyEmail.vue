@@ -15,7 +15,7 @@
       <br><br>
 
       <!-- "We were unable to verify your email address. That link may have expired." -->
-      <!-- TODO: Can I remove this v-if="!getShowSpinner"? -->
+      <!-- TODO: Can I remove this v-if="!getShowSpinner"? I don't think it is necessary, but I need to test it before I permanently remove it. -->
       <!-- TODO: I think the v-ifs need to be in the <h1> elements. -->
       <h1 v-if="!getShowSpinner">
         <button

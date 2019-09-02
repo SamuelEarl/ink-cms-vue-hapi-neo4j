@@ -253,6 +253,11 @@ export default {
 
   mounted() {
     this.displayLoginForm();
+
+    // // Click on the first tab in the login form to select it when the form first loads
+    // let firstTab = document.getElementsByClassName("tablink")[0].click();
+    // // Add the "active-tab" class to the currently selected tab.
+    // firstTab += " active-tab";
   },
 
   methods: {
@@ -346,16 +351,16 @@ export default {
         const res = response.data;
         const msg = res.flash;
 
+        this.showSpinnerAction(false);
+
         // If there is an error, then display the error message.
         if (res.error) {
           this.flashAction({ flashType: "error", flashMsg: msg });
-          this.showSpinnerAction(false);
           return;
         }
 
         // If a user successfully registers, they will be redirected to the "email-sent" route
         // where they will be instructed to check their email account.
-        this.showSpinnerAction(false);
         this.$router.push({ name: "email-sent", params: { email: this.email } });
       }
       catch(e) {
@@ -411,17 +416,17 @@ export default {
         const res = response.data;
         const msg = res.flash;
 
+        this.showSpinnerAction(false);
+
         // If there is an error, then display the error message.
         if (res.error) {
           this.flashAction({ flashType: "error", flashMsg: msg });
-          this.showSpinnerAction(false);
           return;
         }
 
         // If a user successfully submits a request to reset their password, then they will be
         // redirected to the "email-sent" route where they will be instructed to check their email
         // account.
-        this.showSpinnerAction(false);
         this.$router.push({ name: "email-sent", params: { email: this.email } });
       }
       catch(e) {

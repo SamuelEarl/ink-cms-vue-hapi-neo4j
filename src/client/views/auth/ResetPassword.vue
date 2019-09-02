@@ -17,12 +17,13 @@
       <!-- "Your password reset link is invalid or has expired." -->
       <h1 v-if="cta === 'tryAgain'">
         <button
-          @click="redirectToLogin"
+          @click="redirectToPasswordReset"
         >
           Request a new password reset &rsaquo;
         </button>
       </h1>
 
+      <!-- TODO: Create an "AuthFormContainer" component and refactor all of the auth forms to use it. I think I would use slots to do this. -->
       <div v-if="cta === 'resetPassword'" id="reset-password">
         <form @submit.prevent="resetPassword">
           <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
@@ -70,12 +71,12 @@ export default {
   data() {
     return {
       email: this.$route.params.email,
+      password: "",
+      confirmPassword: "",
       token: this.$route.params.token,
       validatingPasswordResetLink: true,
       message: "",
       cta: "", // This can be "tryAgain" or "resetPassword",
-      password: "",
-      confirmPassword: ""
     };
   },
 
@@ -93,6 +94,7 @@ export default {
   methods: {
     ...mapActions({
       showSpinnerAction: "userFeedback/showSpinnerAction",
+      flashAction: "userFeedback/flashAction"
     }),
 
     async checkPasswordResetLink() {
@@ -113,13 +115,44 @@ export default {
       this.cta = res.cta;
     },
 
-    resetPassword() {
-      console.log("Clicked resetPassword");
+    async resetPassword() {
+      this.showSpinnerAction(true);
+
+      const method = "POST";
+      const url = "/reset-password";
+      const payload = {
+        email: this.email,
+        token: this.token,
+        password: this.password,
+        confirmPassword: this.confirmPassword
+      };
+
+      const response = await Axios({
+        method: method,
+        url: url,
+        data: payload
+      });
+
+      console.log("checkPasswordResetLink RESPONSE:", response.data);
+
+      const res = response.data;
+      const msg = res.flash;
+
+      this.showSpinnerAction(false);
+
+      if (res.error) {
+        this.flashAction({ flashType: "error", flashMsg: msg });
+        return;
+      }
+
+      // If the user successfully updates their password, then redirect them to the login form.
+      this.flashAction({ flashType: "success", flashMsg: msg });
+      this.$router.push({ name: "auth" });
     },
 
-    redirectToLogin() {
+    redirectToPasswordReset() {
       this.showSpinnerAction(false);
-      this.$router.push({ name: "auth" });
+      this.$router.push({ name: "password-reset" });
     }
   }
 }
