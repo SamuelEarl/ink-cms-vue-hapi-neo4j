@@ -3,48 +3,50 @@
 
     <br><br>
 
-    <div v-if="verifyingEmail">
-      <h1>Verifying your email address</h1>
+    <div v-if="validatingPasswordResetLink">
+      <h1>Checking if password reset link is valid</h1>
       <br>
       <SpinnerLarge />
     </div>
 
-    <div v-if="!verifyingEmail">
+    <div v-if="!validatingPasswordResetLink">
       <h1>{{ message }}</h1>
 
       <br><br>
 
-      <!-- "We were unable to verify your email address. That link may have expired." -->
-      <h1 v-if="!getShowSpinner">
+      <!-- "Your password reset link is invalid or has expired." -->
+      <h1 v-if="cta === 'tryAgain'">
         <button
-          v-if="cta === 'resendVerification'"
-          @click="resendVerificationLink"
-        >
-          Click here to send a new verification link &rsaquo;
-        </button>
-      </h1>
-
-      <SpinnerLarge />
-
-      <!-- "We were unable to find a user associated with that email address." -->
-      <h1>
-        <button
-          v-if="cta === 'register'"
           @click="redirectToLogin"
         >
-          Please register again &rsaquo;
+          Request a new password reset &rsaquo;
         </button>
       </h1>
 
-      <!-- `Your email address (${email}) has (already) been verified.` -->
-      <h1>
-        <button
-          v-if="cta === 'login'"
-          @click="redirectToLogin"
-        >
-          Please login &rsaquo;
-        </button>
-      </h1>
+      <div v-if="cta === 'resetPassword'" id="reset-password">
+        <form @submit.prevent="resetPassword">
+          <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+          <!-- <div class="validation-messages">
+            <div v-if="!$v.password.required" class="error">Password is required</div>
+            <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
+            <br v-if="$v.password.$invalid">
+          </div> -->
+
+          <br>
+
+          <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
+          <!-- <div class="validation-messages">
+            <div v-if="!$v.confirmPassword.sameAsPassword" class="error">Passwords must match</div>
+            <br v-if="$v.confirmPassword.$invalid">
+          </div> -->
+
+          <br>
+
+          <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Reset Password</button> -->
+          <button v-if="!getShowSpinner" class="btn-primary btn-form blue-gradient">Reset Password</button>
+          <SpinnerSmall />
+        </form>
+      </div>
     </div>
 
     <br>
@@ -55,11 +57,13 @@
 <script>
 import * as Axios from "axios";
 import { mapActions, mapGetters } from "vuex";
+import SpinnerSmall from "@/client/components/SpinnerSmall.vue";
 import SpinnerLarge from "@/client/components/SpinnerLarge.vue";
 
 export default {
-  name: "VerifyEmail",
+  name: "ResetPassword",
   components: {
+    SpinnerSmall,
     SpinnerLarge
   },
 
@@ -67,9 +71,11 @@ export default {
     return {
       email: this.$route.params.email,
       token: this.$route.params.token,
-      verifyingEmail: true,
+      validatingPasswordResetLink: true,
       message: "",
-      cta: "" // This can be "resendVerification", "register", or "login"
+      cta: "", // This can be "tryAgain" or "resetPassword",
+      password: "",
+      confirmPassword: ""
     };
   },
 
@@ -81,36 +87,34 @@ export default {
 
   created() {
     this.showSpinnerAction(true);
-    this.verifyEmail();
+    this.checkPasswordResetLink();
   },
 
   methods: {
     ...mapActions({
       showSpinnerAction: "userFeedback/showSpinnerAction",
-      resendVerificationLinkAction: "auth/resendVerificationLinkAction"
     }),
 
-    async verifyEmail() {
+    async checkPasswordResetLink() {
       const method = "GET";
-      const url = `/verify-email/${this.email}/${this.token}`;
+      const url = `/reset-password/${this.email}/${this.token}`;
 
       const response = await Axios({
         method: method,
         url: url
       });
 
-      console.log("verifyEmail RESPONSE:", response.data);
+      console.log("checkPasswordResetLink RESPONSE:", response.data);
 
       const res = response.data;
       this.showSpinnerAction(false);
-      this.verifyingEmail = false;
+      this.validatingPasswordResetLink = false;
       this.message = res.flash;
       this.cta = res.cta;
     },
 
-    resendVerificationLink() {
-      this.showSpinnerAction(true);
-      this.resendVerificationLinkAction(this.email);
+    resetPassword() {
+      console.log("Clicked resetPassword");
     },
 
     redirectToLogin() {

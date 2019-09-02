@@ -133,7 +133,7 @@
               v-if="!getShowSpinner"
               class="btn-tertiary btn-form"
             >
-              Send
+              Send Verification
             </button>
 
             <SpinnerSmall />
@@ -157,12 +157,12 @@
         <header class="form-header">
           <div class="header-content">
             <h3>Forgot Your Password?</h3>
-            <p>Please enter the email address that you used to register for an account and we will reset your password.</p>
+            <p>Please enter your email address to request a password reset.</p>
           </div>
         </header>
 
         <div class="form-body">
-          <form @submit.prevent="resetPassword">
+          <form @submit.prevent="forgotPassword">
             <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
             <!-- <div class="validation-messages">
               <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
@@ -177,7 +177,7 @@
               v-if="!getShowSpinner"
               class="btn-tertiary btn-form"
             >
-              Send
+              Request Password Reset
             </button>
 
             <SpinnerSmall />
@@ -322,6 +322,7 @@ export default {
           confirmPassword: this.confirmPassword
         };
 
+        // TODO: Remove the following line if I am not going to use it.
         // this.registerAction(newUser);
 
         const method = "POST";
@@ -353,14 +354,9 @@ export default {
         }
 
         // If a user successfully registers, they will be redirected to the "email-sent" route
-        // where they will be instructed to verify their email address.
-        if (res.redirect) {
-          this.showSpinnerAction(false);
-          this.$router.push({ name: "email-sent", params: { email: this.email } });
-        }
-        else {
-          throw new Error("Error while attempting to register user.");
-        }
+        // where they will be instructed to check their email account.
+        this.showSpinnerAction(false);
+        this.$router.push({ name: "email-sent", params: { email: this.email } });
       }
       catch(e) {
         console.error("Registration Error:", e);
@@ -390,8 +386,47 @@ export default {
       this.resendVerificationLinkAction(this.email);
     },
 
-    forgotPassword() {
-      console.log("Forgot Password clicked!");
+    async forgotPassword() {
+      try {
+        const method = "POST";
+        const url = "/send-password-reset-link";
+        const payload = {
+          email: this.email
+        };
+        let response;
+
+        if (true) {
+        // if (!this.$v.email.$invalid) {
+          this.showSpinnerAction(true);
+
+          response = await Axios({
+            method: method,
+            url: url,
+            data: payload
+          });
+        }
+
+        console.log("forgotPassword RESPONSE:", response.data);
+
+        const res = response.data;
+        const msg = res.flash;
+
+        // If there is an error, then display the error message.
+        if (res.error) {
+          this.flashAction({ flashType: "error", flashMsg: msg });
+          this.showSpinnerAction(false);
+          return;
+        }
+
+        // If a user successfully submits a request to reset their password, then they will be
+        // redirected to the "email-sent" route where they will be instructed to check their email
+        // account.
+        this.showSpinnerAction(false);
+        this.$router.push({ name: "email-sent", params: { email: this.email } });
+      }
+      catch(e) {
+        console.error("Forgot Password Error:", e);
+      }
     }
   }
 }

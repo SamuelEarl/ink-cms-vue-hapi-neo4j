@@ -4,7 +4,7 @@
     <br />
     <h1>An email has been sent to {{ $route.params.email }}.</h1>
     <br />
-    <h1>Please verify your email address.</h1>
+    <h1>Please check your email account.</h1>
   </div>
 </template>
 

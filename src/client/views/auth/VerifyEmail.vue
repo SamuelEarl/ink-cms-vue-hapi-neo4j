@@ -15,6 +15,8 @@
       <br><br>
 
       <!-- "We were unable to verify your email address. That link may have expired." -->
+      <!-- TODO: Can I remove this v-if="!getShowSpinner"? -->
+      <!-- TODO: I think the v-ifs need to be in the <h1> elements. -->
       <h1 v-if="!getShowSpinner">
         <button
           v-if="cta === 'resendVerification'"

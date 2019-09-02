@@ -6,6 +6,7 @@ import AuthLayout from "./views/layouts/AuthLayout.vue";
 import AuthForms from "./views/auth/AuthForms.vue";
 import EmailSent from "./views/auth/EmailSent.vue";
 import VerifyEmail from "./views/auth/VerifyEmail.vue";
+import ResetPassword from "./views/auth/ResetPassword.vue";
 import PublicPage from "./views/pages-public/PublicPage.vue";
 import Admin from "./views/pages-admin/Admin.vue";
 import Users from "./views/pages-admin/Users.vue";
@@ -81,6 +82,11 @@ const router = new Router({
           path: "verify-email/:email/:token",
           name: "verify-email",
           component: VerifyEmail
+        },
+        {
+          path: "reset-password/:email/:token",
+          name: "reset-password",
+          component: ResetPassword
         },
       ]
     }

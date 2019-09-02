@@ -20,10 +20,6 @@ exports.plugin = {
 
     /**
      * Create a new user.
-     * NOTE: The "/register" route returns a "redirect" variable to tell Vue to redirect the user
-     * to the EmailSent component (when the response is received by Vue). The "login" route does not
-     * return a "redirect" variable because after the user logs in, the user will get redirected to
-     * a different page depending on how they navigated to the login form.
      */
     server.route({
       method: "POST",
@@ -44,8 +40,6 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
-        let redirect = false;
-        // let user = {};
 
         try {
           const userUuid = uuidv4();
@@ -153,11 +147,6 @@ exports.plugin = {
           };
 
           await transporter.sendMail(mailOptions);
-
-          // Set "redirect" to true.
-          // If a user successfully registers, they will be redirected to the "email-sent" route
-          // in Vue where they will be instructed to verify their email address.
-          redirect = true;
         }
         catch(e) {
           // Make sure to provide a default error message for this route in the false condition of
@@ -167,8 +156,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          // return { error, flash, user };
-          return { error, flash, redirect };
+          return { error, flash };
         }
       }
     });
@@ -467,8 +455,8 @@ exports.plugin = {
               email: { emailParam }
             })
             SET
-              passwordResetToken = { tokenParam },
-              passwordResetExpires = { timestampParam }
+              u.passwordResetToken = { tokenParam },
+              u.passwordResetExpires = { timestampParam }
             RETURN u`, {
               emailParam: email,
               tokenParam: token,
@@ -544,7 +532,7 @@ exports.plugin = {
           // property that has not expired.
           const userNode = await session.run(
             `MATCH (u:User {
-              passwordResetToken: { tokenParam },
+              passwordResetToken: { tokenParam }
             })
             WHERE u.passwordResetExpires > { currentTimeParam }
             RETURN u`, {
@@ -552,6 +540,9 @@ exports.plugin = {
               currentTimeParam: currentTime,
             }
           );
+
+          console.log("FIRED 2!");
+
 
           session.close();
 
@@ -563,7 +554,7 @@ exports.plugin = {
             throw new Error(flash);
           }
 
-          flash = `Please reset the password that is associated with this email address: ${email}.`;
+          // flash = `Please reset the password that is associated with this email address: ${email}.`;
           cta = "resetPassword";
         }
         catch(e) {
@@ -609,7 +600,7 @@ exports.plugin = {
           // and "passwordResetExpires" properties.
           const userNode = await session.run(
             `MATCH (u:User {
-              passwordResetToken: { tokenParam },
+              passwordResetToken: { tokenParam }
             })
             WHERE u.passwordResetExpires > { currentTimeParam }
             SET u.password = { passwordParam }
@@ -672,8 +663,8 @@ exports.plugin = {
 
     /**
      * Login
-     * NOTE: Why does the "/register" route return a "redirect" variable, but the "/login" route
-     * does not? See the comment above the "/register" route.
+     * NOTE: After a user successfully logs in, they will be redirected to a different page
+     * depending on how they navigated to the login form.
      */
     server.route({
       method: "POST",
