@@ -68,7 +68,7 @@ const mutations = {
 
 
 const actions = {
-  // TODO: The "registerAction" is not currently being used. I need to see if I still need it here after I have completed all of the input validations. I think the current register() method that is being used in AuthForms.vue has different behavior than this registerAction.
+  // TODO: The "registerAction" is not currently being used. I need to see if I still need it here after I have completed all of the input validations. I think the current register() method that is being used in RegisterForm.vue has different behavior than this registerAction.
   registerAction: async ({ commit, dispatch }, newUser) => {
     try {
       let user = {

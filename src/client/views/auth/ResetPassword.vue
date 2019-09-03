@@ -9,24 +9,29 @@
       <SpinnerLarge />
     </div>
 
-    <div v-if="!validatingPasswordResetLink">
+    <div v-if="!validatingPasswordResetLink && cta === 'tryAgain'">
       <h1>{{ message }}</h1>
 
       <br><br>
 
       <!-- "Your password reset link is invalid or has expired." -->
-      <h1 v-if="cta === 'tryAgain'">
+      <h1>
         <button
-          @click="redirectToPasswordReset"
+          @click="redirectToForgotPassword"
         >
           Request a new password reset &rsaquo;
         </button>
       </h1>
+    </div>
 
-      <!-- TODO: Create an "AuthFormContainer" component and refactor all of the auth forms to use it. I think I would use slots to do this. -->
-      <div v-if="cta === 'resetPassword'" id="reset-password">
-        <form @submit.prevent="resetPassword">
-          <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+    <!-- If the password reset link is still valid, then show the reset password form. -->
+    <AuthFormsWrapper v-if="!validatingPasswordResetLink && cta === 'resetPassword'">
+
+      <template #form-title>Reset Your Password</template>
+
+      <template #form>
+        <form class="auth-form" @submit.prevent="resetPassword">
+          <input v-model="password" class="w3-input w3-border" type="password" placeholder="New Password">
           <!-- <div class="validation-messages">
             <div v-if="!$v.password.required" class="error">Password is required</div>
             <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
@@ -35,7 +40,7 @@
 
           <br>
 
-          <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
+          <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm New Password">
           <!-- <div class="validation-messages">
             <div v-if="!$v.confirmPassword.sameAsPassword" class="error">Passwords must match</div>
             <br v-if="$v.confirmPassword.$invalid">
@@ -43,12 +48,13 @@
 
           <br>
 
-          <!-- <button v-if="!getShowSpinner" @click="$v.$touch()" class="btn-primary">Reset Password</button> -->
-          <button v-if="!getShowSpinner" class="btn-primary btn-form blue-gradient">Reset Password</button>
-          <SpinnerSmall />
+          <!-- <button v-if="!showSpinner" @click="$v.$touch()" class="btn-primary">Reset Password</button> -->
+          <button v-if="!showSpinner" class="btn-primary btn-form blue-gradient">Reset Password</button>
+          <SpinnerSmall v-if="showSpinner" />
         </form>
-      </div>
-    </div>
+      </template>
+
+    </AuthFormsWrapper>
 
     <br>
 
@@ -58,12 +64,15 @@
 <script>
 import * as Axios from "axios";
 import { mapActions, mapGetters } from "vuex";
+import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
+import AuthFormsWrapper from "./AuthFormsWrapper.vue";
 import SpinnerSmall from "@/client/components/SpinnerSmall.vue";
 import SpinnerLarge from "@/client/components/SpinnerLarge.vue";
 
 export default {
   name: "ResetPassword",
   components: {
+    AuthFormsWrapper,
     SpinnerSmall,
     SpinnerLarge
   },
@@ -80,9 +89,21 @@ export default {
     };
   },
 
+  // validations: {
+  //   password: {
+  //     required,
+  //     minLength: minLength(6)
+  //   },
+  //   confirmPassword: {
+  //     // Do not use the "required" validator because it is not necessary and it will get displayed
+  //     // at the same time as the "sameAs" validator and the error messages will overlap.
+  //     sameAsPassword: sameAs("password")
+  //   }
+  // },
+
   computed: {
     ...mapGetters({
-      getShowSpinner: "userFeedback/getShowSpinner",
+      showSpinner: "userFeedback/getShowSpinner",
     })
   },
 
@@ -94,7 +115,7 @@ export default {
   methods: {
     ...mapActions({
       showSpinnerAction: "userFeedback/showSpinnerAction",
-      flashAction: "userFeedback/flashAction"
+      flashAction: "userFeedback/flashAction",
     }),
 
     async checkPasswordResetLink() {
@@ -147,12 +168,12 @@ export default {
 
       // If the user successfully updates their password, then redirect them to the login form.
       this.flashAction({ flashType: "success", flashMsg: msg });
-      this.$router.push({ name: "auth" });
+      this.$router.push({ name: "login" });
     },
 
-    redirectToPasswordReset() {
+    redirectToForgotPassword() {
       this.showSpinnerAction(false);
-      this.$router.push({ name: "password-reset" });
+      this.$router.push({ name: "forgot-password" });
     }
   }
 }

@@ -92,19 +92,13 @@
         >
           <font-awesome-icon icon="user-shield" />
         </router-link>
-        <a
-          v-if="isAuthenticated"
-          @click="logout"
-        >
-          Logout
-        </a>
-        <router-link
-          v-else
-          :to="{ name: 'auth' }"
-          exact
-        >
-          Login / Register
-        </router-link>
+        <div v-if="isAuthenticated">
+          <a @click="logout">Logout</a>
+        </div>
+        <div v-else>
+          <router-link :to="{ name: 'login' }" exact>Login</router-link>
+          <router-link :to="{ name: 'register' }" exact>Register</router-link>
+        </div>
       </div>
     </nav>
   </header>

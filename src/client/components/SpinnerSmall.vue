@@ -1,5 +1,5 @@
 <template>
-  <div v-if="getShowSpinner" class="spinner"></div>
+  <div class="spinner"></div>
 </template>
 
 <script>
@@ -12,12 +12,6 @@ export default {
     return {
       // properties...
     }
-  },
-
-  computed: {
-    ...mapGetters({
-      getShowSpinner: "userFeedback/getShowSpinner"
-    })
   },
 };
 </script>

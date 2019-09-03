@@ -3,7 +3,10 @@ import Router from "vue-router";
 import store from "./store";
 import Layout from "./views/layouts/Layout.vue";
 import AuthLayout from "./views/layouts/AuthLayout.vue";
-import AuthForms from "./views/auth/AuthForms.vue";
+import LoginForm from "./views/auth/LoginForm.vue";
+import RegisterForm from "./views/auth/RegisterForm.vue";
+import ForgotPasswordForm from "./views/auth/ForgotPasswordForm.vue";
+import SendEmailVerificationForm from "./views/auth/SendEmailVerificationForm.vue";
 import EmailSent from "./views/auth/EmailSent.vue";
 import VerifyEmail from "./views/auth/VerifyEmail.vue";
 import ResetPassword from "./views/auth/ResetPassword.vue";
@@ -69,9 +72,24 @@ const router = new Router({
       component: AuthLayout,
       children: [
         {
-          path: "auth",
-          name: "auth",
-          component: AuthForms
+          path: "login",
+          name: "login",
+          component: LoginForm
+        },
+        {
+          path: "register",
+          name: "register",
+          component: RegisterForm
+        },
+        {
+          path: "forgot-password",
+          name: "forgot-password",
+          component: ForgotPasswordForm
+        },
+        {
+          path: "send-email-verification",
+          name: "send-email-verification",
+          component: SendEmailVerificationForm
         },
         {
           path: "email-sent/:email",

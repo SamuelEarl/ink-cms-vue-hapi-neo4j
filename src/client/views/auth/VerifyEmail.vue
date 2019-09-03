@@ -6,7 +6,7 @@
     <div v-if="verifyingEmail">
       <h1>Verifying your email address</h1>
       <br>
-      <SpinnerLarge />
+      <SpinnerLarge v-if="showSpinner" />
     </div>
 
     <div v-if="!verifyingEmail">
@@ -15,35 +15,25 @@
       <br><br>
 
       <!-- "We were unable to verify your email address. That link may have expired." -->
-      <!-- TODO: Can I remove this v-if="!getShowSpinner"? I don't think it is necessary, but I need to test it before I permanently remove it. -->
-      <!-- TODO: I think the v-ifs need to be in the <h1> elements. -->
-      <h1 v-if="!getShowSpinner">
-        <button
-          v-if="cta === 'resendVerification'"
-          @click="resendVerificationLink"
-        >
+      <!-- The "!showSpinner" check will hide the message and display the spinner when the user clicks the button to send a new verification link -->
+      <h1 v-if="!showSpinner && cta === 'resendVerification'">
+        <button @click="resendVerificationLink">
           Click here to send a new verification link &rsaquo;
         </button>
       </h1>
 
-      <SpinnerLarge />
+      <SpinnerLarge v-if="showSpinner" />
 
       <!-- "We were unable to find a user associated with that email address." -->
-      <h1>
-        <button
-          v-if="cta === 'register'"
-          @click="redirectToLogin"
-        >
-          Please register again &rsaquo;
+      <h1 v-if="cta === 'register'">
+        <button @click="redirectToRegister">
+          Please register &rsaquo;
         </button>
       </h1>
 
       <!-- `Your email address (${email}) has (already) been verified.` -->
-      <h1>
-        <button
-          v-if="cta === 'login'"
-          @click="redirectToLogin"
-        >
+      <h1 v-if="cta === 'login'">
+        <button @click="redirectToLogin">
           Please login &rsaquo;
         </button>
       </h1>
@@ -77,7 +67,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      getShowSpinner: "userFeedback/getShowSpinner",
+      showSpinner: "userFeedback/getShowSpinner",
     })
   },
 
@@ -115,10 +105,15 @@ export default {
       this.resendVerificationLinkAction(this.email);
     },
 
+    redirectToRegister() {
+      this.showSpinnerAction(false);
+      this.$router.push({ name: "register" });
+    },
+
     redirectToLogin() {
       this.showSpinnerAction(false);
-      this.$router.push({ name: "auth" });
-    }
+      this.$router.push({ name: "login" });
+    },
   }
 }
 </script>
