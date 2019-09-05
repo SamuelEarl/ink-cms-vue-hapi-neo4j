@@ -124,8 +124,8 @@ const actions = {
   },
 
   /**
-   * I wanted to keep the login action in Vuex so that I could set the user profile that will be
-   * used throughout the entire app.
+   * The login action is kept in Vuex so I can set the user profile that will be used throughout
+   * the entire app.
    */
   loginAction: async ({ commit, dispatch, rootState }, credentials) => {
     try {

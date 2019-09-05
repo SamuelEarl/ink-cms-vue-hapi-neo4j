@@ -291,11 +291,11 @@ exports.plugin = {
       method: "POST",
       path: "/resend-verification-link",
       options: {
-        // validate: {
-        //   payload: {
-        //     email: Joi.string().email().required(),
-        //   }
-        // },
+        validate: {
+          payload: {
+            email: Joi.string().email().required(),
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
