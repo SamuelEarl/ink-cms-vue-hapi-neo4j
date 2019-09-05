@@ -5,25 +5,30 @@
     <template #form>
       <form class="auth-form" @submit.prevent="login">
         <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-        <!-- <div class="validation-messages">
-          <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
-          <div v-if="!$v.email.email && $v.email.$dirty" class="error">Must be a valid email address</div>
-          <br v-if="$v.email.$invalid && $v.email.$dirty">
-        </div> -->
+        <div v-if="$v.$dirty" class="validation-messages">
+          <div v-if="!$v.email.required" class="error">Email is required</div>
+          <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
+          <br v-if="$v.email.$invalid">
+        </div>
 
         <br>
 
         <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
-        <!-- <div class="validation-messages">
-          <div v-if="!$v.password.required && $v.password.$dirty" class="error">Password is required</div>
-          <div v-if="!$v.password.minLength && $v.password.$dirty" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
-          <br v-if="$v.password.$invalid && $v.password.$dirty">
-        </div> -->
+        <div v-if="$v.$dirty" class="validation-messages">
+          <div v-if="!$v.password.required" class="error">Password is required</div>
+          <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
+          <br v-if="$v.password.$invalid">
+        </div>
 
         <br>
 
-        <!-- <button v-if="!showSpinner" @click="$v.$touch()" class="btn-primary">Login</button> -->
-        <button v-if="!showSpinner" class="btn-primary btn-form blue-gradient">Login</button>
+        <button
+          v-if="!showSpinner"
+          @click="$v.$touch()"
+          class="btn-primary btn-form blue-gradient"
+        >
+          Login
+        </button>
         <SpinnerSmall v-if="showSpinner" />
       </form>
     </template>
@@ -57,16 +62,16 @@ export default {
     }
   },
 
-  // validations: {
-  //   email: {
-  //     required,
-  //     email
-  //   },
-  //   password: {
-  //     required,
-  //     minLength: minLength(6)
-  //   },
-  // },
+  validations: {
+    email: {
+      required,
+      email
+    },
+    password: {
+      required,
+      minLength: minLength(6)
+    },
+  },
 
   computed: {
     ...mapGetters({
@@ -87,8 +92,8 @@ export default {
           password: this.password
         };
 
-        if (true) {
-        // if (!this.$v.email.$invalid && !this.$v.password.$invalid) {
+        // If the form is valid, then show the spinner and call loginAction.
+        if (!this.$v.$invalid) {
           this.showSpinnerAction(true);
           this.loginAction(credentials);
         }

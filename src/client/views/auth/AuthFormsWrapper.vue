@@ -73,7 +73,7 @@ export default {
             .error {
               padding: 5px;
               color: white;
-              background-color: darkred;
+              background-color: $red;
               position: absolute;
             }
           }

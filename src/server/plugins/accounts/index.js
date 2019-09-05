@@ -25,8 +25,12 @@ exports.plugin = {
       method: "POST",
       path: "/register",
       options: {
-        // If you validate even one field from your payload with Joi, then you have to validate all
-        // fields from your payload. Otherwise you will get very confusing errors.
+        // Do data validation after the route is finished. Start by implementing data validation on
+        // the server and then implement data validation on the client.
+        // If you validate even one key from your payload with Joi, then you have to validate all
+        // keys from your payload. Otherwise you will get an "Invalid request payload input" error,
+        // which can be a bit confusing if you are not familiar with Joi. Also, that error doesn't
+        // tell which key is causing the validation error, which can make things a bit more difficult.
         validate: {
           payload: {
             firstName: Joi.string().required(),
@@ -69,7 +73,7 @@ exports.plugin = {
           // If a user already exists with this email, then close the database connection, set "flash" to an error message, and throw an error.
           if (existingUser.records.length > 0 && existingUser.records[0]._fields[0].properties.isVerified) {
             session.close();
-            flash = "A user with this email already exists. Please use a different email address.";
+            flash = "A user with this email already exists. Please login.";
             throw new Error(flash);
           }
 
@@ -169,12 +173,12 @@ exports.plugin = {
       method: "GET",
       path: "/verify-email/{email}/{token}",
       options: {
-        // validate: {
-        //   params: {
-        //     email: Joi.string().email().required(),
-        //     token: Joi.string().required()
-        //   }
-        // },
+        validate: {
+          params: {
+            email: Joi.string().email().required(),
+            token: Joi.string().required()
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;

@@ -5,49 +5,57 @@
     <template #form>
       <form class="auth-form" @submit.prevent="register">
         <input v-model="firstName" class="w3-input w3-border" type="text" placeholder="First Name">
-        <!-- <div class="validation-messages">
+        <!-- The v-if="$v.$dirty" check will only allow the error messages to be shown if the user has "touched" the input field. See the comment above the "Register" button for more details. -->
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.firstName.required" class="error">First Name is required</div>
           <br v-if="$v.firstName.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
         <input v-model="lastName" class="w3-input w3-border" type="text" placeholder="Last Name">
-        <!-- <div class="validation-messages">
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.lastName.required" class="error">Last Name is required</div>
           <br v-if="$v.lastName.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
         <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-        <!-- <div class="validation-messages">
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.email.required" class="error">Email is required</div>
           <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
           <br v-if="$v.email.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
         <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
-        <!-- <div class="validation-messages">
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.password.required" class="error">Password is required</div>
           <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
           <br v-if="$v.password.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
         <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm Password">
-        <!-- <div class="validation-messages">
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.confirmPassword.sameAsPassword" class="error">Passwords must match</div>
           <br v-if="$v.confirmPassword.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
-        <!-- <button v-if="!showSpinner" @click="$v.$touch()" class="btn-primary">Register</button> -->
-        <button v-if="!showSpinner" class="btn-primary btn-form blue-gradient">Register</button>
+        <!-- When a user has "touched" an input field, we say that the input field is "dirty". (With Vuelidate you decide what "touched" means. For example, you could use logic that causes an input field to be "touched" when a user clicks inside of it or clicks out of it [i.e., using a blur event].) Vuelidate uses a boolean property called "$dirty" to indicate whether an input field is dirty or not. $dirty is set to false by default and Vuelidate does not automatically set an input field's $dirty property to true for you. You have to manually take care of setting the $dirty property by calling the $touch() method when appropriate. -->
+        <!-- In our register form, we are setting each field's $dirty property to true when the "Register" button is clicked. NOTE: $v.$touch refers to all the fields in the form. $v.firstName.$touch would only refer to the firstName field.  -->
+        <button
+          v-if="!showSpinner"
+          @click="$v.$touch()"
+          class="btn-primary btn-form blue-gradient"
+        >
+          Register
+        </button>
         <SpinnerSmall v-if="showSpinner" />
       </form>
     </template>
@@ -85,27 +93,27 @@ export default {
     }
   },
 
-  // validations: {
-  //   firstName: {
-  //     required
-  //   },
-  //   lastName: {
-  //     required
-  //   },
-  //   email: {
-  //     required,
-  //     email
-  //   },
-  //   password: {
-  //     required,
-  //     minLength: minLength(6)
-  //   },
-  //   confirmPassword: {
-  //     // Do not use the "required" validator because it is not necessary and it will get displayed
-  //     // at the same time as the "sameAs" validator and the error messages will overlap.
-  //     sameAsPassword: sameAs("password")
-  //   }
-  // },
+  validations: {
+    firstName: {
+      required
+    },
+    lastName: {
+      required
+    },
+    email: {
+      required,
+      email
+    },
+    password: {
+      required,
+      minLength: minLength(6)
+    },
+    confirmPassword: {
+      // Do not use the "required" validator because it is not necessary and it will get displayed
+      // at the same time as the "sameAs" validator, which will cause those error messages to overlap.
+      sameAsPassword: sameAs("password")
+    }
+  },
 
   computed: {
     ...mapGetters({
@@ -138,8 +146,8 @@ export default {
         const payload = newUser;
         let response;
 
-        if (true) {
-        // if (!this.$v.$invalid) {
+        // If the form is valid, then show the spinner and send an AJAX call to the "/register" endpoint.
+        if (!this.$v.$invalid) {
           this.showSpinnerAction(true);
 
           response = await Axios({
