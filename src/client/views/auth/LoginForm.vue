@@ -5,20 +5,20 @@
     <template #form>
       <form class="auth-form" @submit.prevent="login">
         <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-        <!-- <div v-if="$v.$dirty" class="validation-messages">
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.email.required" class="error">Email is required</div>
           <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
           <br v-if="$v.email.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
         <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
-        <!-- <div v-if="$v.$dirty" class="validation-messages">
+        <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.password.required" class="error">Password is required</div>
           <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
           <br v-if="$v.password.$invalid">
-        </div> -->
+        </div>
 
         <br>
 
@@ -88,8 +88,7 @@ export default {
     login() {
       try {
         // If the form is valid, then show the spinner and call loginAction.
-        // if (!this.$v.$invalid) {
-        if (true) {
+        if (!this.$v.$invalid) {
           const credentials = {
             email: this.email,
             password: this.password

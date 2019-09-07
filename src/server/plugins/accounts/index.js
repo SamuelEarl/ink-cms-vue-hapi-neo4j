@@ -690,6 +690,17 @@ exports.plugin = {
           payload: {
             email: Joi.string().email().required(),
             password: Joi.string().min(6).max(200).required().strict()
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a function and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" lifecycle method where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
         auth: {
@@ -772,7 +783,6 @@ exports.plugin = {
           flash = `"${userFirstName} ${userLastName}" has successfully logged in!`;
         }
         catch(e) {
-          console.log("Joi Error?:", e);
           const msg = e.message ? e.message : "Login error. Please try again.";
           const errorRes = server.methods.catch(e, msg, request.path);
           error = errorRes;

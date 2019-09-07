@@ -44,7 +44,7 @@ const server = new Hapi.Server({
  */
 server.ext({
   type: "onPreResponse",
-  method: function(request, h) {
+  method: function(request, h, err) {
     const res = request.response;
     let httpStatusMsg;
     let errorMsg;
@@ -53,9 +53,37 @@ server.ext({
       // console.log("REQUEST.RESPONSE:", res);
       // console.log("REQUEST.RESPONSE.SOURCE:", res.source);
 
-      // if (res.isJoi) {
-      //   console.log("");
-      // }
+
+      /**
+       * If a validation error occurs, then there will be a "res.isJoi" property instead of a
+       * "res.source.error.isBoom" property.
+       * For more details about Joi errors, see https://hapi.dev/family/joi/?v=15.1.1#errors.
+       * NOTE: This check for "res.isJoi" has to come before the next check for "res.isBoom" because
+       * validation errors also have an "isBoom" property. If the "isBoom" check came first, then it
+       * would also catch the validation errors that have the "isJoi" property and it would handle
+       * those incorrectly.
+       */
+      if (res.isJoi) {
+        // Set the error property to equal "res.isJoi". The value of "res.isJoi" is true, so the
+        // error property will also be true.
+        const error = res.isJoi;
+        let flash = "";
+        for (let i=0; i < res.details.length; i++) {
+          let validationErrorMsg = res.details[i].message;
+
+          // See what each validation error message looks like.
+          // console.log(`VALIDATION ERROR ${i}:`, validationErrorMsg);
+
+          // Combine all of the error messages into a single, cleanly formatted string.
+          flash = `${flash} ${validationErrorMsg}.`;
+        }
+        // See the final output of the flash message:
+        // console.log("FLASH:", flash);
+
+        // Skip the rest of the "onPreResponse" method and return the "error" and "flash"
+        // properties to the browser.
+        return { error, flash };
+      }
 
       /**
        * If an error occurs before the route handler executes (e.g., a user is not logged in and
@@ -68,9 +96,11 @@ server.ext({
         const statusCode = res.output.payload.statusCode;
         httpStatusMsg = res.output.payload.error;
         errorMsg = res.output.payload.message;
+        // Set the error property to equal "res.isBoom". The value of "res.isBoom" is true, so the
+        // error property will also be true.
         const error = res.isBoom;
         const flash = `Error: ${statusCode} ${httpStatusMsg}: ${errorMsg}`;
-        // Skip the rest of the "onPreResponse" method and return these "error" and "flash"
+        // Skip the rest of the "onPreResponse" method and return the "error" and "flash"
         // properties to the browser.
         return { error, flash };
       }
