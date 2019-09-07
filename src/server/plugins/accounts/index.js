@@ -48,7 +48,7 @@ exports.plugin = {
         try {
           const userUuid = uuidv4();
           const sessionUuid = uuidv4();
-          const currentTime = new Date().getTime();
+          const currentTime = Date.now();
           const userId = `${userUuid}-${currentTime}`;
           const sessionId = `${sessionUuid}-${currentTime}`;
           const { firstName, lastName, email, password } = request.payload;
@@ -138,7 +138,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
+          const verifyUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -146,8 +146,8 @@ exports.plugin = {
             subject: "Verify your email address",
             // If you place the text in between string literals (``), then the text in the email
             // message might display in monospaced font.
-            text: "Hello " + firstName + ",\n\nPlease verify your email address by clicking the link:\n\n" + confUrl + ".\n\n"
-            // html: `<p>Hello ${firstName},</p> <p>Please verify your email address by clicking the link:</p> <p>${confUrl}.</p>`
+            text: "Hello " + firstName + ",\n\nPlease verify your email address by clicking the link:\n\n" + verifyUrl + ".\n\n"
+            // html: `<p>Hello ${firstName},</p> <p>Please verify your email address by clicking the link:</p> <p>${verifyUrl}.</p>`
           };
 
           await transporter.sendMail(mailOptions);
@@ -326,7 +326,7 @@ exports.plugin = {
           if (userNode.records.length > 0 && userNode.records[0]._fields[0].properties.isVerified) {
             session.close();
             flash = `Your email address (${email}) has already been verified. Please login.`;
-            return;
+            throw new Error(flash);
           }
 
           // If the User node exists and the user's email address has not already been verified, then:
@@ -382,7 +382,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
+          const verifyUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -390,8 +390,7 @@ exports.plugin = {
             subject: "Verify your email address",
             // If you place the text in between string literals (``), then the text in the email
             // message might display in monospaced font.
-            text: "Hello " + firstName + ",\n\nPlease verify your email address by clicking the link:\n\n" + confUrl + ".\n\n"
-            // html: `<p>Hello ${firstName},</p> <p>Please verify your email address by clicking the link:</p> <p>${confUrl}.</p>`
+            text: "Hello " + firstName + ",\n\nPlease verify your email address by clicking the link:\n\n" + verifyUrl + ".\n\n"
           };
 
           await transporter.sendMail(mailOptions);
@@ -416,11 +415,11 @@ exports.plugin = {
       method: "POST",
       path: "/send-password-reset-link",
       options: {
-        // validate: {
-        //   payload: {
-        //     email: Joi.string().email().required(),
-        //   }
-        // },
+        validate: {
+          payload: {
+            email: Joi.string().email().required(),
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -482,7 +481,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const confUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/reset-password/${email}/${token}`;
+          const resetUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/reset-password/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -490,7 +489,7 @@ exports.plugin = {
             subject: "Reset your password",
             // If you place the text in between string literals (``), then the text in the email
             // message might display in monospaced font.
-            text: "Hello " + firstName + ",\n\nYou have requested to reset your password. Please click the following link to reset your password:\n\n" + confUrl + ".\n\nIf you did not request a password reset, then ignore this email and your password will remain unchanged."
+            text: "Hello " + firstName + ",\n\nYou have requested to reset your password. Please click the following link to reset your password:\n\n" + resetUrl + ".\n\nIf you did not request a password reset, then ignore this email and your password will remain unchanged."
           };
 
           await transporter.sendMail(mailOptions);
@@ -515,12 +514,12 @@ exports.plugin = {
       method: "GET",
       path: "/reset-password/{email}/{token}",
       options: {
-        // validate: {
-        //   params: {
-        //     email: Joi.string().email().required(),
-        //     token: Joi.string().required()
-        //   }
-        // },
+        validate: {
+          params: {
+            email: Joi.string().email().required(),
+            token: Joi.string().required()
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -536,10 +535,12 @@ exports.plugin = {
           // property that has not expired.
           const userNode = await session.run(
             `MATCH (u:User {
+              email: { emailParam },
               passwordResetToken: { tokenParam }
             })
             WHERE u.passwordResetExpires > { currentTimeParam }
             RETURN u`, {
+              emailParam: email,
               tokenParam: token,
               currentTimeParam: currentTime,
             }
@@ -578,14 +579,14 @@ exports.plugin = {
       method: "POST",
       path: "/reset-password",
       options: {
-        // validate: {
-        //   payload: {
-        //     email: Joi.string().email().required(),
-        //     password: Joi.string().min(6).max(200).required().strict(),
-        //     confirmPassword: Joi.string().valid(Joi.ref("password")).required().strict(),
-        //     token: Joi.string().required(),
-        //   }
-        // },
+        validate: {
+          payload: {
+            email: Joi.string().email().required(),
+            password: Joi.string().min(6).max(200).required().strict(),
+            confirmPassword: Joi.string().valid(Joi.ref("password")).required().strict(),
+            token: Joi.string().required(),
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -605,8 +606,10 @@ exports.plugin = {
 
           // Find a user node with a matching "passwordResetToken" and a "passwordResetExpires"
           // property that has not expired. If there is a matching node, then update the "password"
-          // property with the password that the user submitted and remove the "passwordResetToken"
-          // and "passwordResetExpires" properties.
+          // property with the password that the user submitted. Then remove the "passwordResetToken"
+          // and "passwordResetExpires" properties so that the reset password link that was sent to
+          // the user cannot be used again accidentally or by a malicious user who might get access
+          // to the link.
           const userNode = await session.run(
             `MATCH (u:User {
               passwordResetToken: { tokenParam }
@@ -626,9 +629,14 @@ exports.plugin = {
           session.close();
 
           // If no User node exists with the above passwordResetToken or if the token has expired,
-          // then set "flash" to an error message and throw an error.
+          // then set "flash" to an error message and throw an error. Since we just checked the
+          // "passwordResetToken" and the "passwordResetExpires" properties when the user clicked
+          // the reset password link in their email and then they were redirected to the
+          // "ResetPassword.vue" page, this scenario would be unlikely. However, you should always
+          // secure your routes. If a user got to the "Reset Your Password" form, but never reset
+          // their password, then we need to tell them to request a new password reset link.
           if (userNode.records.length === 0) {
-            flash = "Your password reset link is invalid or has expired.";
+            flash = "Your password reset link is invalid or has expired. Please request a new one.";
             cta = "tryAgain";
             throw new Error(flash);
           }
@@ -700,7 +708,7 @@ exports.plugin = {
 
         try {
           const uuid = uuidv4();
-          const currentTime = new Date().getTime();
+          const currentTime = Date.now();
           const { email, password } = request.payload;
 
           // See if a user exists with this email.
@@ -764,6 +772,7 @@ exports.plugin = {
           flash = `"${userFirstName} ${userLastName}" has successfully logged in!`;
         }
         catch(e) {
+          console.log("Joi Error?:", e);
           const msg = e.message ? e.message : "Login error. Please try again.";
           const errorRes = server.methods.catch(e, msg, request.path);
           error = errorRes;
@@ -855,6 +864,12 @@ exports.plugin = {
       method: "PUT",
       path: "/users/update-user-scope",
       options: {
+        validate: {
+          payload: {
+            userId: Joi.string().required(),
+            updatedScopeArray: Joi.array().items(Joi.string()).required(),
+          }
+        },
         auth: {
           strategy: "userSession",
           mode: "required",

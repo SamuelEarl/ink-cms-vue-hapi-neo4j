@@ -6,16 +6,21 @@
     <template #form>
       <form class="auth-form" @submit.prevent="resendVerificationLink">
         <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
-        <!-- <div class="validation-messages">
-          <div v-if="!$v.email.required && $v.email.$dirty" class="error">Email is required</div>
-          <div v-if="!$v.email.email && $v.email.$dirty" class="error">Must be a valid email address</div>
-          <br v-if="$v.email.$invalid && $v.email.$dirty">
-        </div> -->
+        <div v-if="$v.$dirty" class="validation-messages">
+          <div v-if="!$v.email.required" class="error">Email is required</div>
+          <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
+          <br v-if="$v.email.$invalid">
+        </div>
 
         <br>
 
-        <!-- <button v-if="!showSpinner" @click="$v.$touch()" class="btn-primary">Send Verification</button> -->
-        <button v-if="!showSpinner" class="btn-tertiary btn-form">Send Verification</button>
+        <button
+          v-if="!showSpinner"
+          @click="$v.$touch()"
+          class="btn-tertiary btn-form"
+        >
+          Send Verification
+        </button>
         <SpinnerSmall v-if="showSpinner" />
       </form>
     </template>
@@ -43,12 +48,12 @@ export default {
     }
   },
 
-  // validations: {
-  //   email: {
-  //     required,
-  //     email
-  //   },
-  // },
+  validations: {
+    email: {
+      required,
+      email
+    },
+  },
 
   computed: {
     ...mapGetters({
@@ -64,8 +69,16 @@ export default {
     }),
 
     resendVerificationLink() {
-      this.showSpinnerAction(true);
-      this.resendVerificationLinkAction(this.email);
+      try {
+        // If the form is valid, then show the spinner and call resendVerificationLinkAction.
+        if (!this.$v.$invalid) {
+          this.showSpinnerAction(true);
+          this.resendVerificationLinkAction(this.email);
+        }
+      }
+      catch(e) {
+        console.error("Send Verification Error:", e);
+      }
     },
   }
 }

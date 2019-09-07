@@ -146,9 +146,8 @@ const actions = {
         data: payload
       });
 
-      console.log("login RESPONSE:", response.data);
-
       const res = response.data;
+      console.log("login RESPONSE:", res);
       const msg = res.flash;
 
       // If there is an error, then hide the spinner and display the error message.
@@ -228,9 +227,8 @@ const actions = {
         data: payload
       });
 
-      console.log("resendVerificationLinkActon RESPONSE:", response.data);
-
       const res = response.data;
+      console.log("resendVerificationLinkActon RESPONSE:", response.data);
       const msg = res.flash;
 
       // Once the response comes back from the server, then hide the spinner.

@@ -35,7 +35,7 @@ exports.plugin = {
 
         try {
           const uuid = uuidv4();
-          const currentTime = new Date().getTime();
+          const currentTime = Date.now();
           const pageId = `${uuid}-${currentTime}`;
           const title = request.payload.title;
           // For the slug value that was entered by the user, replace any spaces with hyphens and make all characters lowercase.

@@ -21,6 +21,11 @@ exports.plugin = {
       method: "GET",
       path: "/pages-public/get-page/{slug?}",
       handler: async function(request, h) {
+        // Define the properties that will be returned in the object that is in the "finally" block.
+        // As a user's request works through the logic in this route, these properties will get set
+        // to any necessary values before the object is returned in the "finally" block. For example,
+        // if there is an error, then the error property will get set with that error and the flash
+        // property will get set with a helpful feedback message for the user.
         let error = null;
         let flash = null;
         let pageData = {};
@@ -76,6 +81,11 @@ exports.plugin = {
           console.error(errorLog);
         }
         finally {
+          // I like to return an object of values for a couple of reasons:
+          // (1) If you want to return more than one value at the end of a route, then you have to return an object of values. I like to return at least an error and a flash message (for user feadback) in each route. So I am going to be returning an object of values anyway.
+          // (2) Returning an error property gives me more control over the errors that are returned from my routes. I can set the error property to an error object or just an error message if I want.
+          // (3) It is good practice to give users helpful feedback messages (that helps improve the user experience). It is also best to define your feedback messages on the server and return those in your route responses. The flash property is where I return my feedback messages.
+          // (4) If all of my routes return an object of values, then the data structure of the responses will be the same. That consistency makes it much easier to work with my routes. If, on the other hand, one route returned a single value and another route returned an object, then things could get messy and confusing. Consistency is important if you want to have maintainable code.
           return { error, flash, pageData };
         }
       }

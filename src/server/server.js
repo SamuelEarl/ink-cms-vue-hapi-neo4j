@@ -53,6 +53,10 @@ server.ext({
       // console.log("REQUEST.RESPONSE:", res);
       // console.log("REQUEST.RESPONSE.SOURCE:", res.source);
 
+      // if (res.isJoi) {
+      //   console.log("");
+      // }
+
       /**
        * If an error occurs before the route handler executes (e.g., a user is not logged in and
        * they gain access to a route that requires authentication or if the user does not have the

@@ -32,24 +32,29 @@
       <template #form>
         <form class="auth-form" @submit.prevent="resetPassword">
           <input v-model="password" class="w3-input w3-border" type="password" placeholder="New Password">
-          <!-- <div class="validation-messages">
+          <div v-if="$v.$dirty" class="validation-messages">
             <div v-if="!$v.password.required" class="error">Password is required</div>
             <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
             <br v-if="$v.password.$invalid">
-          </div> -->
+          </div>
 
           <br>
 
           <input v-model="confirmPassword" class="w3-input w3-border" type="password" placeholder="Confirm New Password">
-          <!-- <div class="validation-messages">
+          <div v-if="$v.$dirty" class="validation-messages">
             <div v-if="!$v.confirmPassword.sameAsPassword" class="error">Passwords must match</div>
             <br v-if="$v.confirmPassword.$invalid">
-          </div> -->
+          </div>
 
           <br>
 
-          <!-- <button v-if="!showSpinner" @click="$v.$touch()" class="btn-primary">Reset Password</button> -->
-          <button v-if="!showSpinner" class="btn-primary btn-form blue-gradient">Reset Password</button>
+          <button
+            v-if="!showSpinner"
+            @click="$v.$touch()"
+            class="btn-primary btn-form blue-gradient"
+          >
+            Reset Password
+          </button>
           <SpinnerSmall v-if="showSpinner" />
         </form>
       </template>
@@ -89,17 +94,17 @@ export default {
     };
   },
 
-  // validations: {
-  //   password: {
-  //     required,
-  //     minLength: minLength(6)
-  //   },
-  //   confirmPassword: {
-  //     // Do not use the "required" validator because it is not necessary and it will get displayed
-  //     // at the same time as the "sameAs" validator and the error messages will overlap.
-  //     sameAsPassword: sameAs("password")
-  //   }
-  // },
+  validations: {
+    password: {
+      required,
+      minLength: minLength(6)
+    },
+    confirmPassword: {
+      // Do not use the "required" validator because it is not necessary and it will get displayed
+      // at the same time as the "sameAs" validator and the error messages will overlap.
+      sameAsPassword: sameAs("password")
+    }
+  },
 
   computed: {
     ...mapGetters({
@@ -127,9 +132,9 @@ export default {
         url: url
       });
 
-      console.log("checkPasswordResetLink RESPONSE:", response.data);
-
       const res = response.data;
+      console.log("checkPasswordResetLink RESPONSE:", res);
+
       this.showSpinnerAction(false);
       this.validatingPasswordResetLink = false;
       this.message = res.flash;
@@ -137,38 +142,50 @@ export default {
     },
 
     async resetPassword() {
-      this.showSpinnerAction(true);
+      try {
+        // If the form is valid, then show the spinner and send the AJAX request.
+        if (!this.$v.$invalid) {
+          this.showSpinnerAction(true);
 
-      const method = "POST";
-      const url = "/reset-password";
-      const payload = {
-        email: this.email,
-        token: this.token,
-        password: this.password,
-        confirmPassword: this.confirmPassword
-      };
+          const method = "POST";
+          const url = "/reset-password";
+          const payload = {
+            email: this.email,
+            token: this.token,
+            password: this.password,
+            confirmPassword: this.confirmPassword
+          };
 
-      const response = await Axios({
-        method: method,
-        url: url,
-        data: payload
-      });
+          const response = await Axios({
+            method: method,
+            url: url,
+            data: payload
+          });
 
-      console.log("checkPasswordResetLink RESPONSE:", response.data);
+          const res = response.data;
+          console.log("checkPasswordResetLink RESPONSE:", res);
+          const msg = res.flash;
 
-      const res = response.data;
-      const msg = res.flash;
+          this.showSpinnerAction(false);
 
-      this.showSpinnerAction(false);
+          if (res.error) {
+            this.flashAction({ flashType: "error", flashMsg: msg });
 
-      if (res.error) {
-        this.flashAction({ flashType: "error", flashMsg: msg });
-        return;
+            if (res.cta === "tryAgain") {
+              this.$router.push({ name: "forgot-password" });
+            }
+
+            return;
+          }
+
+          // If the user successfully updates their password, then redirect them to the login form.
+          this.flashAction({ flashType: "success", flashMsg: msg });
+          this.$router.push({ name: "login" });
+        }
       }
-
-      // If the user successfully updates their password, then redirect them to the login form.
-      this.flashAction({ flashType: "success", flashMsg: msg });
-      this.$router.push({ name: "login" });
+      catch(e) {
+        console.error("resetPassword Error:", e);
+      }
     },
 
     redirectToForgotPassword() {
