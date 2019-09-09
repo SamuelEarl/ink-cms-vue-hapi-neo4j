@@ -37,7 +37,27 @@ exports.plugin = {
             lastName: Joi.string().required(),
             email: Joi.string().email().required(),
             password: Joi.string().min(6).max(200).required().strict(),
-            confirmPassword: Joi.string().valid(Joi.ref("password")).required().strict()
+            // If "confirmPassword" fails validation, then specify the error message to be sent to
+            // the user. The "language" property is used to override individual error messages.
+            // See https://hapi.dev/family/joi/?v=15.1.1#validatevalue-schema-options-callback
+            confirmPassword: Joi.string().required().valid(Joi.ref("password")).options({
+              language: {
+                any: {
+                  allowOnly: "!!\"Password\" and \"Confirm Password\" must match"
+                }
+              }
+            }).strict()
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         }
       },
@@ -177,6 +197,17 @@ exports.plugin = {
           params: {
             email: Joi.string().email().required(),
             token: Joi.string().required()
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
       },
@@ -294,6 +325,17 @@ exports.plugin = {
         validate: {
           payload: {
             email: Joi.string().email().required(),
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
       },
@@ -418,6 +460,17 @@ exports.plugin = {
         validate: {
           payload: {
             email: Joi.string().email().required(),
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
       },
@@ -518,6 +571,17 @@ exports.plugin = {
           params: {
             email: Joi.string().email().required(),
             token: Joi.string().required()
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
       },
@@ -585,6 +649,17 @@ exports.plugin = {
             password: Joi.string().min(6).max(200).required().strict(),
             confirmPassword: Joi.string().valid(Joi.ref("password")).required().strict(),
             token: Joi.string().required(),
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
       },
@@ -695,9 +770,9 @@ exports.plugin = {
             // Get all validation errors before aborting the request.
             abortEarly: false
           },
-          // Set the "failAction" option to a function and return the error object. If there are
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
           // validation errors, then returning the error object will make the error object available
-          // in the "onPreResponse" lifecycle method where we can format all of our validation
+          // in the "onPreResponse" extension point where we can format all of our validation
           // errors, if we want.
           failAction: function(request, h, error) {
             return error;
@@ -878,6 +953,17 @@ exports.plugin = {
           payload: {
             userId: Joi.string().required(),
             updatedScopeArray: Joi.array().items(Joi.string()).required(),
+          },
+          options: {
+            // Get all validation errors before aborting the request.
+            abortEarly: false
+          },
+          // Set the "failAction" option to a lifecycle method and return the error object. If there are
+          // validation errors, then returning the error object will make the error object available
+          // in the "onPreResponse" extension point where we can format all of our validation
+          // errors, if we want.
+          failAction: function(request, h, error) {
+            return error;
           }
         },
         auth: {

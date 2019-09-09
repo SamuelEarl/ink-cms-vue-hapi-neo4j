@@ -44,7 +44,7 @@ const server = new Hapi.Server({
  */
 server.ext({
   type: "onPreResponse",
-  method: function(request, h, err) {
+  method: function(request, h, error) {
     const res = request.response;
     let httpStatusMsg;
     let errorMsg;
@@ -161,7 +161,7 @@ server.ext({
       return h.continue;
     }
     catch(e) {
-      console.error("Error in onPreResponse Request Lifecycle Method:", e);
+      console.error("Error in onPreResponse Request Lifecycle Extension Point:", e);
     }
   }
 });

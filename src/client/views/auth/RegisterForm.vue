@@ -49,11 +49,12 @@
 
         <!-- When a user has "touched" an input field, we say that the input field is "dirty". (With Vuelidate you decide what "touched" means. For example, you could use logic that causes an input field to be "touched" when a user clicks inside of it [e.g., using a click event] or clicks out of it [e.g., using a blur event].) Vuelidate uses a boolean property called "$dirty" to indicate whether an input field is dirty or not. $dirty is set to false by default and Vuelidate does not automatically set an input field's $dirty property to true for you. You have to manually take care of setting the $dirty property by calling the $touch() method when appropriate. -->
         <!-- In our register form, we are setting each field's $dirty property to true when the "Register" button is clicked. NOTE: $v.$touch refers to all the fields in the form. $v.firstName.$touch would only refer to the firstName field.  -->
-        <button
+        <button v-if="!showSpinner" class="btn-primary btn-form blue-gradient">
+        <!-- <button
           v-if="!showSpinner"
           @click="$v.$touch()"
           class="btn-primary btn-form blue-gradient"
-        >
+        > -->
           Register
         </button>
         <SpinnerSmall v-if="showSpinner" />
@@ -130,49 +131,49 @@ export default {
 
     async register() {
       try {
-        const newUser = {
-          firstName: this.firstName,
-          lastName: this.lastName,
-          email: this.email,
-          password: this.password,
-          confirmPassword: this.confirmPassword
-        };
-
-        // TODO: Remove the following line if I am not going to use it.
-        // this.registerAction(newUser);
-
-        const method = "POST";
-        const url = "/register";
-        const payload = newUser;
-        let response;
-
         // If the form is valid, then show the spinner and send an AJAX call to the "/register" endpoint.
-        if (!this.$v.$invalid) {
+        // if (!this.$v.$invalid) {
+        if (true) {
+          const newUser = {
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            password: this.password,
+            confirmPassword: this.confirmPassword
+          };
+
+          // TODO: Remove the following line if I am not going to use it.
+          // this.registerAction(newUser);
+
+          const method = "POST";
+          const url = "/register";
+          const payload = newUser;
+
           this.showSpinnerAction(true);
 
-          response = await Axios({
+          const response = await Axios({
             method: method,
             url: url,
             data: payload
           });
+
+
+          const res = response.data;
+          console.log("register RESPONSE:", res);
+          const msg = res.flash;
+
+          this.showSpinnerAction(false);
+
+          // If there is an error, then display the error message.
+          if (res.error) {
+            this.flashAction({ flashType: "error", flashMsg: msg });
+            return;
+          }
+
+          // If a user successfully registers, they will be redirected to the "email-sent" route
+          // where they will be instructed to check their email account.
+          this.$router.push({ name: "email-sent", params: { email: this.email } });
         }
-
-        console.log("register RESPONSE:", response.data);
-
-        const res = response.data;
-        const msg = res.flash;
-
-        this.showSpinnerAction(false);
-
-        // If there is an error, then display the error message.
-        if (res.error) {
-          this.flashAction({ flashType: "error", flashMsg: msg });
-          return;
-        }
-
-        // If a user successfully registers, they will be redirected to the "email-sent" route
-        // where they will be instructed to check their email account.
-        this.$router.push({ name: "email-sent", params: { email: this.email } });
       }
       catch(e) {
         console.error("Registration Error:", e);
