@@ -5,6 +5,7 @@
     <h1>An email has been sent to {{ $route.params.email }}.</h1>
     <br />
     <h1>Please check your email account.</h1>
+    <h1>If you don't see an email in your inbox, then check your spam and junk folders.</h1>
   </div>
 </template>
 

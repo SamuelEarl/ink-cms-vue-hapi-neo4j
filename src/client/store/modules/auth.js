@@ -42,11 +42,12 @@ const mutations = {
     state.isAuthenticated = isAuthenticated;
   },
 
-  setUserProfile: (state, [ userProfile, prevRouteName ]) => {
+  setUserProfile: (state, [ userProfile, prevRoute ]) => {
     state.userProfile = userProfile;
 
-    // If the previous route is "verify-email", then redirect the user to the home route.
-    if (prevRouteName === "verify-email" || prevRouteName === "reset-password") {
+    // If the previous route is an "auth" route, then redirect the user to the home route after they
+    // have logged in.
+    if (prevRoute && prevRoute.path && prevRoute.path.startsWith("/auth")) {
       router.push({ name: "home" });
     }
     // Otherwise redirect the user to the previous route.
@@ -154,6 +155,13 @@ const actions = {
       if (res.error) {
         dispatch("userFeedback/showSpinnerAction", false, { root: true });
         dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
+
+        // If the user needs a new email verification sent to them, then redirect the user to the
+        // "send-email-verification" route.
+        if (res.cta === "resendVerification") {
+          router.push({ name: "send-email-verification" });
+        }
+
         return;
       }
 
@@ -162,12 +170,12 @@ const actions = {
       user.email = res.user.userEmail;
       user.scope = res.user.userScope;
 
-      const prevRouteName = rootState.helpers.prevRouteName;
+      const prevRoute = rootState.helpers.prevRoute;
 
       // If the user is successfully logged in, then call "setUserProfile" with the logged in user's
       // profile object and display a success message.
       if (user.firstName && user.lastName && user.email && user.scope.length > 0) {
-        commit("setUserProfile", [ user, prevRouteName ]);
+        commit("setUserProfile", [ user, prevRoute ]);
         commit("setIsAuthenticated", true);
 
         // Hide the spinner
@@ -228,7 +236,7 @@ const actions = {
       });
 
       const res = response.data;
-      console.log("resendVerificationLinkActon RESPONSE:", response.data);
+      console.log("resendVerificationLinkActon RESPONSE:", res);
       const msg = res.flash;
 
       // Once the response comes back from the server, then hide the spinner.
@@ -237,6 +245,13 @@ const actions = {
       // If there is an error, then display the error message.
       if (res.error) {
         dispatch("userFeedback/flashAction", { flashType: "error", flashMsg: msg }, { root: true });
+
+        // If the user has already verified their email address, then that will be displayed in the
+        // flash message. Redirect the user to the login page.
+        if (res.cta === "login") {
+          router.push({ name: "login" });
+        }
+
         return;
       }
 

@@ -3,33 +3,33 @@
 
 // computed: {
 //   ...mapGetters({
-//     getPrevRouteName: "helpers/getPrevRouteName"
+//     getPrevRoute: "helpers/getPrevRoute"
 //   })
 // }
 
 
 const state = {
-  prevRouteName: null,
+  prevRoute: null,
 };
 
 
 const getters = {
-  getPrevRouteName: (state) => {
-    return state.prevRouteName;
+  getPrevRoute: (state) => {
+    return state.prevRoute;
   },
 };
 
 
 const mutations = {
-  setPrevRouteName: (state, prevRouteName) => {
-    state.prevRouteName = prevRouteName;
+  setPrevRoute: (state, prevRoute) => {
+    state.prevRoute = prevRoute;
   },
 };
 
 
 const actions = {
-  setPrevRouteNameAction: ({ commit }, prevRouteName) => {
-    commit("setPrevRouteName", prevRouteName);
+  setPrevRouteAction: ({ commit }, prevRoute) => {
+    commit("setPrevRoute", prevRoute);
   },
 };
 

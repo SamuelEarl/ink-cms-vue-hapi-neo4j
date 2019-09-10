@@ -1,7 +1,7 @@
 <template>
   <AuthFormsWrapper>
     <template #form-title>Verify Your Email</template>
-    <template #form-instructions>If you have not received a verification email, then check your spam folder. Otherwise, we can send a new verification email to you.</template>
+    <template #form-instructions>If you have not received a verification email, then check your spam and junk folders. Otherwise, we can send a new verification email to you.</template>
 
     <template #form>
       <form class="auth-form" @submit.prevent="resendVerificationLink">

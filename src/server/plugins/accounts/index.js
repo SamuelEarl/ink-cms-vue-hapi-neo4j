@@ -158,7 +158,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const verifyUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
+          const verifyUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/auth/verify-email/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -342,6 +342,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        let cta = null;
         const email = request.payload.email;
 
         try {
@@ -359,7 +360,7 @@ exports.plugin = {
           // set "flash" to an error message, and throw an error.
           if (userNode.records.length === 0) {
             session.close();
-            flash = "We were unable to find a user associated with that email address. Please register.";
+            flash = "We were unable to find a user associated with that email address. Do you need to register for an account?";
             throw new Error(flash);
           }
 
@@ -368,6 +369,7 @@ exports.plugin = {
           if (userNode.records.length > 0 && userNode.records[0]._fields[0].properties.isVerified) {
             session.close();
             flash = `Your email address (${email}) has already been verified. Please login.`;
+            cta = "login";
             throw new Error(flash);
           }
 
@@ -424,7 +426,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const verifyUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/verify-email/${email}/${token}`;
+          const verifyUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/auth/verify-email/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -443,7 +445,7 @@ exports.plugin = {
           error = errorRes;
         }
         finally {
-          return { error, flash };
+          return { error, flash, cta };
         }
       }
     });
@@ -494,7 +496,7 @@ exports.plugin = {
           // set "flash" to an error message, and throw an error.
           if (userNode.records.length === 0) {
             session.close();
-            flash = "We were unable to find a user associated with that email address. Please register.";
+            flash = "We were unable to find a user associated with that email address. Do you need to register for an account?";
             throw new Error(flash);
           }
 
@@ -534,7 +536,7 @@ exports.plugin = {
 
           const host = request.headers.host;
 
-          const resetUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/reset-password/${email}/${token}`;
+          const resetUrl = `http${NODE_ENV === "production" ? "s" : ""}://${NODE_ENV === "production" ? host : "localhost:8080"}/auth/reset-password/${email}/${token}`;
 
           const mailOptions = {
             from: "no-reply@yourwebapplication.com",
@@ -738,7 +740,7 @@ exports.plugin = {
 
           await transporter.sendMail(mailOptions);
 
-          flash = "You have successfully updated your password. Please log in.";
+          flash = "You have successfully updated your password. Please login.";
         }
         catch(e) {
           const msg = e.message ? e.message : "Error while attempting to reset password.";
@@ -810,14 +812,14 @@ exports.plugin = {
           // If no user exists with the above email or the password does not match the one stored in
           // the database, then set "flash" to an error message and throw an error.
           if (existingUser.records.length === 0 || !(await Bcrypt.compare(password, existingUser.records[0]._fields[0].properties.password))) {
-            flash = "The email or password that you provided does not match our records. Please register.";
+            flash = "The email or password that you provided does not match our records. Do you need to register for an account?";
             throw new Error(flash);
           }
 
           // If the user has not verified their email address, then set "flash" to an error message
           // and throw an error.
           if (!existingUser.records[0]._fields[0].properties.isVerified) {
-            flash = "You have not verified your email address. Click the link below to send a new verification email.";
+            flash = "You have not verified your email address. Fill out the form below to have a new verification email sent to you.";
             cta = "resendVerification";
             throw new Error(flash);
           }

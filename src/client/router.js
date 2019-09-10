@@ -68,7 +68,7 @@ const router = new Router({
       ],
     },
     {
-      path: "/",
+      path: "/auth",
       component: AuthLayout,
       children: [
         {
@@ -127,8 +127,9 @@ const router = new Router({
 // For each protected route, check if the user is logged in before they are allowed access.
 // If the user is not logged in, then redirect them to the login page.
 router.beforeEach(async (to, from, next) => {
-  // Store the previous route in Vuex. This is used to determine where to redirect users in the login flow.
-  store.dispatch("helpers/setPrevRouteNameAction", from.name);
+  // Store the previous route information in Vuex. This is used to determine where to redirect
+  // users in the login flow.
+  store.dispatch("helpers/setPrevRouteAction", from);
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // If the user is not logged in, then redirect the user to the login page.
