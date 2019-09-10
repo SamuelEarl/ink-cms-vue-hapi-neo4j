@@ -5,7 +5,7 @@
 
     <template #form>
       <form class="auth-form" @submit.prevent="resendVerificationLink">
-        <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+        <input v-model="email" class="w3-input w3-border input" type="email" placeholder="Email">
         <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.email.required" class="error">Email is required</div>
           <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
@@ -17,7 +17,7 @@
         <button
           v-if="!showSpinner"
           @click="$v.$touch()"
-          class="btn-tertiary btn-form"
+          class="btn-tertiary full-width"
         >
           Send Verification
         </button>

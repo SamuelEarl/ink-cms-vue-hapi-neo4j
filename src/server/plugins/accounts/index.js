@@ -763,6 +763,13 @@ exports.plugin = {
       method: "POST",
       path: "/login",
       options: {
+        auth: {
+          strategy: "userSession",
+          // A user is not required to be logged in before they can login. Obviously.
+          // The example in the @hapi/cookie GitHub page uses the "try" mode, so I am using it here
+          // too. See https://github.com/hapijs/cookie.
+          mode: "try"
+        },
         validate: {
           payload: {
             email: Joi.string().email().required(),
@@ -780,13 +787,6 @@ exports.plugin = {
             return error;
           }
         },
-        auth: {
-          strategy: "userSession",
-          // A user is not required to be logged in before they can login. Obviously.
-          // The example in the @hapi/cookie GitHub page uses the "try" mode, so I am using it here
-          // too. See https://github.com/hapijs/cookie.
-          mode: "try"
-        }
       },
       handler: async function(request, h) {
         let error = null;
@@ -951,6 +951,13 @@ exports.plugin = {
       method: "PUT",
       path: "/users/update-user-scope",
       options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
+        },
         validate: {
           payload: {
             userId: Joi.string().required(),
@@ -968,13 +975,6 @@ exports.plugin = {
             return error;
           }
         },
-        auth: {
-          strategy: "userSession",
-          mode: "required",
-          access: {
-            scope: ["admin"]
-          }
-        }
       },
       handler: async function(request) {
         let error = null;

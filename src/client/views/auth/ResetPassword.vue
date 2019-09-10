@@ -51,7 +51,7 @@
           <button
             v-if="!showSpinner"
             @click="$v.$touch()"
-            class="btn-primary btn-form blue-gradient"
+            class="btn-primary full-width blue-gradient"
           >
             Reset Password
           </button>

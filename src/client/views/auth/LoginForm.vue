@@ -4,7 +4,7 @@
 
     <template #form>
       <form class="auth-form" @submit.prevent="login">
-        <input v-model="email" class="w3-input w3-border" type="email" placeholder="Email">
+        <input v-model="email" class="w3-input w3-border input" type="email" placeholder="Email">
         <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.email.required" class="error">Email is required</div>
           <div v-if="!$v.email.email" class="error">Must be a valid email address</div>
@@ -13,7 +13,7 @@
 
         <br>
 
-        <input v-model="password" class="w3-input w3-border" type="password" placeholder="Password">
+        <input v-model="password" class="w3-input w3-border input" type="password" placeholder="Password">
         <div v-if="$v.$dirty" class="validation-messages">
           <div v-if="!$v.password.required" class="error">Password is required</div>
           <div v-if="!$v.password.minLength" class="error">Password must be at least {{ $v.password.$params.minLength.min }} characters long</div>
@@ -25,7 +25,7 @@
         <button
           v-if="!showSpinner"
           @click="$v.$touch()"
-          class="btn-primary btn-form blue-gradient"
+          class="btn-primary full-width blue-gradient"
         >
           Login
         </button>

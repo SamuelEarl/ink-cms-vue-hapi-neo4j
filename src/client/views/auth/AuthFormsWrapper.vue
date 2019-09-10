@@ -66,9 +66,9 @@ export default {
         .form-body {
 
           .auth-form {
-            input {
-              background-color: $light-gray;
-            }
+            // input {
+            //   background-color: $light-gray;
+            // }
 
             .error {
               padding: 5px;

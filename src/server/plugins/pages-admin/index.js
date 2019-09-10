@@ -5,6 +5,7 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 // Imports
 const uuidv4 = require("uuid/v4");
 const Boom = require("@hapi/boom");
+const Joi = require("@hapi/joi");
 
 exports.plugin = {
   pkg: require("./package.json"),
@@ -27,7 +28,21 @@ exports.plugin = {
           access: {
             scope: ["admin"]
           }
-        }
+        },
+        validate: {
+          payload: {
+            title: Joi.string().required(),
+            slug: Joi.string().allow(""),
+            content: Joi.string().required(),
+            sortPosition: Joi.number().required(),
+          },
+          options: {
+            abortEarly: false
+          },
+          failAction: function(request, h, error) {
+            return error;
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -132,7 +147,18 @@ exports.plugin = {
           access: {
             scope: ["admin"]
           }
-        }
+        },
+        validate: {
+          params: {
+            pageId: Joi.string().required(),
+          },
+          options: {
+            abortEarly: false
+          },
+          failAction: function(request, h, error) {
+            return error;
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -196,7 +222,23 @@ exports.plugin = {
           access: {
             scope: ["admin"]
           }
-        }
+        },
+        validate: {
+          params: {
+            pageId: Joi.string().required(),
+          },
+          payload: {
+            title: Joi.string().required(),
+            slug: Joi.string().allow(""),
+            content: Joi.string().required(),
+          },
+          options: {
+            abortEarly: false
+          },
+          failAction: function(request, h, error) {
+            return error;
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -294,7 +336,19 @@ exports.plugin = {
           access: {
             scope: ["admin"]
           }
-        }
+        },
+        validate: {
+          payload: {
+            pageId: Joi.string().required(),
+            title: Joi.string().required(),
+          },
+          options: {
+            abortEarly: false
+          },
+          failAction: function(request, h, error) {
+            return error;
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;
@@ -342,7 +396,24 @@ exports.plugin = {
           access: {
             scope: ["admin"]
           }
-        }
+        },
+        validate: {
+          payload: {
+            pagesList: Joi.array().items(Joi.object({
+              pageId: Joi.string(),
+              title: Joi.string(),
+              slug: Joi.string(),
+              content: Joi.string(),
+              sortPosition: Joi.number(),
+            })).required(),
+          },
+          options: {
+            abortEarly: false
+          },
+          failAction: function(request, h, error) {
+            return error;
+          }
+        },
       },
       handler: async function(request, h) {
         let error = null;

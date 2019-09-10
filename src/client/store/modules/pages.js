@@ -62,6 +62,7 @@ const actions = {
   reorderPagesAction: debounce(async ({ commit, dispatch, state }) => {
     try {
       const reorderedPagesList = state.pagesList;
+      console.log("reorderedPagesList:", reorderedPagesList);
 
       const method = "PUT";
       const url = "/pages-admin/reorder-pages";
