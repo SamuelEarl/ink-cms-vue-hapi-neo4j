@@ -231,6 +231,12 @@ export default {
 }
 </script>
 
+<style lang="stylus">
+  .mce-content-body {
+    background-color: #eee !important;
+  }
+</style>
+
 <style scoped lang="stylus">
 @media $s-up {
   .error {

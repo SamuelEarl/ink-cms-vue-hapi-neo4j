@@ -8,12 +8,12 @@
     "lint:vue": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
-    "__dev_comment__": "Configure dev env with babel-node and node-dev (or nodemon if nodemon isn't broken): https://github.com/babel/example-node-server. UPDATE: In Babel 7, the 'babel-node' command comes from @babel/node: https://new.babeljs.io/docs/en/next/v7-migration.html#babel-node. If node-dev doesn't work in dev:hapi, then use PM2's watch and restart options for development: https://pm2.io/doc/en/runtime/guide/development-tools/#watch-options.",
+    "__dev_comments__": "(1) Configure your dev environment with babel-node and node-dev (or nodemon if nodemon isn't broken): https://github.com/babel/example-node-server. UPDATE: In Babel 7, the 'babel-node' command comes from @babel/node: https://new.babeljs.io/docs/en/next/v7-migration.html#babel-node. (2) If node-dev doesn't work in dev:hapi, then use PM2's watch and restart options for development: https://pm2.io/doc/en/runtime/guide/development-tools/#watch-options.",
     "dev": "npm-run-all --parallel dev:vue dev:hapi",
     "dev:vue": "vue-cli-service serve",
     "dev:vue-old": "NODE_ENV=development webpack --env dev --watch",
     "dev:hapi": "NODE_ENV=development node-dev --no-notify src/server/server.js --exec babel-node",
-    "__build_comment__": "Configure production build with babel (https://github.com/babel/example-node-server), but use the new @babel/cli package (https://babeljs.io/docs/en/babel-cli)",
+    "__build_comments__": "(1) Configure your production build with babel, as opposed to babel-node (https://github.com/babel/example-node-server), but use the new @babel/cli package (https://babeljs.io/docs/en/babel-cli). (2) When creating your project inside of a Docker environment, your node_modules packages should only be accessible inside of Docker. So you need to run the app in one terminal with the 'make dev' command and then open a separate terminal that has access to your Docker environment and run 'npm run build' to build your project",
     "prebuild": "npm run clean",
     "build": "npm-run-all --serial build:vue build:hapi",
     "build:vue-old": "NODE_ENV=production webpack --env prod",
@@ -76,6 +76,7 @@
     "vuex-persistedstate": "^2.5.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.6.0",
     "@vue/cli-plugin-babel": "^3.7.0",
     "@vue/cli-plugin-e2e-nightwatch": "^3.7.0",
     "@vue/cli-plugin-eslint": "^3.7.0",
