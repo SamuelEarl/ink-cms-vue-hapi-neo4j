@@ -83,6 +83,10 @@ NOTES:
 ---
 
 # PRODUCTION
+UPDATE:
+When creating your project inside of a Docker environment, your `node_modules` packages should only be accessible inside of Docker. So you need to run the app in one terminal with the `make dev` command and then open a separate terminal that has access to your Docker environment (e.g., in VS Code's Docker plugin under the "Containers" section, right click your app container and select "Attach Shell"). Once you are inside a shell terminal with acces to your Docker container, run `npm run build` to build your project.
+
+I need to update the rest of this documentation to reflect the above explanation.
 
 ## Run the app in a production environment
 Navigate to the root folder and run

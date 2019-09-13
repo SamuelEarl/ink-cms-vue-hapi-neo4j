@@ -13,7 +13,7 @@
     "dev:vue": "vue-cli-service serve",
     "dev:vue-old": "NODE_ENV=development webpack --env dev --watch",
     "dev:hapi": "NODE_ENV=development node-dev --no-notify src/server/server.js --exec babel-node",
-    "__build_comments__": "(1) Configure your production build with babel, as opposed to babel-node (https://github.com/babel/example-node-server), but use the new @babel/cli package (https://babeljs.io/docs/en/babel-cli). (2) When creating your project inside of a Docker environment, your node_modules packages should only be accessible inside of Docker. So you need to run the app in one terminal with the 'make dev' command and then open a separate terminal that has access to your Docker environment and run 'npm run build' to build your project",
+    "__build_comments__": "(1) Configure your production build with babel, as opposed to babel-node (https://github.com/babel/example-node-server), but use the new @babel/cli package (https://babeljs.io/docs/en/babel-cli). (2) When creating your project inside of a Docker environment, your node_modules packages should only be accessible inside of Docker. Refer to the README.md file for details on how to build the app inside of a Docker container.",
     "prebuild": "npm run clean",
     "build": "npm-run-all --serial build:vue build:hapi",
     "build:vue-old": "NODE_ENV=production webpack --env prod",
