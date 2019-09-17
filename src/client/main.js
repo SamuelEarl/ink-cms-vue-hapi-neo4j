@@ -26,6 +26,13 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
 
 Vue.use(Vuelidate);
 
+// Min and Max media query ranges:
+Vue.prototype.$sMin = 0;
+Vue.prototype.$sMax = 600;
+Vue.prototype.$mMin = 601;
+Vue.prototype.$mMax = 992;
+Vue.prototype.$lMin = 993;
+
 // TinyMCE Editor Configs:
 Vue.prototype.$editorApiKey = "7gka8rihodg40gmphfhqb1tk9tjbswjiu0xcdqvgetdg6057";
 // Configure the editor's appearance, including the menu and toolbar controls:
@@ -33,6 +40,11 @@ Vue.prototype.$editorApiKey = "7gka8rihodg40gmphfhqb1tk9tjbswjiu0xcdqvgetdg6057"
 // This pen shows some more advanced configs: https://codepen.io/qinglu/pen/mOKgPP. I think it's an
 // older version of TinyMCE, but most of the concepts still apply.
 Vue.prototype.$editorOptions = {
+  // Disable the default mobile theme and set it to "silver", which is the default desktop theme.
+  // See https://stackoverflow.com/questions/54579110/is-it-possible-to-disable-the-mobile-ui-features-in-tinymce-5.
+  mobile: {
+    theme: "silver"
+  },
   // The easiest way to add a lot of styles the TinyMCE editor is to do this: Inside the "/public/" directory, create a "css" folder. Inside of that "css" folder, create a file called "tiny-mce.css". (You can call this file anything you want.) Then place the file path to that CSS file on the "content_css" setting, as I have done below. Then you can add your styles in your "tiny-mce.css" file. In your browser, you can right-click on the editor to inspect it and see which CSS classes are available for styling. (NOTE: TinyMCE doesn't allow you to overwrite too many of their default styles. In order to do that, you will have to look into using different skins.) You can also create styles for different HTML elements that are used within the editor. For example, you can style all <p> tags to have a light gray background and larger margins.
   // When you build your app for production, this file will also get placed in the correct location in relation to your index.html file, so it will work in production too without any extra configurations.
   // Keep in mind that this is a CSS file and not a Stylus file, so you can't nest your style rules or use variables, etc.

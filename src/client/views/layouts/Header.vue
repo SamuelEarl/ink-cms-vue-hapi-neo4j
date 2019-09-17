@@ -125,6 +125,20 @@ export default {
     }),
   },
 
+  watch: {
+    // This watch property will watch the $route. If the route changes, then the method will check
+    // if the current screen size is the upper medium range or smaller. If the screen size is the
+    // upper medium range or smaller, then the mobile navigation menu will be hidden when the route
+    // changes.
+    $route() {
+      const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+      if (width <= this.$mMax) {
+        document.getElementById("nav").style.display = "none";
+      }
+    }
+  },
+
   /**
    * When this component is first created, it calls the "setPagesListAction", which populates
    * the "pages" state property in the "pages" Vuex module.
