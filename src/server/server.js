@@ -8,7 +8,8 @@ if (Dotenv.error) {
 }
 
 if (NODE_ENV === "production") {
-  require("@babel/polyfill");
+  require("core-js/stable");
+  require("regenerator-runtime/runtime");
 }
 require("make-promises-safe");
 const Fs = require("fs");

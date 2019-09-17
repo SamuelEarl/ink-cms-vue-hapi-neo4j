@@ -44,7 +44,7 @@ staging:
 # PRODUCTION
 # ==============================
 # `make prod`
-# Start the production containers in daemon mode. If no containers exist, then this command will create new containers.
+# Start the production containers in regular mode (as opposed to daemon mode). If no containers exist, then this command will create new containers.
 prod:
 	docker-compose -f docker-compose.prod.yml up
 	# The `-f` flag specifies the filename that should be used in the docker-compose command.

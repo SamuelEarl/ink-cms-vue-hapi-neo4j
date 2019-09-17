@@ -1,0 +1,59 @@
+# Configure Docker Compose for production: https://docs.docker.com/compose/production/
+# Configure for restart: https://docs.docker.com/compose/compose-file/#restart_policy
+  # This link suggests using "restart: always".
+
+# Do I need to install and configure NGiNX if I am deploying a multi-container app on an IaaS provider like DigitalOcean? I will probably reserve that kind of config for my book, but not for this app as it currently stands because it is a startup app (as opposed to an enterprise app) and it will be deployed to Google App Engine, which will handle load balancing for me.
+# When I am ready to setup NGiNX, read under the heading "Setup NGiNX as a reverse proxy for Node.js apps" in my "Web Development For Those Who Don't Know Where To Begin" Google doc.
+
+version: "3.7"
+
+services:
+  prod-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    # The production files need to be mounted so that log files (and other files) can
+    # persist through server crashes.
+    volumes:
+      - ./package.json:/usr/src/app/package.json
+      - ./package-lock.json:/usr/src/app/package-lock.json
+      - ./node_modules:/usr/src/app/node_modules
+      - ./dist:/usr/src/app/dist
+      - ./logs:/usr/src/app/logs
+    ports:
+      - target: 4000 # port inside the container
+        published: 80 # port on the host where you can access the app
+    # You have to run `npm install` to install the dependencies, `npm run build` to create a production build of the app and `npm run prod` to run the production version of the app.
+    # You have to use bash to execute the command otherwise you will get errors.
+    command: npm run prod
+    networks:
+      app_net:
+        ipv4_address: 172.28.1.1
+    depends_on:
+      - prod-neo4j
+
+  prod-neo4j:
+    image: bitnami/neo4j:3.5.3
+    ports:
+      - "7474:7474"
+      - "7473:7473"
+      - "7687:7687"
+    # Volumes allow you to persist data. See the README to find out where the Neo4j data are stored on the host machine.
+    volumes:
+      - type: volume
+        source: neo4j_data_prod
+        target: /bitnami
+    networks:
+      app_net:
+        ipv4_address: 172.28.1.2
+
+volumes:
+  neo4j_data_prod:
+    driver: local
+
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

@@ -13,10 +13,12 @@ exports.plugin = {
   pkg: require("./package.json"),
   register: async function(server, options) {
 
+    // I think these static asset routes are only used in production because I commented out all the routes and it still ran fine in development mode. I think that while in development mode, the assets are simply served up from Vue’s development server. In production mode, there is no development server and that’s where hapi comes in to serve up the static assets - at least some of them.
+
     server.route({
-      method: "GET",
-      // method: "*", // Does the method need to be "*" so that the index.html file is returned
-      // with every request no matter what the method is?
+      method: "*",
+      // I was using "methode: 'GET'", but I think this needs to be "method: '*'" so that the
+      // index.html file is returned with every request no matter what the method is. Is that right?
       path: "/{path*}",
       handler: async function(request, h) {
         try {
@@ -59,6 +61,16 @@ exports.plugin = {
 
     server.route({
       method: "GET",
+      path: "/img/{file*}",
+      handler: {
+        directory: {
+          path: Path.join(__dirname, "../../../client/img")
+        }
+      }
+    });
+
+    server.route({
+      method: "GET",
       path: "/service-worker.js",
       handler: async function(request, h) {
         try {
@@ -68,16 +80,6 @@ exports.plugin = {
         }
         catch(e) {
           console.error(`\n [ENDPONT]: ${request.path} \n [ERROR]: ${e} `);
-        }
-      }
-    });
-
-    server.route({
-      method: "GET",
-      path: "/img/{file*}",
-      handler: {
-        directory: {
-          path: Path.join(__dirname, "../../../client/img")
         }
       }
     });
