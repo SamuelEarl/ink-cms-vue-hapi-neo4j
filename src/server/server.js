@@ -7,6 +7,7 @@ if (Dotenv.error) {
   throw Dotenv.error;
 }
 
+
 if (NODE_ENV === "production") {
   require("core-js/stable");
   require("regenerator-runtime/runtime");
