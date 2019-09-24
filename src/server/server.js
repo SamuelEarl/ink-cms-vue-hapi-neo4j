@@ -7,11 +7,13 @@ if (Dotenv.error) {
   throw Dotenv.error;
 }
 
+// if (NODE_ENV === "production") {
+//   // This package is for adding polyfills to support features like Promises:
+//   require("core-js/stable");
+//   // This package is for transforming generators:
+//   // import "regenerator-runtime/runtime";
+// }
 
-if (NODE_ENV === "production") {
-  require("core-js/stable");
-  require("regenerator-runtime/runtime");
-}
 require("make-promises-safe");
 const Fs = require("fs");
 const Path = require("path");
