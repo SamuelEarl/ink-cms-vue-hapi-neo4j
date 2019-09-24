@@ -223,12 +223,12 @@ if (NODE_ENV === "production") {
 }
 else {
   dbOptions = {
-    uri: process.env.DOCKER_NEO4J_URI,
-    user: process.env.DOCKER_NEO4J_USER,
-    password: process.env.DOCKER_NEO4J_PASSWORD
-    // uri: process.env.GRAPHENE_DEV_URI,
-    // user: process.env.GRAPHENE_DEV_USER,
-    // password: process.env.GRAPHENE_DEV_PASSWORD
+    // uri: process.env.DOCKER_NEO4J_URI,
+    // user: process.env.DOCKER_NEO4J_USER,
+    // password: process.env.DOCKER_NEO4J_PASSWORD
+    uri: process.env.GRAPHENE_DEV_URI,
+    user: process.env.GRAPHENE_DEV_USER,
+    password: process.env.GRAPHENE_DEV_PASSWORD
   };
 }
 

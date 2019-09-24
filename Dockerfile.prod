@@ -1,7 +1,11 @@
-# # I need to run "npm install" to install all dependencies, then "npm run build" (to create a production build in the /dist folder), then "npm prune --production" (to remove `devDependencies` packages) and then copy over only the node_modules directory (which contains the production-only packages) and the dist directory (which is the production build).
+# I need to run "npm install" to install all dependencies, then "npm run build" (to create a production build in the /dist folder), then "npm prune --production" (to remove `devDependencies` packages) and then copy over only the node_modules directory (which contains the production-only packages) and the dist directory (which is the production build).
 
+# TODO: I need to figure out what these instructions are doing. I thought they were installing dependencies in a temporary Docker container and then copying over the necessary files and folders into the final Docker container. But if I delete the `dist` folder and try to run `make prod-rebuild` and then `make prod`, I get an error that says that Docker cannot find the `dist/server/server.js` module. So right now I have to first run `npm run build` outside of any Docker commands and then I can run `make prod-rebuild` and then `make prod` and everything works properly. Hmmm. I want everything contained within the Dockerfiles and docker-compose files, so I need to rework these files.
+
+# --------------------------------------------------
 # Instructions for first stage of multi-stage build
-FROM node:10 AS build
+# --------------------------------------------------
+FROM node:12 AS build
 
 # Copy package.json and package-lock.json files
 COPY package.json .
@@ -17,10 +21,12 @@ RUN npm run build
 
 # Remove `devDependencies` packages
 # I need to see if this is removing packages that I need before can reliably use it.
-# RUN npm prune --production
+RUN npm prune --production
 
+# ---------------------------------------------------
 # Instructions for second stage of multi-stage build
-FROM node:10 AS production
+# ---------------------------------------------------
+FROM node:12 AS production
 
 WORKDIR /usr/src/app
 
@@ -30,6 +36,8 @@ COPY --from=build package.json package.json
 COPY --from=build package-lock.json package-lock.json
 
 COPY --from=build node_modules node_modules
+
+COPY --from=build .env .env
 
 COPY --from=build dist dist
 
