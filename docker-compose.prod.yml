@@ -25,9 +25,9 @@ services:
         published: 80 # port on the host where you can access the app
     # You have to run `npm install` to install the dependencies, `npm run build` to create a production build of the app and `npm run prod` to run the production version of the app.
     # You have to use bash to execute the command otherwise you will get errors.
-    # command: bash -c "ls"
+    command: bash -c "cat package.json"
     # command: bash -c "echo $PWD"
-    command: npm run prod
+    # command: npm run prod
 
 #     # Comment out everything below this line in order to run the app without the database.
 #     networks:
