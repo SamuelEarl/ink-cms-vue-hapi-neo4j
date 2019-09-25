@@ -1,0 +1,12 @@
+# .dockerignore Reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
+node_modules
+npm-debug.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.git
+.gitignore
+README.md
+LICENSE
+.vscode

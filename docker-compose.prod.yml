@@ -8,7 +8,7 @@
 version: "3.7"
 
 services:
-  prod-app:
+  ink-prod-app:
     build:
       context: .
       dockerfile: Dockerfile.prod
@@ -25,35 +25,39 @@ services:
         published: 80 # port on the host where you can access the app
     # You have to run `npm install` to install the dependencies, `npm run build` to create a production build of the app and `npm run prod` to run the production version of the app.
     # You have to use bash to execute the command otherwise you will get errors.
+    # command: bash -c "ls"
+    # command: bash -c "echo $PWD"
     command: npm run prod
-    networks:
-      app_net:
-        ipv4_address: 172.28.1.1
-    depends_on:
-      - prod-neo4j
 
-  prod-neo4j:
-    image: bitnami/neo4j:3.5.3
-    ports:
-      - "7474:7474"
-      - "7473:7473"
-      - "7687:7687"
-    # Volumes allow you to persist data. See the README to find out where the Neo4j data are stored on the host machine.
-    volumes:
-      - type: volume
-        source: neo4j_data_prod
-        target: /bitnami
-    networks:
-      app_net:
-        ipv4_address: 172.28.1.2
+#     # Comment out everything below this line in order to run the app without the database.
+#     networks:
+#       app_net:
+#         ipv4_address: 172.28.1.1
+#     depends_on:
+#       - prod-neo4j
 
-volumes:
-  neo4j_data_prod:
-    driver: local
+#   prod-neo4j:
+#     image: bitnami/neo4j:3.5.3
+#     ports:
+#       - "7474:7474"
+#       - "7473:7473"
+#       - "7687:7687"
+#     # Volumes allow you to persist data. See the README to find out where the Neo4j data are stored on the host machine.
+#     volumes:
+#       - type: volume
+#         source: neo4j_data_prod
+#         target: /bitnami
+#     networks:
+#       app_net:
+#         ipv4_address: 172.28.1.2
 
-networks:
-  app_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.28.0.0/16
+# volumes:
+#   neo4j_data_prod:
+#     driver: local
+
+# networks:
+#   app_net:
+#     ipam:
+#       driver: default
+#       config:
+#         - subnet: 172.28.0.0/16

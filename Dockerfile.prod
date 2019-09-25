@@ -1,26 +1,39 @@
 # I need to run "npm install" to install all dependencies, then "npm run build" (to create a production build in the /dist folder), then "npm prune --production" (to remove `devDependencies` packages) and then copy over only the node_modules directory (which contains the production-only packages) and the dist directory (which is the production build).
 
-# TODO: I need to figure out what these instructions are doing. I thought they were installing dependencies in a temporary Docker container and then copying over the necessary files and folders into the final Docker container. But if I delete the `dist` folder and try to run `make prod-rebuild` and then `make prod`, I get an error that says that Docker cannot find the `dist/server/server.js` module. So right now I have to first run `npm run build` outside of any Docker commands and then I can run `make prod-rebuild` and then `make prod` and everything works properly. Hmmm. I want everything contained within the Dockerfiles and docker-compose files, so I need to rework these files. I want to install and copy over fresh new `node_modules` and `dist` directies all from within my Docker files. I need to read up on multi-stage builds again.
+# TODO: I need to figure out what these instructions are doing. I thought they were installing dependencies in an intermediate Docker container and then copying over the necessary files and folders into the final Docker container. But if I delete the `dist` folder and try to run `make prod-rebuild` and then `make prod`, I get an error that says that Docker cannot find the `dist/server/server.js` module. So right now I have to first run `npm run build` outside of any Docker commands and then I can run `make prod-rebuild` and then `make prod` and everything works properly. Hmmm. I want all development and production build steps contained within the Dockerfiles and docker-compose files, so I need to rework these files. I want to install and copy over fresh new `node_modules` and `dist` directies all from within my Docker files. I need to read up on multi-stage builds again.
 
 # --------------------------------------------------
 # Instructions for first stage of multi-stage build
 # --------------------------------------------------
 FROM node:12 AS build
 
-# Copy package.json and package-lock.json files
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json files from host system to intermediate container.
 COPY package.json .
 
 COPY package-lock.json .
 
+# Install Node packages into the intermediate container.
 RUN npm install
 
+# Copy all files from the host to the intermediate container in preparation for the build step.
 COPY . .
 
-# Create production version of the app
+# Create production version of the app inside the intermediate container.
 RUN npm run build
 
-# Remove `devDependencies` packages
-# I need to see if this is removing packages that I need before can reliably use it.
+# At this stage there is no dist folder on the host, so this isn't copying anything.
+# COPY the `dist` directory from the host to the intermediate container.
+# COPY dist dist/
+# COPY . .
+
+# COPY .env .
+
+# Remove all `devDependencies` packages from the `node_modules` directory. These packages won't be
+# used in the production app after it has been built. Be careful that the only packages that are
+# installed in `devDependencies` are Babel, testing, linting, and other development-only or
+# testing-only packages.
 RUN npm prune --production
 
 # ---------------------------------------------------
@@ -31,14 +44,17 @@ FROM node:12 AS production
 WORKDIR /usr/src/app
 
 # Copy the package.json and package-lock.json files
-COPY --from=build package.json package.json
+COPY --from=build /package.json package.json
 
-COPY --from=build package-lock.json package-lock.json
+COPY --from=build /package-lock.json package-lock.json
 
-COPY --from=build node_modules node_modules
+COPY --from=build /.env .env
 
-COPY --from=build .env .env
+COPY --from=build /node_modules/ node_modules/
 
-COPY --from=build dist dist
+COPY --from=build /dist/ dist/
+
+# RUN echo $PWD
+# RUN ls dist/server
 
 CMD [ "npm", "run", "prod" ]

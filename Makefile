@@ -1,4 +1,23 @@
 # ==============================
+# DOCKER DEVELOPMENT
+# ==============================
+# `make docker-build`
+# Build the Docker image.
+docker-build:
+		docker image build -t ink-dev-image -f Dockerfile.dev .
+
+docker-dev:
+		docker container run ink-dev-image
+
+
+# ==============================
+# DOCKER COMPOSE
+# ==============================
+
+
+
+
+# ==============================
 # DEVELOPMENT
 # ==============================
 # `make dev`
