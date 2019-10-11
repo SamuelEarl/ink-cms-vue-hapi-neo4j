@@ -15,11 +15,12 @@ exports.plugin = {
   register: async function(server, options) {
 
     server.route({
-      // Set the method to "*" so that the index.html file is returned with every request, no matter
-      // what the HTTP request method is.
       // If you use "history" mode in Vue Router, then you need to configure your server to repond
       // to every request with the index.html file. See my "Vue.js Reference Guide" under the
       // heading "Using Vue Router’s History Mode".
+      // Set the method to "*" so that the index.html file is returned with every request instead
+      // of a 404 error. NOTE: When creating a SPA, any 404 errors/pages should be handled by the
+      // frontend framework and not by the backend server.
       method: "*",
       path: "/{path*}",
       handler: function(request, h) {
