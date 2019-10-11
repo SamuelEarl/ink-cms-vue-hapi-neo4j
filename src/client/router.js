@@ -10,7 +10,7 @@ import SendEmailVerificationForm from "./views/auth/SendEmailVerificationForm.vu
 import EmailSent from "./views/auth/EmailSent.vue";
 import VerifyEmail from "./views/auth/VerifyEmail.vue";
 import ResetPassword from "./views/auth/ResetPassword.vue";
-import PublicPage from "./views/pages-public/PublicPage.vue";
+import ContentPage from "./views/pages-public/ContentPage.vue";
 import Admin from "./views/pages-admin/Admin.vue";
 import Users from "./views/pages-admin/Users.vue";
 import PagesList from "./views/pages-admin/PagesList.vue";
@@ -19,6 +19,9 @@ import CreateEditPage from "./views/pages-admin/CreateEditPage.vue";
 Vue.use(Router);
 
 const router = new Router({
+  // If you use "history" mode, then you need to configure your server to repond to every request
+  // with the index.html file. See my "Vue.js Reference Guide" under the heading "Using Vue Router’s
+  // History Mode".
   mode: "history",
   base: process.env.BASE_URL,
   routes: [
@@ -29,12 +32,12 @@ const router = new Router({
         {
           path: "",
           name: "home",
-          component: PublicPage
+          component: ContentPage
         },
         {
           path: "page/:slug",
           name: "public-page",
-          component: PublicPage
+          component: ContentPage
         },
         {
           path: "admin",

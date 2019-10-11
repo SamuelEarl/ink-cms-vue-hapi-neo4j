@@ -10,9 +10,6 @@ exports.plugin = {
   pkg: require("./package.json"),
   register: async function(server, options) {
 
-    // Set session to the Neo4j "session" database object
-    const session = server.app.session;
-
     /**
      * Beginning of "catch" server method
      * Use the "catch" server method in your catch blocks, like this:

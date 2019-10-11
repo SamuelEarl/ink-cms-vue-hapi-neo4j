@@ -26,7 +26,10 @@ exports.plugin = {
       server.app.session = session;
 
       if (driver) {
-        console.log(`Connected to Neo4j database on ${driver._hostPort}`);
+        // const driverString = JSON.stringify(driver);
+        // console.log("Neo4j Connection Info:", driverString);
+        const connection = JSON.stringify(driver._address._hostPort);
+        console.log(`Connected to Neo4j database on ${connection}`);
       }
 
       await server.logger().info(driver);

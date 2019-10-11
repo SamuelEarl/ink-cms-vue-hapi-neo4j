@@ -268,7 +268,7 @@ const init = async () => {
       { plugin: require("./plugins/helpers") },
       { plugin: require("@hapi/inert") },
       // Route handlers to serve static files (HTML, CSS, JS, images)
-      { plugin: require("./plugins/static-routes") },
+      { plugin: require("./plugins/static-files") },
     ]);
 
     // Start the server and log the following message

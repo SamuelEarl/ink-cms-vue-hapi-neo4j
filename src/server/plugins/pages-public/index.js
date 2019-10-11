@@ -9,6 +9,7 @@ const sanitizeHtml = require("sanitize-html");
 
 exports.plugin = {
   pkg: require("./package.json"),
+  dependencies: ["database"],
   register: async function(server, options) {
 
     // Set session to the Neo4j "session" database object
@@ -32,7 +33,7 @@ exports.plugin = {
 
         try {
           // When a user sends a request for the home page, then there will be no slug sent with
-          // that request. (See the comments in "PublicPage.vue" under the "loadPageContent" method
+          // that request. (See the comments in "ContentPage.vue" under the "loadPageContent" method
           // for more details.)
           // If the slug exists, then set the slug variable to the existing slug. If no slug exists,
           // then that means that it is a request for the home page, so set the slug variable to

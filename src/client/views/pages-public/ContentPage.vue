@@ -11,13 +11,13 @@ import * as Axios from "axios";
 import { mapActions } from "vuex";
 
 export default {
-  name: "PublicPage",
+  name: "ContentPage",
   components: {},
 
   data() {
     return {
       title: "",
-      content: "You are seeing this message because you have not create a home page yet. <br> Please sign into the Admin area and create a custom home page. <br> Feel free to also create any other custom pages you want."
+      content: "You are seeing this message because you have not created a home page yet. <br> Please sign into the Admin area and create a custom home page."
     }
   },
 
@@ -31,7 +31,7 @@ export default {
   watch: {
     // When the route changes, call the "loadPageContent" method.
     // To improve performance, Vue will try to re-use components when it can. If a component can be reused, then the browser won't have to reload all the HTML, CSS, JavaScript, etc. that is required to load a page. So when a user navigates to a new page that uses the same component as the previous page they were on, you have to do something to tell the browser to request and load the data for that page.
-    // In this case, when a user navigates to a new page that also uses this "PublicPage" component, then Vue will not reload the component, which means that the new page's data will also not be loaded in the browser. When a user naviages to a new page the route will change in the URL, but nothing else will and it will appear as if the app is broken.
+    // In this case, when a user navigates to a new page that also uses this "ContentPage" component, then Vue will not reload the component, which means that the new page's data will also not be loaded in the browser. When a user naviages to a new page the route will change in the URL, but nothing else will and it will appear as if the app is broken.
     // This watch property will watch the $route and if the route changes, then the "loadPageContent" method will be called, which will load the content for the new page.
     $route() {
       this.loadPageContent();
