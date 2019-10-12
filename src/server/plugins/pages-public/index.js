@@ -32,7 +32,6 @@ exports.plugin = {
         let flash = null;
         let page;
         let pageData = {};
-        console.log("PARAMS:", request.params);
 
         try {
           // When a user sends a request for the home page, then there will be no slug sent with

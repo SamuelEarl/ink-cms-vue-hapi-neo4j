@@ -15,14 +15,6 @@
 
     <br><br><br>
 
-    <p v-if="pagesList.length > 0">
-      <em>
-        NOTE: The first page listed below will be designated as the home page and it will be visible by default.
-      </em>
-    </p>
-
-    <br>
-
     <p v-if="pagesList.length === 0">
       <em>
         You have not created any pages
@@ -88,6 +80,15 @@
         </Draggable>
       </table>
     </div>
+
+    <br><br>
+
+    <p v-if="pagesList.length > 0">
+      <em>
+        NOTE: The first page listed above will be designated as the home page and it will be visible by default.
+      </em>
+    </p>
+
   </div>
 </template>
 
@@ -183,7 +184,6 @@ export default {
         });
 
         const res = response.data;
-        console.log("showPage RESPONSE:", res);
         let msg = res.flash;
 
         // If there is an error, then display the error message.
@@ -242,7 +242,7 @@ export default {
             this.flashAction({ flashType: "success", flashMsg: msg });
             // If the home page is deleted and the "sortPosition" properties are not updated, then
             // no page will be designated as the home page. So after a page has been deleted, then
-            // call "reorderPagesAction" to update the "sortPosition" properties.
+            // call "reorderPagesAction" to update the "sortPosition" and "showPage" properties.
             this.reorderPagesAction();
           }
           else {

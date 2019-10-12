@@ -16,7 +16,6 @@ const state = {
 
 const getters = {
   getPagesList: (state) => {
-    console.log("getPagesList:", state.pagesList);
     return state.pagesList;
   },
 };
@@ -70,9 +69,8 @@ const actions = {
       // The first page in the list (in the PagesList.vue file) is designated as the home page. So when the pages get reordered, the following commit to "setShowPage" will set the first page's "Show Page" property to true so that the home page will appear in the header.
       commit("setShowPage", [ 0, true ]);
 
-      // Send the most recently reordered pagesList to the server to update the "sortPosition" and "showPage" properties in the database.
+      // Send the most recently reordered state.pagesList to the server to update the "sortPosition" and "showPage" properties in the database.
       const reorderedPagesList = state.pagesList;
-      console.log("PAGES:", reorderedPagesList);
 
       const method = "PUT";
       const url = "/pages-admin/reorder-pages";
@@ -87,7 +85,6 @@ const actions = {
       });
 
       const res = response.data;
-      console.log("reorderedPagesList:", res);
 
       const msg = res.flash;
 
