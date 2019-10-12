@@ -39,7 +39,7 @@
       <!-- Public Left Nav -->
       <div v-else id="left-nav">
 
-        <!-- If the user has not created any pages, then provide a default home page. -->
+        <!-- If the user has not created any pages, then provide a default home page that will give instructions to login to the admin area and create a home page. -->
         <router-link
           v-if="getPagesList.length === 0"
           :to="{ name: 'home' }"
@@ -50,28 +50,29 @@
           <img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo">
         </router-link>
 
+        <!-- If the user has created at least one page, then display that page (or those pages). -->
         <div v-for="page in getPagesList" :key="page.id">
+          <div v-if="page.showPage">
+            <!-- The first page listed in "getPagesList" will be displayed as the home page. The home page will show up in the header with the icon provided below. -->
+            <router-link
+              v-if="page.sortPosition === 0"
+              :to="{ name: 'home' }"
+              exact
+              id="home-link"
+              title="Home"
+            >
+              <img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo">
+            </router-link>
 
-          <!-- Home link with icon -->
-          <router-link
-            v-if="page.slug === 'home'"
-            :to="{ name: 'home' }"
-            exact
-            id="home-link"
-            title="Home"
-          >
-            <img id="logo" src="@/client/assets/ink-splat-white-30x28.png" alt="logo">
-          </router-link>
-
-          <!-- Public header links -->
-          <router-link
-            v-else
-            :to="{ name: 'public-page', params: { slug: page.slug } }"
-            exact
-          >
-            {{ page.title | capitalize }}
-          </router-link>
-
+            <!-- Public header links -->
+            <router-link
+              v-else
+              :to="{ name: 'public-page', params: { slug: page.slug } }"
+              exact
+            >
+              {{ page.title | capitalize }}
+            </router-link>
+          </div>
         </div>
       </div>
 
@@ -143,14 +144,14 @@ export default {
    * When this component is first created, it calls the "setPagesListAction", which populates
    * the "pages" state property in the "pages" Vuex module.
    */
-  async created() {
+  created() {
     // Since the "setPagesListAction" will also be called when the "pages-list" route is loaded
     // we don't want it to be called twice unnecessarily. So we will return with no value if
     // the "pages-list" route is being loaded.
     if (this.$route.name === "pages-list") {
       return;
     }
-    await this.setPagesListAction();
+    this.setPagesListAction();
   },
 
   methods: {

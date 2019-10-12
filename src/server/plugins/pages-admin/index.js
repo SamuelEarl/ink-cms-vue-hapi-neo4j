@@ -93,14 +93,16 @@ exports.plugin = {
                 title: { titleParam },
                 slug: { slugParam },
                 content: { contentParam },
-                sortPosition: { sortPositionParam }
+                sortPosition: { sortPositionParam },
+                showPage: { showPageParam }
               })
               RETURN p`, {
                 pageIdParam: pageId,
                 titleParam: title,
                 slugParam: slug,
                 contentParam: content,
-                sortPositionParam: sortPosition
+                sortPositionParam: sortPosition,
+                showPageParam: true
               }
             );
 
@@ -324,6 +326,74 @@ exports.plugin = {
 
 
     /**
+     * Set the page visibility
+     */
+    server.route({
+      method: "PUT",
+      path: "/pages-admin/show-page",
+      options: {
+        auth: {
+          strategy: "userSession",
+          mode: "required",
+          access: {
+            scope: ["admin"]
+          }
+        },
+        validate: {
+          payload: {
+            pageId: Joi.string().required(),
+            showPage: Joi.boolean().required(),
+            title: Joi.string().required(),
+          },
+          options: {
+            abortEarly: false
+          },
+          failAction: function(request, h, error) {
+            return error;
+          }
+        },
+      },
+      handler: async function(request, h) {
+        let error = null;
+        let flash = null;
+        const pageId = request.payload.pageId;
+        const title = request.payload.title;
+        const showPage = request.payload.showPage;
+
+        try {
+          await session.run(
+            `MATCH (p:Page {
+              pageId: { pageIdParam }
+            })
+            SET p.showPage = { showPageParam }
+            RETURN p`, {
+              pageIdParam: pageId,
+              showPageParam: showPage
+            }
+          );
+
+          session.close();
+
+          if (showPage) {
+            flash = `The "${title}" page is now visible!`;
+          }
+          else {
+            flash = `The "${title}" page is now hidden!`;
+          }
+        }
+        catch(e) {
+          error = new Boom(`Error while updating the "${title}" page "Show Page" setting.`);
+          const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
+          console.error(errorLog);
+        }
+        finally {
+          return { error, flash };
+        }
+      }
+    });
+
+
+    /**
      * Delete a page
      */
     server.route({
@@ -372,7 +442,7 @@ exports.plugin = {
           flash = `The "${title}" page was successfully deleted!`;
         }
         catch(e) {
-          error = new Boom(`Error while deleting the "${title}" page`);
+          error = new Boom(`Error while deleting the "${title}" page.`);
           const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
@@ -405,6 +475,7 @@ exports.plugin = {
               slug: Joi.string(),
               content: Joi.string(),
               sortPosition: Joi.number(),
+              showPage: Joi.boolean(),
             })).required(),
           },
           options: {
@@ -418,6 +489,7 @@ exports.plugin = {
       handler: async function(request, h) {
         let error = null;
         let flash = null;
+        let reorderedPagesArray = [];
 
         try {
           const pagesList = request.payload.pagesList;
@@ -432,10 +504,12 @@ exports.plugin = {
               `MATCH (p:Page {
                 pageId: { pageIdParam }
               })
-              SET p.sortPosition = { sortPositionParam }
+              SET p.sortPosition = { sortPositionParam },
+                  p.showPage = { showPageParam }
               RETURN p`, {
                 pageIdParam: page.pageId,
-                sortPositionParam: index
+                sortPositionParam: index,
+                showPageParam: page.showPage
               }
             );
 
@@ -448,9 +522,7 @@ exports.plugin = {
 
           // I need to show the JSON of a Neo4j record with an explanation of what each part means. Then I can clearly explain this next part.
 
-          let reorderedPagesArray = [];
-
-          // The "records[i]._fields[i].properties" property is an object that contains the properties of the node that is returned. For every node that is returned from the query, we are going to push that "properties" object into the "reorderedPagesArray". The result will be an array of objects. We don't need to return that array of objects to the browser because the pages were already reordered on the client. So we will return a success message letting the user know that their page reorganization has been saved. If an error occurred and the page reorganization was not saved in the database, then the execution would stop and skip to the catch block where an error would be create and sent back to the user.
+          // The "records[i]._fields[i].properties" property is an object that contains the properties of the node that is returned. For every node that is returned from the query, we are going to push that "properties" object into the "reorderedPagesArray". The result will be an array of objects, which will be returned to the browser. It is necessary to return the "reorderedPagesArray" to the browser so that the "getPagesList" getter in Vuex will return the updated list with the updated "sortPosition" properties. We will also return a success message letting the user know that their page reorganization has been saved. If an error occurred and the page reorganization was not saved in the database, then the execution would stop and skip to the catch block where an error would be created and then sent back to the user in the finally block.
           for (const pagePromise of arrayOfPromises) {
             const resolvedPromise = await pagePromise;
             resolvedPromise.records.forEach(async function(record) {
@@ -458,15 +530,15 @@ exports.plugin = {
             });
           }
 
-          flash = "Your page reorganization has been saved!";
+          flash = "The order of your pages has been updated in the database!";
         }
         catch(e) {
-          error = new Boom("Your page reorganization was not saved!");
+          error = new Boom("The order of your pages was NOT updated in the database!");
           const errorLog = `[ENDPOINT]: ${request.path}\n[ERROR]: ${error}`;
           console.error(errorLog);
         }
         finally {
-          return { error, flash };
+          return { error, flash, reorderedPagesArray };
         }
       }
     });

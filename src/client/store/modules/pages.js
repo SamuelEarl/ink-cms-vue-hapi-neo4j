@@ -8,7 +8,6 @@
 // }
 
 import * as Axios from "axios";
-import debounce from "lodash.debounce";
 
 const state = {
   pagesList: [],
@@ -17,6 +16,7 @@ const state = {
 
 const getters = {
   getPagesList: (state) => {
+    console.log("getPagesList:", state.pagesList);
     return state.pagesList;
   },
 };
@@ -25,6 +25,10 @@ const getters = {
 const mutations = {
   setPagesList: (state, pagesArray) => {
     state.pagesList = pagesArray;
+  },
+
+  setShowPage: (state, [ index, showPage ]) => {
+    state.pagesList[index].showPage = showPage;
   },
 
   removePageFromPagesList: (state, index) => {
@@ -50,19 +54,25 @@ const actions = {
     commit("setPagesList", pagesArray);
   },
 
+  showPageAction: ({ commit }, [ index, showPage ]) => {
+    commit("setShowPage", [ index, showPage ]);
+  },
+
   removePageAction: ({ commit }, index) => {
     commit("removePageFromPagesList", index);
   },
 
   /**
-   * Reorganizing the pages in the database is a bit of an expensive operation, so wait 2 seconds
-   * before you send the request to reorganize the pages to make sure that the user has completed
-   * at least most of their reorganizing.
+   * Reorganizing the pages in the database.
    */
-  reorderPagesAction: debounce(async ({ commit, dispatch, state }) => {
+  reorderPagesAction: async ({ commit, dispatch, state }) => {
     try {
+      // The first page in the list (in the PagesList.vue file) is designated as the home page. So when the pages get reordered, the following commit to "setShowPage" will set the first page's "Show Page" property to true so that the home page will appear in the header.
+      commit("setShowPage", [ 0, true ]);
+
+      // Send the most recently reordered pagesList to the server to update the "sortPosition" and "showPage" properties in the database.
       const reorderedPagesList = state.pagesList;
-      console.log("reorderedPagesList:", reorderedPagesList);
+      console.log("PAGES:", reorderedPagesList);
 
       const method = "PUT";
       const url = "/pages-admin/reorder-pages";
@@ -77,6 +87,8 @@ const actions = {
       });
 
       const res = response.data;
+      console.log("reorderedPagesList:", res);
+
       const msg = res.flash;
 
       // Display a flash message with either an error or a success message for page reordering.
@@ -85,14 +97,16 @@ const actions = {
         return;
       }
       else {
-        dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
+        commit("setPagesList", res.reorderedPagesArray);
+        // I have decided to remove the success message for page reordering, but you can keep it in, if you prefer.
+        // dispatch("userFeedback/flashAction", { flashType: "success", flashMsg: msg }, { root: true });
       }
     }
     catch(e) {
       console.error(e);
     }
 
-  }, 2000),
+  },
 };
 
 

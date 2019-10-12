@@ -13,14 +13,6 @@
 
     <br><br><br>
 
-    <p>
-      <em>
-        NOTE: To create a home page, give one of your pages the slug "home".
-      </em>
-    </p>
-
-    <br>
-
     <form @submit.prevent>
       <label><strong>Title</strong></label>
       <div v-if="$v.$dirty" class="validation-messages">

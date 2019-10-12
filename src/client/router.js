@@ -35,7 +35,7 @@ const router = new Router({
           component: ContentPage
         },
         {
-          path: "page/:slug",
+          path: ":slug",
           name: "public-page",
           component: ContentPage
         },

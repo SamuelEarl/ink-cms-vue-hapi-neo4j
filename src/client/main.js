@@ -5,6 +5,8 @@ import {
   faShoppingCart,
   faUserShield,
   faEdit,
+  faEye,
+  faEyeSlash,
   faTimesCircle,
   faSort
 } from "@fortawesome/free-solid-svg-icons";
@@ -19,6 +21,8 @@ library.add(faBars);
 library.add(faShoppingCart);
 library.add(faUserShield);
 library.add(faEdit);
+library.add(faEye);
+library.add(faEyeSlash);
 library.add(faTimesCircle);
 library.add(faSort);
 

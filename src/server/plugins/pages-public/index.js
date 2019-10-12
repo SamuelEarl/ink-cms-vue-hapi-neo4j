@@ -16,39 +16,67 @@ exports.plugin = {
     const session = server.app.session;
 
     /**
-     * Get the data for a public page based on the slug that is passed in "request.params.slug".
+     * Get the data for a public page based on the sortPosition (if the page is the home page) or
+     * the slug (if the page is any page other than the home page).
      */
     server.route({
       method: "GET",
-      path: "/pages-public/get-page/{slug?}",
+      path: "/pages-public/get-page/{sortPosition}/{slug?}",
       handler: async function(request, h) {
         // Define the properties that will be returned in the object that is in the "finally" block.
-        // As a user's request works through the logic in this route, these properties will get set
-        // to any necessary values before the object is returned in the "finally" block. For example,
-        // if there is an error, then the error property will get set with that error and the flash
-        // property will get set with a helpful feedback message for the user.
+        // As a user's request gets processed through the logic in this route, these properties will
+        // get set to any necessary values before the object is returned in the "finally" block. For
+        // example, if there is an error, then the error property will get set with that error and
+        // the flash property will get set with a helpful feedback message for the user.
         let error = null;
         let flash = null;
+        let page;
         let pageData = {};
+        console.log("PARAMS:", request.params);
 
         try {
           // When a user sends a request for the home page, then there will be no slug sent with
           // that request. (See the comments in "ContentPage.vue" under the "loadPageContent" method
           // for more details.)
-          // If the slug exists, then set the slug variable to the existing slug. If no slug exists,
-          // then that means that it is a request for the home page, so set the slug variable to
-          // "home".
-          const slug = request.params.slug ? request.params.slug : "home";
+          // If the sortPosition equals "0" (which is a string), then set sortPostion to 0 (the
+          // numerical value). Otherwise, sortPosition will be "null" (a string value), so set it to
+          // null (the original null value).
+          // Set the slug variable to request.params.slug.
+          // NOTE: The request params are passed as strings, so if you want to use them as their
+          // original data types, then you need to coerce them back into their original data types.
+          let sortPosition;
+          if (request.params.sortPosition === "0") {
+            sortPosition = 0;
+          }
+          else {
+            sortPosition = null;
+          }
 
-          // Retrieve the page content from Neo4j
-          const page = await session.run(
-            `MATCH (p:Page {
-              slug: { slugParam }
-            })
-            RETURN p`, {
-              slugParam: slug
-            }
-          );
+          const slug = request.params.slug;
+
+          // If sortPosition === 0, then retrieve the page data for the current home page from Neo4j.
+          if (sortPosition === 0) {
+            page = await session.run(
+              `MATCH (p:Page {
+                sortPosition: { sortPositionParam }
+              })
+              RETURN p`, {
+                sortPositionParam: sortPosition
+              }
+            );
+          }
+
+          // If the slug param exists, then retrieve the page data that is associated with that slug.
+          if (slug) {
+            page = await session.run(
+              `MATCH (p:Page {
+                slug: { slugParam }
+              })
+              RETURN p`, {
+                slugParam: slug
+              }
+            );
+          }
 
           session.close();
 

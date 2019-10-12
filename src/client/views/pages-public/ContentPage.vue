@@ -17,7 +17,7 @@ export default {
   data() {
     return {
       title: "",
-      content: "You are seeing this message because you have not created a home page yet. <br> Please sign into the Admin area and create a custom home page."
+      content: "You are seeing this message because you have not created any pages yet. <br> Please sign into the Admin area and create some pages."
     }
   },
 
@@ -45,19 +45,21 @@ export default {
 
     async loadPageContent() {
       let url;
-      // All the "public-page" routes are defined with a slug in the path (e.g., "page/about-us").
-      // However, the home route should only be "/", which does not allow for a slug. So we can run
-      // the following conditional checks to see which path the user is trying to navigate to. If
-      // they are going to the home route, then no slug is required. But for any other "public-page"
-      // route, there should be a slug.
+      // All the "public-page" routes are defined as "/:slug" (e.g., "/about-us").
+      // However, the home route is defined simply as "/", which does not allow for a slug. So we
+      // can run the following conditional checks to see which path the user is trying to navigate
+      // to. If they are going to the home route, then the "sortPosition" will be set to 0 and sent
+      // to the API endpoint in hapi. But for any other "public-page" route, the "sortPosition" will
+      // be set to null (because the sortPosition is not needed to retrieve the page's data) and the
+      // "slug" will be set to the route's slug value.
       // We can use the same URL for either page request ("home" or some other "public-page" request)
-      // because the "slug" parameter in the "/pages-public/get-page/{slug}" endpoint is optional.
+      // because the "slug" parameter in the "/pages-public/get-page/{sortPosition}/{slug}" endpoint is optional.
       if (this.$route.name === "home") {
-        url = "/pages-public/get-page";
+        url = "/pages-public/get-page/0";
       }
       else {
         const slug = this.$route.params.slug;
-        url = `/pages-public/get-page/${slug}`;
+        url = `/pages-public/get-page/null/${slug}`;
       }
       const response = await Axios.get(url);
 

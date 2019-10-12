@@ -17,7 +17,7 @@
 
     <p v-if="pagesList.length > 0">
       <em>
-        NOTE: To create a home page, give one of your pages the slug "home".
+        NOTE: The first page listed below will be designated as the home page and it will be visible by default.
       </em>
     </p>
 
@@ -36,6 +36,7 @@
             <th></th>
             <th>Title</th>
             <th class="center">Edit Page</th>
+            <th class="center">Show Page</th>
             <th class="center">Delete Page</th>
           </tr>
         </thead>
@@ -67,6 +68,16 @@
                   <font-awesome-icon icon="edit" />
                 </button>
               </router-link>
+            </td>
+            <td class="center">
+              <button
+                class="btn-table"
+                v-if="index !== 0"
+                v-on:click="showPage(page.pageId, !page.showPage, index, page.title)"
+              >
+                <font-awesome-icon v-if="page.showPage" icon="eye" title="Visible" />
+                <font-awesome-icon v-else icon="eye-slash" title="Hidden" />
+              </button>
             </td>
             <td class="center">
               <button v-on:click="deletePage(page.pageId, index, page.title)" class="btn-table">
@@ -132,6 +143,7 @@ export default {
   methods: {
     ...mapActions({
       setPagesListAction: "pages/setPagesListAction",
+      showPageAction: "pages/showPageAction",
       removePageAction: "pages/removePageAction",
       reorderPagesAction: "pages/reorderPagesAction",
       flashAction: "userFeedback/flashAction",
@@ -152,6 +164,47 @@ export default {
           sortPosition: sortPosition
         }
       });
+    },
+
+    async showPage(pageId, showPage, index, title) {
+      try {
+        const method = "PUT";
+        const url = "/pages-admin/show-page";
+        const payload = {
+          pageId: pageId,
+          showPage: showPage,
+          title: title
+        };
+
+        const response = await Axios({
+          method: method,
+          url: url,
+          data: payload
+        });
+
+        const res = response.data;
+        console.log("showPage RESPONSE:", res);
+        let msg = res.flash;
+
+        // If there is an error, then display the error message.
+        if (res.error) {
+          this.flashAction({ flashType: "error", flashMsg: msg });
+          return;
+        }
+
+        // Otherwise use a Vuex action to update the page's showPage property.
+        if (index > -1) {
+          this.showPageAction([ index, showPage ]);
+          // this.flashAction({ flashType: "success", flashMsg: msg });
+        }
+        else {
+          msg = "A UI error occurred while updating the \"Show Page\" setting. Please refresh your browser.";
+          this.flashAction({ flashType: "error", flashMsg: msg });
+        }
+      }
+      catch(e) {
+        console.error("showPage:", e);
+      }
     },
 
     async deletePage(pageId, index, title) {
@@ -187,6 +240,10 @@ export default {
           if (index > -1) {
             this.removePageAction(index, 1);
             this.flashAction({ flashType: "success", flashMsg: msg });
+            // If the home page is deleted and the "sortPosition" properties are not updated, then
+            // no page will be designated as the home page. So after a page has been deleted, then
+            // call "reorderPagesAction" to update the "sortPosition" properties.
+            this.reorderPagesAction();
           }
           else {
             msg = "A UI error occurred while deleting the page. Please refresh your browser.";
