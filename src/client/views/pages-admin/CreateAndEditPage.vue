@@ -25,7 +25,7 @@
       <label>
         <strong>Slug</strong>&nbsp;<em>(Optional)</em>
         <span class="w3-tooltip tooltip-icon">i
-          <span class="w3-text w3-tag tooltip-text">If left blank, the slug will be auto-generated.</span>
+          <span class="w3-text w3-tag tooltip-text">The slug is a unique ID for the page. If this field is left blank, then the slug will be auto-generated based on the page title.</span>
         </span>
       </label>
       <input type="text" class="w3-input input" name="slug" v-model="slug">
@@ -175,7 +175,6 @@ export default {
           });
 
           const res = response.data;
-          console.log("submitPageData RESPONSE:", res);
           const msg = res.flash;
 
           this.showSpinnerAction(false);
@@ -206,8 +205,6 @@ export default {
         method: method,
         url: url
       });
-
-      console.log("getPageData RESPONSE:", response);
 
       const res = response.data;
       const msg = res.flash;
@@ -242,8 +239,8 @@ export default {
 
     .tooltip-text {
       position: absolute;
-      width: 175px;
-      padding: 7px 5px;
+      width: 200px;
+      padding: 8px;
       left: 20px;
       bottom: 0px;
       font-size: 0.9rem;

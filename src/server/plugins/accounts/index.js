@@ -52,10 +52,9 @@ exports.plugin = {
             // Get all validation errors before aborting the request.
             abortEarly: false
           },
-          // Set the "failAction" option to a lifecycle method and return the error object. If there are
-          // validation errors, then returning the error object will make the error object available
-          // in the "onPreResponse" extension point where we can format all of our validation
-          // errors, if we want.
+          // Set the "failAction" option to a lifecycle method (https://hapi.dev/api/?v=18.4.0#lifecycle-methods)// and return the error object. If there are validation errors, then returning the error
+          // object will make the error object available in the "onPreResponse" extension point
+          // where we can format all of our validation errors, if we want.
           failAction: function(request, h, error) {
             return error;
           }

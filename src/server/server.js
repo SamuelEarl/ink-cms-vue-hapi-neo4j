@@ -33,13 +33,13 @@ const server = new Hapi.Server({
 /**
  * Comments for the onPreResponse method:
  *
- * The return values from your endpoints will be passed to the "onPreResponse" method. This gives
- * you an opportunity to format any data before they are returned to the browser. I usually only
- * format the flash message and leave everything else alone.
+ * The return values from your endpoints will be passed to the "onPreResponse" method before they
+ * are returned to the browser. This gives you an opportunity to format any data before they are
+ * returned to the browser. I usually only format the flash message and leave everything else alone.
  *
  * If you return a single value in your endpoint, then that value can be found on the
  * "request.response" object inside the "onPreResponse" method. If you return an object of values
- * (e.g., return { error, flash, user }), then those values are found on the
+ * (e.g., return { error, flash, pageData }), then those values are found on the
  * "request.response.source" object inside the "onPreResponse" method.
  *
  * To format the flash message before it is returned to the browser, you will simply do something
@@ -57,7 +57,6 @@ server.ext({
       // console.log("REQUEST.RESPONSE:", res);
       // console.log("REQUEST.RESPONSE.SOURCE:", res.source);
 
-
       /**
        * If a validation error occurs, then there will be a "res.isJoi" property instead of a
        * "res.source.error.isBoom" property.
@@ -65,14 +64,15 @@ server.ext({
        * NOTE: This check for "res.isJoi" has to come before the next check for "res.isBoom" because
        * validation errors also have an "isBoom" property. If the "isBoom" check came first, then it
        * would also catch the validation errors that have the "isJoi" property and it would handle
-       * those incorrectly.
+       * those validation errors incorrectly.
        */
       if (res.isJoi) {
         // Set the error property to equal "res.isJoi". The value of "res.isJoi" is true, so the
         // error property will also be true.
         const error = res.isJoi;
         let flash = "";
-        for (let i=0; i < res.details.length; i++) {
+        // res.details contains an array of error objects.
+        for (let i = 0; i < res.details.length; i++) {
           let validationErrorMsg = res.details[i].message;
 
           // See what each validation error message looks like.
@@ -94,6 +94,7 @@ server.ext({
        * they gain access to a route that requires authentication or if the user does not have the
        * proper permissions to perform a given task), then there will be a "res.isBoom" property
        * instead of a "res.source.error.isBoom" property.
+       * You can read more about Boom error objects here: https://hapi.dev/family/boom/?v=8.0.1.
        */
       // Check if the "res.isBoom" property exists and set the "error" and "flash" properties.
       if (res.isBoom) {
