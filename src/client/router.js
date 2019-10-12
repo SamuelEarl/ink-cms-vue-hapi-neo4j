@@ -14,7 +14,7 @@ import ContentPage from "./views/pages-public/ContentPage.vue";
 import Admin from "./views/pages-admin/Admin.vue";
 import Users from "./views/pages-admin/Users.vue";
 import PagesList from "./views/pages-admin/PagesList.vue";
-import CreateEditPage from "./views/pages-admin/CreateEditPage.vue";
+import CreateAndEditPage from "./views/pages-admin/CreateAndEditPage.vue";
 
 Vue.use(Router);
 
@@ -54,12 +54,12 @@ const router = new Router({
             {
               path: "create-page/:sortPosition",
               name: "create-page",
-              component: CreateEditPage
+              component: CreateAndEditPage
             },
             {
               path: "edit-page/:pageId",
               name: "edit-page",
-              component: CreateEditPage
+              component: CreateAndEditPage
             },
             {
               path: "users",

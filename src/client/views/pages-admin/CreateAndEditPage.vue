@@ -22,7 +22,7 @@
     <br>
 
     <form @submit.prevent>
-      <label><b>Title</b></label>
+      <label><strong>Title</strong></label>
       <div v-if="$v.$dirty" class="validation-messages">
         <div v-if="!$v.title.required" class="error">Title is required</div>
       </div>
@@ -30,12 +30,17 @@
 
       <br><br>
 
-      <label><b>Slug</b></label>
+      <label>
+        <strong>Slug</strong>&nbsp;<em>(Optional)</em>
+        <span class="w3-tooltip tooltip-icon">i
+          <span class="w3-text w3-tag tooltip-text">If left blank, the slug will be auto-generated.</span>
+        </span>
+      </label>
       <input type="text" class="w3-input input" name="slug" v-model="slug">
 
       <br><br>
 
-      <label><b>Content</b></label>
+      <label><strong>Content</strong></label>
       <div v-if="$v.$dirty" class="validation-messages">
         <div v-if="!$v.content.required" class="error">Content is required</div>
       </div>
@@ -233,6 +238,29 @@ export default {
 
 <style scoped lang="stylus">
 @media $s-up {
+  .tooltip-icon {
+    margin-left: 5px;
+    padding: 1px 5px;
+    border-radius: 20px;
+    background-color: $ink-blue;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    font-family: mono;
+
+    .tooltip-text {
+      position: absolute;
+      width: 175px;
+      padding: 7px 5px;
+      left: 20px;
+      bottom: 0px;
+      font-size: 0.9rem;
+      font-weight: normal;
+      font-family: sans-serif;
+      background-color: $ink-blue;
+    }
+  }
+
   .error {
     padding: 5px;
     color: white;
