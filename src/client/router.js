@@ -11,9 +11,12 @@ import EmailSent from "./views/auth/EmailSent.vue";
 import VerifyEmail from "./views/auth/VerifyEmail.vue";
 import ResetPassword from "./views/auth/ResetPassword.vue";
 import ContentPage from "./views/pages-public/ContentPage.vue";
+// Route level code-splitting. This generates a separate chunk (e.g., contentPage.[hash].js)
+// for this route, which is lazy-loaded when the route is visited.
+// const ContentPage = () => import(/* webpackChunkName: "contentPage" */ "./views/pages-public/ContentPage.vue");
 import Admin from "./views/pages-admin/Admin.vue";
 import Users from "./views/pages-admin/Users.vue";
-import PagesList from "./views/pages-admin/PagesList.vue";
+// import PagesList from "./views/pages-admin/PagesList.vue";
 import CreateAndEditPage from "./views/pages-admin/CreateAndEditPage.vue";
 
 Vue.use(Router);
@@ -49,7 +52,8 @@ const router = new Router({
             {
               path: "pages-list",
               name: "pages-list",
-              component: PagesList
+              component: () => import(/* webpackChunkName: "pagesList" */ "./views/pages-admin/PagesList.vue")
+              // component: PagesList
             },
             {
               path: "create-page/:sortPosition",
