@@ -15,7 +15,7 @@ exports.plugin = {
   register: async function(server, options) {
 
     server.route({
-      // If you use "history" mode in Vue Router, then you need to configure your server to repond
+      // If you use "history" mode in Vue Router, then you need to configure your server to respond
       // to every request with the index.html file. See my "Vue.js Reference Guide" under the
       // heading "Using Vue Router’s History Mode".
       // Set the method to "*" so that the index.html file is returned with every request instead

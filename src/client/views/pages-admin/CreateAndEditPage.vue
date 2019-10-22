@@ -236,6 +236,7 @@ export default {
     font-size: 0.75rem;
     font-weight: bold;
     font-family: mono;
+    cursor: help;
 
     .tooltip-text {
       position: absolute;
