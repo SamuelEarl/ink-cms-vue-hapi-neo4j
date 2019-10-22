@@ -3,7 +3,10 @@ module.exports = {
     client: {
       presets: [
         "@vue/app",
-      ]
+      ],
+      // plugins: [
+      //   "@babel/plugin-syntax-dynamic-import"
+      // ]
     },
     server: {
       presets: [
