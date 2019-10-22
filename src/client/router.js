@@ -16,7 +16,7 @@ import ContentPage from "./views/pages-public/ContentPage.vue";
 // const ContentPage = () => import(/* webpackChunkName: "contentPage" */ "./views/pages-public/ContentPage.vue");
 import Admin from "./views/pages-admin/Admin.vue";
 import Users from "./views/pages-admin/Users.vue";
-// import PagesList from "./views/pages-admin/PagesList.vue";
+import PagesList from "./views/pages-admin/PagesList.vue";
 import CreateAndEditPage from "./views/pages-admin/CreateAndEditPage.vue";
 
 Vue.use(Router);
@@ -52,8 +52,8 @@ const router = new Router({
             {
               path: "pages-list",
               name: "pages-list",
-              component: () => import(/* webpackChunkName: "pagesList" */ "./views/pages-admin/PagesList.vue")
-              // component: PagesList
+              // component: () => import(/* webpackChunkName: "pagesList" */ "./views/pages-admin/PagesList.vue")
+              component: PagesList
             },
             {
               path: "create-page/:sortPosition",
