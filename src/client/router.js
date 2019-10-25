@@ -22,7 +22,7 @@ import CreateAndEditPage from "./views/pages-admin/CreateAndEditPage.vue";
 Vue.use(Router);
 
 const router = new Router({
-  // If you use "history" mode, then you need to configure your server to repond to every request
+  // If you use "history" mode, then you need to configure your server to respond to every request
   // with the index.html file. See my "Vue.js Reference Guide" under the heading "Using Vue Router’s
   // History Mode".
   mode: "history",
