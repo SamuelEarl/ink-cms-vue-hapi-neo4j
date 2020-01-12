@@ -11,7 +11,7 @@ export default {
   data() {
     return {
       // properties...
-    }
+    };
   },
 };
 </script>
@@ -20,14 +20,13 @@ export default {
 <style lang="stylus" scoped>
 @media $s-up {
   .spinner {
-    border: 6px solid lightgray;
-    border-top: 6px solid $ink-blue;
+    position: absolute;
+    border: 3px solid white;
+    border-top: 3px solid gray;
     border-radius: 50%;
-    // width and height should each equal the total height of the class="btn-primary" buttons.
-    width: 46px;
-    height: 46px;
+    width: 18px;
+    height: 18px;
     animation: spin 1s linear infinite;
-    margin: 0 auto;
   }
 
   @keyframes spin {

@@ -50,13 +50,12 @@
         <!-- When a user has "touched" an input field, we say that the input field is "dirty". (With Vuelidate you decide what "touched" means. For example, you could use logic that causes an input field to be "touched" when a user clicks inside of it [e.g., using a click event] or clicks out of it [e.g., using a blur event].) Vuelidate uses a boolean property called "$dirty" to indicate whether an input field is dirty or not. $dirty is set to false by default and Vuelidate does not automatically set an input field's $dirty property to true for you. You have to manually take care of setting the $dirty property by calling the $touch() method when appropriate. -->
         <!-- In our register form, we are setting each field's $dirty property to true when the "Register" button is clicked. NOTE: $v.$touch refers to all the fields in the form. $v.firstName.$touch would only refer to the firstName field.  -->
         <button
-          v-if="!showSpinner"
           @click="$v.$touch()"
           class="btn-primary full-width blue-gradient"
         >
+          <SpinnerSmall v-if="showSpinner" />
           Register
         </button>
-        <SpinnerSmall v-if="showSpinner" />
       </form>
     </template>
 

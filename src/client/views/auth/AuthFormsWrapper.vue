@@ -1,6 +1,8 @@
 <template>
   <div id="auth-form-wrapper">
 
+    <p id="cancel-btn" @click="$router.push({ name: 'home' })">&lsaquo; Cancel</p>
+
     <div class="form-container">
 
       <div class="form-top">
@@ -40,12 +42,19 @@
 <script>
 export default {
   name: "AuthFormsWrapper"
-}
+};
 </script>
 
 <style scoped lang="stylus">
 @media $s-up {
   #auth-form-wrapper {
+
+    #cancel-btn {
+      margin-bottom: 10px;
+      text-align: center;
+      color: lightgray;
+      cursor: pointer;
+    }
 
     .form-container {
       display: flex;
@@ -112,7 +121,7 @@ export default {
 
 @media $m-up {
   .form-container {
-    margin-top: 40px;
+    margin-top: 20px;
     margin-right: auto;
     margin-left: auto;
     width: 425px;

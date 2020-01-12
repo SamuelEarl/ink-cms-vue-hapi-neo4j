@@ -23,13 +23,12 @@
         <br>
 
         <button
-          v-if="!showSpinner"
           @click="$v.$touch()"
           class="btn-primary full-width blue-gradient"
         >
+          <SpinnerSmall v-if="showSpinner" />
           Login
         </button>
-        <SpinnerSmall v-if="showSpinner" />
       </form>
     </template>
 

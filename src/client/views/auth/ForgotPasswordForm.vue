@@ -15,13 +15,12 @@
         <br>
 
         <button
-          v-if="!showSpinner"
           @click="$v.$touch()"
           class="btn-tertiary full-width"
         >
+          <SpinnerSmall v-if="showSpinner" />
           Request Password Reset
         </button>
-        <SpinnerSmall v-if="showSpinner" />
       </form>
     </template>
 

@@ -42,32 +42,27 @@
         :init="getEditorOptions"
       />
 
-      <!-- If this v-if check is not here along with the matching one below, then the "Content" label will get two <br> spaces under it and the spinner will be touching the bottom of the "Content" input box. -->
-      <div v-if="!showSpinner">
-        <br><br>
-      </div>
+      <br><br>
 
+      <!-- If this is the "create-page" route, then show the "Create Page" button -->
       <button
-        v-if="$route.name === 'create-page' && !showSpinner"
+        v-if="$route.name === 'create-page'"
         @click="submitPageData('create')"
         class="btn-primary full-width"
       >
+        <SpinnerSmall v-if="showSpinner" />
         Create Page <span class="bold">&rsaquo;</span>
       </button>
+      <!-- If this is the "edit-page" route, then show the "Update Page" button -->
       <button
-        v-if="$route.name === 'edit-page' && !showSpinner"
+        v-if="$route.name === 'edit-page'"
         @click="submitPageData('edit')"
         class="btn-primary full-width"
       >
+        <SpinnerSmall v-if="showSpinner" />
         Update Page <span class="bold">&rsaquo;</span>
       </button>
 
-      <!-- If this v-if check is not here along with the matching one above, then the "Content" label will get two <br> spaces under it and the spinner will be touching the bottom of the "Content" input box. -->
-      <div v-if="showSpinner">
-        <br><br>
-      </div>
-
-      <SpinnerSmall v-if="showSpinner" />
     </form>
   </div>
 </template>
