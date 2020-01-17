@@ -20,12 +20,13 @@ export default {
 <style lang="stylus" scoped>
 @media $s-up {
   .spinner {
-    position: absolute;
+    display: inline-block;
+    margin: -3px 7px -5px 0;
     border: 3px solid white;
     border-top: 3px solid gray;
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     animation: spin 1s linear infinite;
   }
 

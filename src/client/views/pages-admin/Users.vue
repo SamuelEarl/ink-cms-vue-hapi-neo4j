@@ -97,7 +97,7 @@ export default {
         scope: []
       },
       modeledUserScope: []
-    }
+    };
   },
 
   computed: {
