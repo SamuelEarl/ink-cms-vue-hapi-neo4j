@@ -3,16 +3,8 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-
 export default {
-  name: "Spinner",
-
-  data() {
-    return {
-      // properties...
-    }
-  },
+  name: "SpinnerLarge"
 };
 </script>
 
@@ -33,9 +25,5 @@ export default {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-}
-
-@media $l-up {
-
 }
 </style>
