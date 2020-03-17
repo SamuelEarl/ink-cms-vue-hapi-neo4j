@@ -3,7 +3,7 @@
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 // Imports
-const uuidv4 = require("uuid/v4");
+const Uuidv4 = require("uuid/v4");
 const Boom = require("@hapi/boom");
 const Joi = require("@hapi/joi");
 const Bcrypt = require("bcrypt");
@@ -52,7 +52,8 @@ exports.plugin = {
             // Get all validation errors before aborting the request.
             abortEarly: false
           },
-          // Set the "failAction" option to a lifecycle method (https://hapi.dev/api/?v=18.4.0#lifecycle-methods)// and return the error object. If there are validation errors, then returning the error
+          // Set the "failAction" option to a lifecycle method (https://hapi.dev/api/?v=18.4.0#lifecycle-methods) and return the error object.
+          // If there are validation errors, then returning the error
           // object will make the error object available in the "onPreResponse" extension point
           // where we can format all of our validation errors, if we want.
           failAction: function(request, h, error) {
@@ -65,8 +66,8 @@ exports.plugin = {
         let flash = null;
 
         try {
-          const userUuid = uuidv4();
-          const sessionUuid = uuidv4();
+          const userUuid = Uuidv4();
+          const sessionUuid = Uuidv4();
           const currentTime = Date.now();
           const userId = `${userUuid}-${currentTime}`;
           const sessionId = `${sessionUuid}-${currentTime}`;
@@ -111,7 +112,8 @@ exports.plugin = {
           // I will not use the APOC library in this tutorial because that will be too complicated to setup for newbies. So when a user registers, I will still create a separate node for the token (to show how to create multiple nodes in one query and connect them with a relationship), but the timestamp for the createdAt field will be set to 24 hours in the future.
 
           const token = Crypto.randomBytes(16).toString("hex");
-          const timestamp = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
+          const timestamp = Date.now();
+          const expiration = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
           // const timestamp = Date.now() + 3000; // 3 seconds = 3000 milliseconds
 
           // Create a new user, a token node, and the relationship between the two.
@@ -128,7 +130,7 @@ exports.plugin = {
             })
             CREATE (t:Token {
               token: { tokenParam },
-              createdAt: { timestampParam }
+              expiresAt: { expirationParam }
             })
             MERGE (u)-[r:EMAIL_VERIFICATION_TOKEN { createdAt: { timestampParam } }]->(t)
             RETURN u,t,r`, {
@@ -141,7 +143,8 @@ exports.plugin = {
               isVerifiedParam: false,
               scopeParam: scope,
               tokenParam: token,
-              timestampParam: timestamp
+              timestampParam: timestamp,
+              expirationParam: expiration,
             }
           );
 
@@ -227,10 +230,13 @@ exports.plugin = {
             `MATCH (u:User {
               email: { emailParam }
             })
-            RETURN u`, {
+            OPTIONAL MATCH (u)-[r:EMAIL_VERIFICATION_TOKEN]->(t:Token)
+            RETURN u,r,t`, {
               emailParam: email
             }
           );
+
+          console.log("USER NODE:", JSON.stringify(userNode));
 
           // If no User node exists with the above email, then close the database connection,
           // set "flash" to an error message, and throw an error.
@@ -250,23 +256,8 @@ exports.plugin = {
             return;
           }
 
-          const currentTime = Date.now();
-
-          // If the above User node exists, then find a Token node with the matching token.
-          const tokenNode = await session.run(
-            `MATCH (t:Token {
-              token: { tokenParam }
-            })
-            WHERE t.createdAt > { currentTimeParam }
-            RETURN t`, {
-              tokenParam: token,
-              currentTimeParam: currentTime,
-
-            }
-          );
-
           // If no Token node exists with the above token or if the token has expired, then close the database connection, set "flash" to an error message, and throw an error.
-          if (tokenNode.records.length === 0) {
+          if (!userNode.records[0]._fields[2]) {
             session.close();
             flash = "We were unable to verify your email address. That link may have expired.";
             cta = "resendVerification";
@@ -275,25 +266,23 @@ exports.plugin = {
 
           // If both the User and Token nodes exist and if the user has not been verified, then set
           // the user's "isVerified" property to true, and delete the Token node and the relationship.
-          await session.run(
+          const deleteToken = await session.run(
             `MATCH (u:User {
               email: { emailParam }
-            })-[r:EMAIL_VERIFICATION_TOKEN]->(t:Token {
-              token: { tokenParam }
-            })
+            })-[r:EMAIL_VERIFICATION_TOKEN]->(t:Token)
             SET u.isVerified = { isVerifiedParam }
             DELETE t,r
             RETURN u`, {
               emailParam: email,
-              tokenParam: token,
               isVerifiedParam: true
             }
           );
 
-          session.close();
-
-          flash = `Your email address (${email}) has been verified.`;
-          cta = "login";
+          if (deleteToken.records.length > 0) {
+            session.close();
+            flash = `Your email address (${email}) has been verified.`;
+            cta = "login";
+          }
         }
         catch(e) {
           const msg = e.message ? e.message : "Error while attempting to verify email.";
@@ -390,8 +379,9 @@ exports.plugin = {
 
           // Create a new verification token.
           const token = Crypto.randomBytes(16).toString("hex");
-          const timestamp = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
+          const expiration = Date.now() + 86400000; // 24 hours = 86400000 milliseconds
           // const timestamp = Date.now() + 3000; // 3 seconds = 3000 milliseconds
+          const timestamp = Date.now();
 
           // Find the matching user and create the token node and the relationship between the user
           // and their token.
@@ -401,12 +391,13 @@ exports.plugin = {
             })
             CREATE (t:Token {
               token: { tokenParam },
-              createdAt: { timestampParam }
+              expiresAt: { expirationParam }
             })
             MERGE (u)-[r:EMAIL_VERIFICATION_TOKEN { createdAt: { timestampParam } }]->(t)
             RETURN u,t,r`, {
               emailParam: email,
               tokenParam: token,
+              expirationParam: expiration,
               timestampParam: timestamp
             }
           );
@@ -794,7 +785,7 @@ exports.plugin = {
         let user = null;
 
         try {
-          const uuid = uuidv4();
+          const uuid = Uuidv4();
           const currentTime = Date.now();
           const { email, password } = request.payload;
 
@@ -839,7 +830,7 @@ exports.plugin = {
 
           session.close();
 
-          // Set the user objcet that will be returned to the browser.
+          // Set the user object that will be returned to the browser.
           // There is probably no need to run an "if" conditional check here to see if this user
           // account exists (e.g., userAccount.records.length === 1) because we already tested
           // that above.

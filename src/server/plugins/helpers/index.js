@@ -33,7 +33,7 @@ exports.plugin = {
           err = new Boom(e);
         }
 
-        // Set the error log message. The `path` variable is that same as `request.path`.
+        // Set the error log message. The `path` variable is the same as `request.path`.
         const errorLog = `[ENDPOINT]: ${path}\n[ERROR]: ${err}`;
 
         // Log the error message.

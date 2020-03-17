@@ -106,7 +106,7 @@ export default {
   data() {
     return {
       // properties
-    }
+    };
   },
 
   computed: {
@@ -264,7 +264,7 @@ export default {
       this.reorderPagesAction();
     },
   }
-}
+};
 </script>
 
 <style scoped lang="stylus">

@@ -19,7 +19,7 @@
 <script>
 export default {
   name: "AuthLayout"
-}
+};
 </script>
 
 <style scoped lang="stylus">

@@ -1,5 +1,5 @@
 <template>
-  <div id="auth-form-wrapper">
+  <div id="auth-forms-wrapper">
 
     <p id="cancel-btn" @click="$router.push({ name: 'home' })">&lsaquo; Cancel</p>
 
@@ -47,7 +47,7 @@ export default {
 
 <style scoped lang="stylus">
 @media $s-up {
-  #auth-form-wrapper {
+  #auth-forms-wrapper {
 
     #cancel-btn {
       margin-bottom: 10px;
