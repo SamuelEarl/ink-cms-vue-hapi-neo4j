@@ -138,7 +138,7 @@ router.beforeEach(async (to, from, next) => {
   // users in the login flow.
   store.dispatch("helpers/setPrevRouteAction", from);
 
-  if (to.matched.some(record => record.meta.requiresAuth)) {
+  if (to.matched.some(route => route.meta.requiresAuth)) {
     // If the user is not logged in, then redirect the user to the login page.
     const isAuthenticated = store.getters["auth/getIsAuthenticated"];
     if (!isAuthenticated) {
