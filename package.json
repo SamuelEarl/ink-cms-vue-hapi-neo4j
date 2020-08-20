@@ -50,7 +50,7 @@
     "@hapi/joi": "^15.1.0",
     "@tinymce/tinymce-vue": "^2.0.0",
     "axios": "^0.18.0",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "core-js": "^2.6.9",
     "dotenv": "^8.0.0",
