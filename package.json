@@ -64,7 +64,7 @@
     "poop": "^3.0.1",
     "register-service-worker": "^1.6.2",
     "rimraf": "^2.6.3",
-    "sanitize-html": "^1.20.1",
+    "sanitize-html": "^2.3.2",
     "style-resources-loader": "^1.2.1",
     "uuid": "^3.3.2",
     "vue": "^2.6.10",
