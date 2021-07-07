@@ -495,7 +495,7 @@ exports.plugin = {
           const pagesList = request.payload.pagesList;
 
           // Loop through the "pagesList" array and update the "sortPosition" property of each page node in Neo4j.
-          // This code takes advantage of parallel async operations, which is more efficient and faster than if the code was written serially. The database call is an async operation that returns a promise. map() will push each returned promise into an array. Once the promises are in the array, they can settle in parallel. Then a for loop will iterate over that array using the "await" keyword to resolve each promise. The data from the resolved promises is then pushed into a new array that is returned to the user.
+          // This code takes advantage of parallel async operations (see https://developers.google.com/web/fundamentals/primers/async-functions), which is more efficient and faster than if the code was written serially. The database call is an async operation that returns a promise. map() will push each returned promise into an array. Once the promises are in the array, they can settle in parallel. Then a for loop will iterate over that array using the "await" keyword to resolve each promise. The data from the resolved promises is then pushed into a new array that is returned to the user.
           const arrayOfPromises = pagesList.map(async (page, index) => {
 
             // The map() function will iterate through the "pagesList" array and will push the
